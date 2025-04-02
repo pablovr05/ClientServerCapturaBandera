@@ -3,7 +3,7 @@ const GameLogic = require('./gameLogic.js');
 const Obj = require('./utilsWebSockets.js');
 
 const debug = true;
-const port = 1234;
+const port = 3000;
 
 // Inicialitzar WebSockets i la lògica del joc
 const ws = new Obj();

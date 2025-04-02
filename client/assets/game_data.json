@@ -2,8 +2,8 @@
   "name": "CapturaOro",
   "levels": [
     {
-      "name": "level1",
-      "description": "level1",
+      "name": "level",
+      "description": "level",
       "layers": [
         {
           "name": "water0",

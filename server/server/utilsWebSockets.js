@@ -68,7 +68,6 @@ class Obj {
         }
     }
 
-
     // Send a message to all websocket clients
     broadcast(msg) {
         console.log("Broadcasting message to all clients: ", msg); // Traza antes de intentar enviar el mensaje
