@@ -1,9 +1,20 @@
-import rng from './rng.js';
-import { unsafeStringify } from './stringify.js'; // **`v1()` - Generate time-based UUID**
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _rng = _interopRequireDefault(require("./rng.js"));
+
+var _stringify = require("./stringify.js");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+// **`v1()` - Generate time-based UUID**
 //
 // Inspired by https://github.com/LiosK/UUID.js
 // and http://docs.python.org/library/uuid.html
-
 let _nodeId;
 
 let _clockseq; // Previous uuid creation time
@@ -22,7 +33,7 @@ function v1(options, buf, offset) {
   // system entropy.  See #189
 
   if (node == null || clockseq == null) {
-    const seedBytes = options.random || (options.rng || rng)();
+    const seedBytes = options.random || (options.rng || _rng.default)();
 
     if (node == null) {
       // Per 4.5, create and 48-bit node id, (47 random bits + multicast bit = 1)
@@ -89,7 +100,8 @@ function v1(options, buf, offset) {
     b[i + n] = node[n];
   }
 
-  return buf || unsafeStringify(b);
+  return buf || (0, _stringify.unsafeStringify)(b);
 }
 
-export default v1;
+var _default = v1;
+exports.default = _default;

@@ -1,5 +1,16 @@
-import { unsafeStringify } from './stringify.js';
-import parse from './parse.js';
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.URL = exports.DNS = void 0;
+exports.default = v35;
+
+var _stringify = require("./stringify.js");
+
+var _parse = _interopRequireDefault(require("./parse.js"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function stringToBytes(str) {
   str = unescape(encodeURIComponent(str)); // UTF8 escape
@@ -13,9 +24,12 @@ function stringToBytes(str) {
   return bytes;
 }
 
-export const DNS = '6ba7b810-9dad-11d1-80b4-00c04fd430c8';
-export const URL = '6ba7b811-9dad-11d1-80b4-00c04fd430c8';
-export default function v35(name, version, hashfunc) {
+const DNS = '6ba7b810-9dad-11d1-80b4-00c04fd430c8';
+exports.DNS = DNS;
+const URL = '6ba7b811-9dad-11d1-80b4-00c04fd430c8';
+exports.URL = URL;
+
+function v35(name, version, hashfunc) {
   function generateUUID(value, namespace, buf, offset) {
     var _namespace;
 
@@ -24,7 +38,7 @@ export default function v35(name, version, hashfunc) {
     }
 
     if (typeof namespace === 'string') {
-      namespace = parse(namespace);
+      namespace = (0, _parse.default)(namespace);
     }
 
     if (((_namespace = namespace) === null || _namespace === void 0 ? void 0 : _namespace.length) !== 16) {
@@ -51,7 +65,7 @@ export default function v35(name, version, hashfunc) {
       return buf;
     }
 
-    return unsafeStringify(bytes);
+    return (0, _stringify.unsafeStringify)(bytes);
   } // Function#name is not settable on some platforms (#270)
 
 
