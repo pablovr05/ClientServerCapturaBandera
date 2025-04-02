@@ -11,6 +11,10 @@ dependencies {
   api "com.github.tommyettinger:anim8-gdx:$anim8Version"
   api "de.golfgl.gdxcontrollerutils:gdx-controllerutils-scene2d:$controllerScene2DVersion"
 
+  implementation 'javax.json:javax.json-api:1.1.4'
+  implementation 'org.glassfish:javax.json:1.1.4' // Implementación de referencia
+  implementation 'org.java-websocket:Java-WebSocket:1.5.3'
+
   if(enableGraalNative == 'true') {
     implementation "io.github.berstanio:gdx-svmhelper-annotations:$graalHelperVersion"
   }
