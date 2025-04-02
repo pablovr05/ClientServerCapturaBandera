@@ -34,7 +34,7 @@ ws.onMessage = (socket, id, msg) => {
 ws.onClose = (socket, id) => {
     if (debug) console.log("WebSocket client disconnected: " + id);
     game.removeClient(id);
-    ws.broadcast(JSON.stringify({ type: "disconnected", from: "server" }));
+    //Aquí se debería hacer un broadcast de los usuarios conectados para conectarse
 };
 
 // Gestionar el tancament del servidor
