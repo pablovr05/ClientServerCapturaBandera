@@ -1,5 +1,5 @@
 const express = require('express');
-const GameLogic = require('./gameLogic.js');
+const game = require('./gameLogic.js');
 const Obj = require('./utilsWebSockets.js');
 
 const debug = true;
@@ -7,7 +7,6 @@ const port = 3000;
 
 // Inicialitzar WebSockets i la lògica del joc
 const ws = new Obj();
-const game = new GameLogic();
 
 // Inicialitzar servidor Express
 const app = express();
