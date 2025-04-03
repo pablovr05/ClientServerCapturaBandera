@@ -6,8 +6,8 @@ class GameLogic {
     
     constructor() {
         if (!GameLogic.instance) {
-            this.clients = new Map(); // Almacena los clientes conectados
-            this.lobbys = new Map();  // Almacena los lobbys activos
+            this.clients = new Map();
+            this.lobbys = new Map();
             GameLogic.instance = this;
         }
         return GameLogic.instance;
@@ -34,17 +34,36 @@ class GameLogic {
         return code;
     }
 
-    // Crear un nuevo lobby con un código único de 6 cifras
+    // Crear un nuevo lobby con un código único de 6 cifras y cuatro equipos
     createLobby() {
         const lobbyId = this.generateLobbyCode();
-        this.lobbys.set(lobbyId, new Set());
+        this.lobbys.set(lobbyId, {
+            teams: {
+                blue: new Set(),
+                purple: new Set(),
+                red: new Set(),
+                yellow: new Set(),
+            },
+        });
         return lobbyId;
     }
 
-    // Añadir un cliente a un lobby
+    // Añadir un cliente a un lobby, repartiéndolo de manera equitativa
     addClientToLobby(lobbyId, clientId) {
         if (this.lobbys.has(lobbyId)) {
-            this.lobbys.get(lobbyId).add(clientId);
+            const lobby = this.lobbys.get(lobbyId);
+            const teams = Object.values(lobby.teams); // Obtener los equipos como array
+            
+            // Encontrar el equipo con menor número de jugadores
+            let teamWithLeastPlayers = teams[0];
+            for (let team of teams) {
+                if (team.size < teamWithLeastPlayers.size) {
+                    teamWithLeastPlayers = team;
+                }
+            }
+
+            // Añadir el cliente al equipo con menos jugadores
+            teamWithLeastPlayers.add(clientId);
         }
     }
 
