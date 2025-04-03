@@ -24,33 +24,12 @@ public class Main extends ApplicationAdapter {
         webSockets = new WebSockets();
         webSockets.create();
         batch = new SpriteBatch();
-        image = new Texture("libgdx.png");
+        image = new Texture("water.png");
     }
 
     @Override
     public void render() {
         ScreenUtils.clear(0.15f, 0.15f, 0.2f, 1f);
-
-        // Si la pantalla está siendo tocada o el mouse está presionado
-        if (Gdx.input.isTouched()) {
-            int touchX = Gdx.input.getX();
-            int touchY = Gdx.input.getY();
-
-            // Solo enviamos el mensaje si la posición ha cambiado
-            if (touchX != lastX || touchY != lastY) {
-                lastX = touchX;
-                lastY = touchY;
-
-                JsonObject jsonObject = Json.createObjectBuilder()
-                    .add("type", "touch")
-                    .add("x", touchX)
-                    .add("y", touchY)
-                    .build();
-    
-                webSockets.sendMessage(jsonObject.toString());
-            }
-        }
-
         batch.begin();
         batch.draw(image, 140, 210);
         batch.end();

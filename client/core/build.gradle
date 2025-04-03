@@ -12,7 +12,6 @@ dependencies {
   api "de.golfgl.gdxcontrollerutils:gdx-controllerutils-scene2d:$controllerScene2DVersion"
 
   implementation 'javax.json:javax.json-api:1.1.4'
-  implementation 'org.glassfish:javax.json:1.1.4' // Implementación de referencia
   implementation 'org.java-websocket:Java-WebSocket:1.5.3'
 
   if(enableGraalNative == 'true') {
