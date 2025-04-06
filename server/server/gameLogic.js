@@ -109,17 +109,29 @@ class GameLogic {
 
     getGameState(lobbyId) {
         const lobby = this.lobbys.get(lobbyId);
-        if (!lobby) return {}; 
-
+        if (!lobby) return {};
+    
+        const players = [];
+    
+        for (const [teamName, teamSet] of Object.entries(lobby.teams)) {
+            for (const clientId of teamSet) {
+                const client = this.clients.get(clientId);
+                if (client) {
+                    players.push({
+                        id: clientId,
+                        position: client.position,
+                        team: teamName
+                    });
+                }
+            }
+        }
+    
         return {
-            players: Array.from(lobby.teams.blue)
-                .concat(Array.from(lobby.teams.purple))
-                .concat(Array.from(lobby.teams.red))
-                .concat(Array.from(lobby.teams.yellow)),
+            players,
             projectiles: Array.from(lobby.objects.projectiles),
-            gold: Array.from(lobby.objects.gold),
+            gold: Array.from(lobby.objects.gold)
         };
-    }
+    }    
 
     handleMessage(id, msg, socket) {
         try {
