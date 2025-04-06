@@ -14,20 +14,31 @@ class GameLogic {
     }
 
     removeClient(id) {
-        // Eliminar el cliente del mapa de clientes
-        this.clients.delete(id);
+        console.log(`[removeClient] Eliminando cliente con ID: ${id}`);
     
-        // Recorrer todos los lobbys
+        // Eliminar del mapa de clientes
+        const existed = this.clients.delete(id);
+        if (existed) {
+            console.log(`[removeClient] Cliente con ID ${id} eliminado de this.clients`);
+        } else {
+            console.warn(`[removeClient] Cliente con ID ${id} no existía en this.clients`);
+        }
+    
+        // Eliminar de los lobbys
         for (const [lobbyId, lobby] of this.lobbys.entries()) {
-            for (const team of Object.values(lobby.teams)) {
-                if (team.has(id)) {
-                    team.delete(id);
+            for (const [teamName, teamSet] of Object.entries(lobby.teams)) {
+                if (teamSet.has(id)) {
+                    teamSet.delete(id);
+                    console.log(`[removeClient] Cliente ${id} eliminado del equipo "${teamName}" en el lobby ${lobbyId}`);
                 }
             }
         }
+    
+        console.log(`[removeClient] Finalizada la eliminación del cliente ${id}`);
     }
     
-
+    
+    
     generateLobbyCode() {
         let code;
         do {
