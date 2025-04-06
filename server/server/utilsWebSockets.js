@@ -38,7 +38,7 @@ class Obj {
         con.send(JSON.stringify({
             type: "welcome",
             id: id,
-            message: "Welcome to the server"
+            message: "Welcome to the server",
         }));
     
         // Informar tots els clients de la nova connexió
@@ -53,7 +53,6 @@ class Obj {
     
         con.on("close", () => {
             this.closeConnection(con);
-            this.socketsClients.delete(con);
         });
     
         con.on('message', (bufferedMessage) => { 
@@ -62,10 +61,18 @@ class Obj {
     }
 
     closeConnection(con) {
-        if (this.onClose && typeof this.onClose === "function") {
-            var id = this.socketsClients.get(con).id
-            this.onClose(con, id)
-        }
+        const metadata = this.socketsClients.get(con);
+        if (!metadata) return;
+    
+        const id = metadata.id;
+    
+        // Notificar a los demás clientes que este cliente se ha desconectado
+        this.broadcast(JSON.stringify({
+            type: "clientDisconnected",
+            id: id
+        }));
+    
+        this.socketsClients.delete(con); // Eliminar del registro
     }
 
     // Send a message to all websocket clients

@@ -137,17 +137,6 @@ class GameLogic {
                     }
                     break;
     
-                case "collectGold":
-                    const { goldX, goldY } = obj;
-                    this.lobbys.forEach(lobby => {
-                        lobby.objects.gold.forEach(gold => {
-                            if (gold.x === goldX && gold.y === goldY) {
-                                lobby.objects.gold.delete(gold);
-                            }
-                        });
-                    });
-                    break;
-    
                 default:
                     break;
             }
