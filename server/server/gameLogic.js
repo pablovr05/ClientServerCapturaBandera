@@ -46,25 +46,42 @@ class GameLogic {
         if (this.lobbys.has(lobbyId)) {
             const lobby = this.lobbys.get(lobbyId);
             const teams = Object.values(lobby.teams);
-            
+    
             let teamWithLeastPlayers = teams[0];
             for (let team of teams) {
                 if (team.size < teamWithLeastPlayers.size) {
                     teamWithLeastPlayers = team;
                 }
             }
-
+    
             teamWithLeastPlayers.add(clientId);
-
+    
             const position = this.assignInitialPosition(clientId);
             const client = this.clients.get(clientId);
             client.position = position;
+    
+            // Enviar mensaje al cliente
+            if (client && client.socket) {
+                client.socket.send(JSON.stringify({
+                    type: "joinedLobby",
+                    lobbyId: lobbyId,
+                    team: Object.keys(lobby.teams).find(key => lobby.teams[key].has(clientId)),
+                    position: position
+                }));
+            }
         }
-    }
+    }    
 
-    assignInitialPosition(clientId) {
-        const x = Math.floor(Math.random() * 500);
-        const y = Math.floor(Math.random() * 500);
+    assignInitialPosition() {
+        const minX = 128;
+        const minY = 128;
+        const maxX = 1920;
+        const maxY = 1920;
+    
+        // Genera una posición válida dentro de los límites
+        const x = Math.floor(Math.random() * (maxX - minX + 1)) + minX;
+        const y = Math.floor(Math.random() * (maxY - minY + 1)) + minY;
+    
         return { x, y };
     }
 

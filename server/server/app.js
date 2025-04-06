@@ -46,8 +46,8 @@ gameLoop.run = (fps) => {
     // Enviar el estado del juego solo para los lobbies activos
     game.lobbys.forEach((lobby, lobbyId) => {
         const gameState = game.getGameState(lobbyId);
-        console.log(`Enviando estado del juego al lobby ${lobbyId}:`);
-        console.log(JSON.stringify({ type: "update", gameState }, null, 2));
+        //console.log(`Enviando estado del juego al lobby ${lobbyId}:`);
+        //console.log(JSON.stringify({ type: "update", gameState }, null, 2));
 
         // Recorrer los equipos y enviar el estado a los clientes
         Object.keys(lobby.teams).forEach(teamKey => {

@@ -5,6 +5,7 @@ import org.java_websocket.handshake.ServerHandshake;
 import org.json.JSONException;
 import org.json.JSONObject; // Asegúrate de importar esta clase para manejar JSON
 
+import com.project.screens.GameScreen;
 import com.project.screens.MenuScreen;
 
 import java.net.URI;
@@ -12,6 +13,8 @@ import java.net.URI;
 public class WebSockets {
     private WebSocketClient webSocketClient;
     private MenuScreen menuScreen; // Instancia de MenuScreen
+    private GameScreen gameScreen;
+    private int playerId;
 
     public WebSockets(MenuScreen menuScreen) {
         this.menuScreen = menuScreen;  // Recibimos y almacenamos la instancia
@@ -39,13 +42,16 @@ public class WebSockets {
                         switch (messageType) {
 
                             case "welcome":
-                                handleUpdateClientsConnected(jsonMessage);
+                                playerId = jsonMessage.getInt("id");
                                 break;
                             case "newClient":
                                 handleUpdateClientsConnected(jsonMessage);
                                 break;
                             case "clientDisconnected":
                                 handleUpdateClientsConnected(jsonMessage);
+                                break;
+                            case "update":
+                                handleUpdate(jsonMessage);
                                 break;
                             default:
                                 System.out.println("Tipo de mensaje desconocido: " + messageType);
@@ -83,6 +89,11 @@ public class WebSockets {
         if (menuScreen != null) {
             menuScreen.updatePlayersCount(totalClients);  // Llamamos el método para actualizar la interfaz
         }
+    }
+
+    // Maneja el update de los personajes y de la instancia del juego
+    private void handleUpdate(JSONObject jsonMessage) throws JSONException {
+        System.out.println("INFO: " + jsonMessage.toString());
     }
 
     public void sendMessage(String message) {

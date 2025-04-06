@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.project.WebSockets;
 import com.badlogic.gdx.graphics.Texture;
 
 public class GameScreen implements Screen {
@@ -15,14 +16,16 @@ public class GameScreen implements Screen {
     private ShapeRenderer shapeRenderer;
     private BitmapFont font, titleFont;
     private Texture backgroundImage;
+    private WebSockets webSockets;
 
-    public GameScreen(Game game) {
+    public GameScreen(Game game, WebSockets webSockets) {
         this.game = game;
         batch = new SpriteBatch();
         shapeRenderer = new ShapeRenderer();
         font = new BitmapFont();
         titleFont = new BitmapFont();
-        backgroundImage = new Texture("fondo.png");
+        backgroundImage = new Texture("mapa.png");
+        this.webSockets = webSockets;
     }
 
     @Override
