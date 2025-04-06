@@ -106,9 +106,27 @@ class GameLogic {
 
     handleMessage(id, msg, socket) {
         try {
-            let obj = JSON.parse(msg);
+            let obj;
+            try {
+                obj = JSON.parse(msg);
+            } catch (e) {
+                // No es un JSON válido, tratamos el mensaje como string plano
+                if (msg === "create lobby") {
+                    const newLobbyId = this.createLobby();
+                    console.log("Se ha creado un nuevo servidor: " + newLobbyId);
+                    socket.send(JSON.stringify({
+                        type: "lobbyCreated",
+                        lobbyId: newLobbyId
+                    }));
+                }
+                return; // Salimos aquí porque ya manejamos el mensaje
+            }
+    
+            // Si sí es un JSON válido
             if (!obj.type) return;
-            console.log("Mensaje de tipo: " + obj.type + " recibido de " + socket)
+    
+            console.log("Mensaje de tipo: " + obj.type + " recibido de " + socket);
+    
             switch (obj.type) {
                 case "launchProjectile":
                     const { direction, team } = obj;
@@ -118,22 +136,26 @@ class GameLogic {
                         this.createProjectile(team, x, y, direction);
                     }
                     break;
+    
                 case "collectGold":
                     const { goldX, goldY } = obj;
                     this.lobbys.forEach(lobby => {
                         lobby.objects.gold.forEach(gold => {
                             if (gold.x === goldX && gold.y === goldY) {
-                                // Aquí deberías manejar la recolección del oro (por ejemplo, eliminándolo)
                                 lobby.objects.gold.delete(gold);
                             }
                         });
                     });
                     break;
+    
                 default:
                     break;
             }
-        } catch (error) {}
-    }
+    
+        } catch (error) {
+            console.error("Error en handleMessage:", error);
+        }
+    }    
 }
 
 const instance = new GameLogic();
