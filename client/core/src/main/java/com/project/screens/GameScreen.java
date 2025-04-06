@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.project.WebSockets;
 import com.badlogic.gdx.graphics.Texture;
+import org.json.JSONObject; // Asegúrate de importar esta clase para manejar JSON
 
 public class GameScreen implements Screen {
     private final Game game;
@@ -84,5 +85,9 @@ public class GameScreen implements Screen {
         font.dispose();
         titleFont.dispose();
         backgroundImage.dispose();
+    }
+
+    public void paintPlayers(JSONObject playersData) {
+        System.out.println("INFO A PINTAR: " + playersData);
     }
 }

@@ -93,7 +93,7 @@ public class WebSockets {
 
     // Maneja el update de los personajes y de la instancia del juego
     private void handleUpdate(JSONObject jsonMessage) throws JSONException {
-        System.out.println("INFO: " + jsonMessage.toString());
+        gameScreen.paintPlayers();
     }
 
     public void sendMessage(String message) {
