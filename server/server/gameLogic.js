@@ -128,15 +128,17 @@ class GameLogic {
             console.log("Mensaje de tipo: " + obj.type + " recibido de " + socket);
     
             switch (obj.type) {
-                case "launchProjectile":
-                    const { direction, team } = obj;
-                    const client = this.clients.get(id);
-                    if (client) {
-                        const { x, y } = client.position;
-                        this.createProjectile(team, x, y, direction);
+                case "addClientToLobby":
+                    const firstLobbyId = this.lobbys.keys().next().value;
+                    
+                    if (firstLobbyId) {
+                        this.addClientToLobby(firstLobbyId, id);  // Añadir al primer lobby disponible
                     }
+
+                    console.log("Se añadió un cliente al primer servidor: " + id + " al servidor: " + firstLobbyId)
+
                     break;
-    
+                
                 default:
                     break;
             }

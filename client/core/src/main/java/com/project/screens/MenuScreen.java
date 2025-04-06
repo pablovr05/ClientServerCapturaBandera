@@ -57,15 +57,26 @@ public class MenuScreen implements Screen {
 
         // Crear el estilo para el botón
         TextButton.TextButtonStyle buttonStyle = new TextButton.TextButtonStyle();
-        buttonStyle.font = font;
-        startButton = new TextButton("Start Game", buttonStyle);
-        startButton.setColor(Color.BLACK);
-        startButton.setSize(250, 80);
 
+        // Asignar la fuente que estás utilizando
+        buttonStyle.font = font;
+
+        // Establecer el color del texto a rojo
+        buttonStyle.fontColor = Color.RED;
+
+        // Crear el botón con el estilo definido
+        startButton = new TextButton("Start Game", buttonStyle);
+
+        // Establecer el color de fondo si lo deseas (esto solo afectará al texto, no al fondo del botón)
+        startButton.setColor(Color.BLACK);
+
+        // Establecer el tamaño del botón
+        startButton.setSize(250, 80);
         startButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 // Cambiar a la pantalla del juego
+                connectToLobby();
                 game.setScreen(new GameScreen(game));
             }
         });
@@ -138,4 +149,11 @@ public class MenuScreen implements Screen {
         batch.dispose();
         font.dispose();
     }
+
+    private void connectToLobby() {
+        // Crear el mensaje JSON
+        String message = "{\"type\": \"addClientToLobby\", \"code\": 555555}";
+        // Enviar el mensaje al servidor
+        webSockets.sendMessage(message);
+    }    
 }

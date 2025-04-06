@@ -2,6 +2,7 @@ package com.project;
 
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
+import org.json.JSONException;
 import org.json.JSONObject; // Asegúrate de importar esta clase para manejar JSON
 
 import com.project.screens.MenuScreen;
@@ -35,9 +36,8 @@ public class WebSockets {
                         JSONObject jsonMessage = new JSONObject(message);
                         String messageType = jsonMessage.getString("type");
 
-                        System.out.println(message);
                         switch (messageType) {
-                            
+
                             case "welcome":
                                 handleUpdateClientsConnected(jsonMessage);
                                 break;
@@ -75,7 +75,7 @@ public class WebSockets {
     }
 
     // Maneja la actualización de la cantidad de clientes conectados
-    private void handleUpdateClientsConnected(JSONObject jsonMessage) {
+    private void handleUpdateClientsConnected(JSONObject jsonMessage) throws JSONException {
         int totalClients = jsonMessage.getInt("totalClients");
         System.out.println("Total de jugadores conectados: " + totalClients);
 
