@@ -38,6 +38,7 @@ class Obj {
         con.send(JSON.stringify({
             type: "welcome",
             id: id,
+            totalClients: this.getClientsIds().length,
             message: "Welcome to the server",
         }));
     
@@ -65,14 +66,17 @@ class Obj {
         if (!metadata) return;
     
         const id = metadata.id;
+
+        this.socketsClients.delete(con); // Eliminar del registro
     
         // Notificar a los demás clientes que este cliente se ha desconectado
         this.broadcast(JSON.stringify({
             type: "clientDisconnected",
-            id: id
+            id: id,
+            totalClients: this.getClientsIds().length,
+            message: "A client has left the server",
         }));
-    
-        this.socketsClients.delete(con); // Eliminar del registro
+
     }
 
     // Send a message to all websocket clients
