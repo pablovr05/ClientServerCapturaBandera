@@ -14,6 +14,7 @@ public class Main extends ApplicationAdapter {
     private SpriteBatch batch;
     private ShapeRenderer shapeRenderer;
     private BitmapFont font, titleFont;
+    private WebSockets webSockets;
 
     // Configuración del panel
     private float marginRatio = 0.05f; // 5% del ancho de la pantalla como margen
@@ -34,6 +35,8 @@ public class Main extends ApplicationAdapter {
     @Override
     public void create() {
         batch = new SpriteBatch();
+        webSockets = new WebSockets();
+        webSockets.create();
         shapeRenderer = new ShapeRenderer();
         font = new BitmapFont();
         font.setColor(Color.BLACK);
