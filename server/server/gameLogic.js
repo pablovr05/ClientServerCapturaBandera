@@ -14,8 +14,19 @@ class GameLogic {
     }
 
     removeClient(id) {
+        // Eliminar el cliente del mapa de clientes
         this.clients.delete(id);
+    
+        // Recorrer todos los lobbys
+        for (const [lobbyId, lobby] of this.lobbys.entries()) {
+            for (const team of Object.values(lobby.teams)) {
+                if (team.has(id)) {
+                    team.delete(id);
+                }
+            }
+        }
     }
+    
 
     generateLobbyCode() {
         let code;

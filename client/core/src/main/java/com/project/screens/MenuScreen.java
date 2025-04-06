@@ -76,8 +76,11 @@ public class MenuScreen implements Screen {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 // Cambiar a la pantalla del juego
+                GameScreen gameScreen = new GameScreen(game, webSockets);
+                webSockets.setGameScreen(gameScreen);
                 connectToLobby();
-                game.setScreen(new GameScreen(game, webSockets));
+                game.setScreen(gameScreen);
+
             }
         });
 
