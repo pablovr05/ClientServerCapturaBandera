@@ -45,7 +45,9 @@ class Obj {
         // Informar tots els clients de la nova connexió
         this.broadcast(JSON.stringify({
             type: "newClient",
-            id: id
+            id: id,
+            totalClients: this.getClientsIds().length,
+            message: "A new client joined the server",
         }));
     
         if (this.onConnection && typeof this.onConnection === "function") {

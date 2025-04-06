@@ -13,6 +13,7 @@ dependencies {
 
   implementation 'javax.json:javax.json-api:1.1.4'
   implementation 'org.java-websocket:Java-WebSocket:1.5.3'
+  implementation 'org.json:json:20210307'
 
   if(enableGraalNative == 'true') {
     implementation "io.github.berstanio:gdx-svmhelper-annotations:$graalHelperVersion"
