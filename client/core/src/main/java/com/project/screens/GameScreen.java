@@ -20,6 +20,7 @@ import com.project.clases.Joystick;
 public class GameScreen implements Screen {
     private final Game game;
     private SpriteBatch batch;
+    private SpriteBatch uiBatch; // Batch para la capa UI (donde dibujaremos el joystick)
     private ShapeRenderer shapeRenderer;
     private BitmapFont font, titleFont;
     private Texture backgroundImage;
@@ -31,7 +32,7 @@ public class GameScreen implements Screen {
 
     private float playerX, playerY; // Posición del jugador
 
-    private Joystick joystick; // Declare the joystick
+    private Joystick joystick; // Declarar el joystick
 
     private Vector2 movementOutput;
     private Vector2 newMovementOutput;
@@ -45,19 +46,21 @@ public class GameScreen implements Screen {
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 800, 600); // Tamaño de la cámara
 
-        batch = new SpriteBatch();
+        batch = new SpriteBatch(); // Batch para el dibujo normal (mapa y jugadores)
+        uiBatch = new SpriteBatch(); // Batch para la capa UI (Joystick)
+
         shapeRenderer = new ShapeRenderer();
         font = new BitmapFont();
         titleFont = new BitmapFont();
         backgroundImage = new Texture("mapa.png");
 
-        // Initialize the joystick (position and radius)
-        joystick = new Joystick(175, 175, 75); // Position it at the bottom-right corner
+        // Inicializar el joystick (posición y radio)
+        joystick = new Joystick(175, 175, 75); // Posición en la esquina inferior derecha
     }
 
     @Override
     public void show() {
-        // Initial setup or logic if needed
+        // Inicialización adicional si es necesario
     }
 
     @Override
@@ -76,12 +79,13 @@ public void render(float delta) {
         camera.position.set(playerX, playerY, 0);
         camera.update();
 
-        batch.setProjectionMatrix(camera.combined); // Usamos la cámara para el batch
-        shapeRenderer.setProjectionMatrix(camera.combined); // Usamos la cámara para el shapeRenderer
+        // Establecer la proyección para la cámara
+        batch.setProjectionMatrix(camera.combined); 
+        shapeRenderer.setProjectionMatrix(camera.combined);
 
         // Dibujar el fondo
         batch.begin();
-        batch.draw(backgroundImage, 0, 0); // Asegúrate de que el mapa comienza en (0,0)
+        batch.draw(backgroundImage, 0, 0, 2048, 2048); // Escalar la imagen al tamaño deseado
         batch.end();
 
         try {
@@ -91,9 +95,18 @@ public void render(float delta) {
         }
     }
 
+    // Restablecer la proyección para la UI (joystick)
+    shapeRenderer.setProjectionMatrix(new Matrix4());  // Restablecer la proyección a las coordenadas de la pantalla
+    uiBatch.setProjectionMatrix(new Matrix4()); // Restablecer la proyección también para el batch de UI
+
+    // Dibujar el joystick siempre en la misma posición
+    shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+    joystick.draw(shapeRenderer);  // Usar ShapeRenderer para dibujar el joystick
+    shapeRenderer.end();
+
     // Actualizar la posición del toque para el joystick
     Vector2 touchPosition = new Vector2(Gdx.input.getX(), Gdx.input.getY());
-    movementOutput = joystick.update(touchPosition); // Actualiza el estado del joystick con la posición actual del toque
+    movementOutput = joystick.update(touchPosition); // Actualizar el estado del joystick con la posición actual del toque
 
     // Crear un objeto JSON con el tipo "updateMovement" y los valores correspondientes
     JSONObject message = new JSONObject();
@@ -108,16 +121,8 @@ public void render(float delta) {
     } catch (JSONException e) {
         e.printStackTrace();
     }
-
-    // Establecer la proyección para dibujar el joystick siempre en la pantalla (sin la cámara)
-    shapeRenderer.setProjectionMatrix(new Matrix4());  // Restablecer la proyección a la pantalla
-
-    // Dibujar el joystick en la parte inferior derecha de la pantalla
-    shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-    joystick.draw(shapeRenderer);  // Dibujar el fondo y el thumbstick del joystick
-    shapeRenderer.end();
 }
- 
+
  
     private void updatePlayerPosition(JSONObject gameState) throws JSONException {
         if (!gameState.has("players")) return;

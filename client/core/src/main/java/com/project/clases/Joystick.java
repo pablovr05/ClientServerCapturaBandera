@@ -78,7 +78,7 @@ public class Joystick {
         verticalInput = deltaY / radius;   // Rango entre -1 y 1
     
         // Retornar los valores de entrada horizontal y vertical como un Vector2
-        //System.out.println("Horizontal: " + horizontalInput + ", Vertical: " + verticalInput);
+        System.out.println("Horizontal: " + horizontalInput + ", Vertical: " + verticalInput);
     
         return new Vector2(horizontalInput, verticalInput); // Retorna los valores de dirección
     }

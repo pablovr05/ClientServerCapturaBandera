@@ -37,6 +37,8 @@ class GameLogic {
 
     createLobby() {
         const lobbyId = this.generateLobbyCode();
+        
+        // Create the lobby with initial teams and objects
         this.lobbys.set(lobbyId, {
             teams: {
                 blue: new Set(),
@@ -49,9 +51,40 @@ class GameLogic {
                 gold: new Set(),
             }
         });
+
+        // Add gold to the newly created lobby
+        this.addGoldToLobby(lobbyId);
+
         return lobbyId;
     }
 
+    addGoldToLobby(lobbyId) {
+        // Define the boundaries for random position generation
+        const minX = 128;
+        const minY = 128;
+        const maxX = 1920;
+        const maxY = 1920;
+        
+        // Generate a random position for the gold within the boundaries
+        const x = Math.floor(Math.random() * (maxX - minX + 1)) + minX;
+        const y = Math.floor(Math.random() * (maxY - minY + 1)) + minY;
+        
+        // Create a gold object with the generated position
+        const gold = {
+            type: 'gold',
+            position: { x, y }
+        };
+        
+        // Add the gold object to the lobby objects
+        const lobby = this.lobbys.get(lobbyId);
+        if (lobby) {
+            lobby.objects.gold.add(gold);
+            console.log(`Gold added to lobby ${lobbyId} at position: (${x}, ${y})`);
+        } else {
+            console.warn(`Lobby with ID ${lobbyId} not found`);
+        }
+    }
+    
     addClientToLobby(lobbyId, clientId) {
         if (this.lobbys.has(lobbyId)) {
             const lobby = this.lobbys.get(lobbyId);
@@ -99,13 +132,6 @@ class GameLogic {
         const projectile = { team, x, y, direction };
         this.lobbys.forEach(lobby => {
             lobby.objects.projectiles.add(projectile);
-        });
-    }
-
-    createGold(x, y) {
-        const gold = { x, y };
-        this.lobbys.forEach(lobby => {
-            lobby.objects.gold.add(gold);
         });
     }
 
