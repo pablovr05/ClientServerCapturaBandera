@@ -181,40 +181,41 @@ class GameLogic {
 
                     break;
                 
-                case "updateMovement": {
-
-                    console.log("ENTRAAA")
+                    case "updateMovement": {
+                        const dirX = obj.x; // entre -1 y 1
+                        const dirY = obj.y;
+                        const speed = 5; // o la velocidad que tú quieras ajustar
                     
-                    const x = obj.x;
-                    const y = obj.y;
-                
-                    const firstLobbyId = this.lobbys.keys().next().value;
-                    if (!firstLobbyId) {
-                        console.warn("No hay lobbys creados");
-                        return;
-                    }
-                
-                    const lobby = this.lobbys.get(firstLobbyId);
-                    let userFound = false;
-                
-                    for (const [teamName, teamSet] of Object.entries(lobby.teams)) {
-                        if (teamSet.has(id)) {
-                            const client = this.clients.get(id);
-                            if (client) {
-                                client.position = { x, y };
-                                console.log(`📍 Posición actualizada: ${id} en lobby ${firstLobbyId}, team ${teamName}: (${x}, ${y})`);
-                                userFound = true;
-                            }
-                            break;
+                        const firstLobbyId = this.lobbys.keys().next().value;
+                        if (!firstLobbyId) {
+                            console.warn("No hay lobbys creados");
+                            return;
                         }
+                    
+                        const lobby = this.lobbys.get(firstLobbyId);
+                        let userFound = false;
+                    
+                        for (const [teamName, teamSet] of Object.entries(lobby.teams)) {
+                            if (teamSet.has(id)) {
+                                const client = this.clients.get(id);
+                                if (client && client.position) {
+                                    client.position.x += dirX * speed;
+                                    client.position.y += dirY * speed;
+                    
+                                    console.log(`🚶 Cliente ${id} movido a (${client.position.x}, ${client.position.y})`);
+                                    userFound = true;
+                                }
+                                break;
+                            }
+                        }
+                    
+                        if (!userFound) {
+                            console.warn(`⚠️ Cliente con ID ${id} no está en ningún equipo del lobby ${firstLobbyId}`);
+                        }
+                    
+                        break;
                     }
-                
-                    if (!userFound) {
-                        console.warn(`⚠️ Cliente con ID ${id} no está en ningún equipo del lobby ${firstLobbyId}`);
-                    }
-                
-                    break;
-                }
+                    
 
                 default:
                     break;
