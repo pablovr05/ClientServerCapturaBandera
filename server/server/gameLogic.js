@@ -37,8 +37,6 @@ class GameLogic {
         console.log(`[removeClient] Finalizada la eliminación del cliente ${id}`);
     }
     
-    
-    
     generateLobbyCode() {
         let code;
         do {

@@ -33,10 +33,10 @@ ws.onMessage = (socket, id, msg) => {
     game.handleMessage(id, msg, socket);
 };
 
-socket.on('close', () => {
-    console.log(`[WebSocketManager] Cliente desconectado: ${clientId}`);
-    if (this.onClose) this.onClose(socket, clientId);
-});
+ws.onClose = (socket, id) => {
+    if (debug) console.log("WebSocket client disconnected: " + id);
+    game.removeClient(id);
+};
 
 
 gameLoop.run = (fps) => {
