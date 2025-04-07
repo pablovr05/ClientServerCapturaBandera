@@ -184,7 +184,7 @@ class GameLogic {
                     case "updateMovement": {
                         const dirX = obj.x; // entre -1 y 1
                         const dirY = obj.y;
-                        const speed = 5; // o la velocidad que tú quieras ajustar
+                        const speed = 1; // o la velocidad que tú quieras ajustar
                     
                         const firstLobbyId = this.lobbys.keys().next().value;
                         if (!firstLobbyId) {

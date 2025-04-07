@@ -7,6 +7,8 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.project.WebSockets;
@@ -23,6 +25,8 @@ public class GameScreen implements Screen {
     private Texture backgroundImage;
     private WebSockets webSockets;
 
+    private OrthographicCamera camera;
+
     private JSONObject latestGameState; // Aquí se guarda el estado actual
 
     private float playerX, playerY; // Posición del jugador
@@ -37,6 +41,9 @@ public class GameScreen implements Screen {
         this.webSockets = webSockets;
         movementOutput = new Vector2();
         newMovementOutput = new Vector2();
+
+        camera = new OrthographicCamera();
+        camera.setToOrtho(false, 800, 600); // Tamaño de la cámara
 
         batch = new SpriteBatch();
         shapeRenderer = new ShapeRenderer();
@@ -54,54 +61,64 @@ public class GameScreen implements Screen {
     }
 
     @Override
-    public void render(float delta) {
-        ScreenUtils.clear(0, 0, 0, 1); // Clear the screen with black color
+public void render(float delta) {
+    ScreenUtils.clear(0, 0, 0, 1); // Limpiar la pantalla con color negro
 
-        if (latestGameState != null) {
-            // Update player position
-            try {
-                updatePlayerPosition(latestGameState);
-            } catch (JSONException e) {
-                throw new RuntimeException(e);
-            }
-
-            // Draw the background
-            batch.begin();
-            batch.draw(backgroundImage, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight()); // Map background
-            batch.end();
-
-            try {
-                drawPlayers(latestGameState); // Draw other players
-            } catch (JSONException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        // Update and draw the joystick
-        Vector2 touchPosition = new Vector2(Gdx.input.getX(), Gdx.input.getY());
-
-        movementOutput = joystick.update(touchPosition); // Update joystick state with the current touch position
-
-        // Crear un objeto JSON con el tipo "updateMovement" y los valores correspondientes
-        JSONObject message = new JSONObject();
+    if (latestGameState != null) {
+        // Actualizar la posición del jugador
         try {
-            message.put("type", "updateMovement");
-            message.put("x", Double.valueOf(movementOutput.x));  // Convert float to Double
-            message.put("y", Double.valueOf(movementOutput.y));  // Convert float to Double
-            message.put("id", webSockets.getPlayerId());  // Suponiendo que webSockets.getPlayerId() devuelve el ID del jugador
-
-            // Enviar el mensaje al servidor
-            webSockets.sendMessage(message.toString());
+            updatePlayerPosition(latestGameState);
         } catch (JSONException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
 
-        // Draw the joystick
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        joystick.draw(shapeRenderer); // Draw joystick background and thumbstick
-        shapeRenderer.end();
+        // Actualizar la cámara para seguir al jugador
+        camera.position.set(playerX, playerY, 0);
+        camera.update();
+
+        batch.setProjectionMatrix(camera.combined); // Usamos la cámara para el batch
+        shapeRenderer.setProjectionMatrix(camera.combined); // Usamos la cámara para el shapeRenderer
+
+        // Dibujar el fondo
+        batch.begin();
+        batch.draw(backgroundImage, 0, 0); // Asegúrate de que el mapa comienza en (0,0)
+        batch.end();
+
+        try {
+            drawPlayers(latestGameState); // Dibujar otros jugadores
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
     }
 
+    // Actualizar la posición del toque para el joystick
+    Vector2 touchPosition = new Vector2(Gdx.input.getX(), Gdx.input.getY());
+    movementOutput = joystick.update(touchPosition); // Actualiza el estado del joystick con la posición actual del toque
+
+    // Crear un objeto JSON con el tipo "updateMovement" y los valores correspondientes
+    JSONObject message = new JSONObject();
+    try {
+        message.put("type", "updateMovement");
+        message.put("x", Double.valueOf(movementOutput.x));  // Convertir float a Double
+        message.put("y", Double.valueOf(movementOutput.y));  // Convertir float a Double
+        message.put("id", webSockets.getPlayerId());  // Obtener el ID del jugador
+    
+        // Enviar el mensaje al servidor
+        webSockets.sendMessage(message.toString());
+    } catch (JSONException e) {
+        e.printStackTrace();
+    }
+
+    // Establecer la proyección para dibujar el joystick siempre en la pantalla (sin la cámara)
+    shapeRenderer.setProjectionMatrix(new Matrix4());  // Restablecer la proyección a la pantalla
+
+    // Dibujar el joystick en la parte inferior derecha de la pantalla
+    shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+    joystick.draw(shapeRenderer);  // Dibujar el fondo y el thumbstick del joystick
+    shapeRenderer.end();
+}
+ 
+ 
     private void updatePlayerPosition(JSONObject gameState) throws JSONException {
         if (!gameState.has("players")) return;
 
@@ -144,15 +161,9 @@ public class GameScreen implements Screen {
             float y = (float) pos.getDouble("y");
             String team = player.getString("team");
     
-            // Scale player coordinates for the screen size
-            float scaleX = (float) Gdx.graphics.getWidth() / 2048f;
-            float scaleY = (float) Gdx.graphics.getHeight() / 2048f;
-            float screenX = x * scaleX;
-            float screenY = y * scaleY;
-    
             // === Dibujar borde verde fosforito ===
             shapeRenderer.setColor(0.5f, 1f, 0f, 1f); // lime green
-            shapeRenderer.circle(screenX, screenY, 17); // radio mayor (borde)
+            shapeRenderer.circle(x, y, 17); // radio mayor (borde)
     
             // === Dibujar jugador encima (relleno) ===
             switch (team.toLowerCase()) {
@@ -172,7 +183,7 @@ public class GameScreen implements Screen {
                     shapeRenderer.setColor(1, 1, 1, 1);
             }
     
-            shapeRenderer.circle(screenX, screenY, 12); // radio del jugador
+            shapeRenderer.circle(x, y, 12); // radio del jugador
         }
     
         shapeRenderer.end();
