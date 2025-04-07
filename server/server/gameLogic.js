@@ -201,16 +201,10 @@ class GameLogic {
                                 if (client && client.position) {
                                     client.position.x += dirX * speed;
                                     client.position.y += dirY * speed;
-                    
-                                    console.log(`🚶 Cliente ${id} movido a (${client.position.x}, ${client.position.y})`);
                                     userFound = true;
                                 }
                                 break;
                             }
-                        }
-                    
-                        if (!userFound) {
-                            console.warn(`⚠️ Cliente con ID ${id} no está en ningún equipo del lobby ${firstLobbyId}`);
                         }
                     
                         break;
