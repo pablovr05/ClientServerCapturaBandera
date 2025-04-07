@@ -181,18 +181,41 @@ class GameLogic {
 
                     break;
                 
-                case "updateMovement":
+                case "updateMovement": {
 
-                    const userId = obj.id;
+                    console.log("ENTRAAA")
+                    
                     const x = obj.x;
                     const y = obj.y;
-                    
-                    console.log(userId)
-                    console.log(x)
-                    console.log(y)
-
-                    break;
                 
+                    const firstLobbyId = this.lobbys.keys().next().value;
+                    if (!firstLobbyId) {
+                        console.warn("No hay lobbys creados");
+                        return;
+                    }
+                
+                    const lobby = this.lobbys.get(firstLobbyId);
+                    let userFound = false;
+                
+                    for (const [teamName, teamSet] of Object.entries(lobby.teams)) {
+                        if (teamSet.has(id)) {
+                            const client = this.clients.get(id);
+                            if (client) {
+                                client.position = { x, y };
+                                console.log(`📍 Posición actualizada: ${id} en lobby ${firstLobbyId}, team ${teamName}: (${x}, ${y})`);
+                                userFound = true;
+                            }
+                            break;
+                        }
+                    }
+                
+                    if (!userFound) {
+                        console.warn(`⚠️ Cliente con ID ${id} no está en ningún equipo del lobby ${firstLobbyId}`);
+                    }
+                
+                    break;
+                }
+
                 default:
                     break;
             }
