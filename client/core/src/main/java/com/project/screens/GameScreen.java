@@ -80,28 +80,21 @@ public class GameScreen implements Screen {
         // Update and draw the joystick
         Vector2 touchPosition = new Vector2(Gdx.input.getX(), Gdx.input.getY());
 
-        newMovementOutput = joystick.update(touchPosition); // Update joystick state with the current touch position
+        movementOutput = joystick.update(touchPosition); // Update joystick state with the current touch position
 
-        if (!newMovementOutput.epsilonEquals(movementOutput, 0.01f)) {
-            movementOutput = newMovementOutput;
-            System.out.println(movementOutput);
+        // Crear un objeto JSON con el tipo "updateMovement" y los valores correspondientes
+        JSONObject message = new JSONObject();
+        try {
+            message.put("type", "updateMovement");
+            message.put("x", Double.valueOf(movementOutput.x));  // Convert float to Double
+            message.put("y", Double.valueOf(movementOutput.y));  // Convert float to Double
+            message.put("id", webSockets.getPlayerId());  // Suponiendo que webSockets.getPlayerId() devuelve el ID del jugador
 
-            // Crear un objeto JSON con el tipo "updateMovement" y los valores correspondientes
-            JSONObject message = new JSONObject();
-            try {
-                message.put("type", "updateMovement");
-                message.put("x", Double.valueOf(movementOutput.x));  // Convert float to Double
-                message.put("y", Double.valueOf(movementOutput.y));  // Convert float to Double
-                message.put("id", webSockets.getPlayerId());  // Suponiendo que webSockets.getPlayerId() devuelve el ID del jugador
-
-                // Enviar el mensaje al servidor
-                webSockets.sendMessage(message.toString());
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
+            // Enviar el mensaje al servidor
+            webSockets.sendMessage(message.toString());
+        } catch (JSONException e) {
+            e.printStackTrace();
         }
-
 
         // Draw the joystick
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
