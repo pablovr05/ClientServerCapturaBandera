@@ -169,6 +169,7 @@ class GameLogic {
             switch (obj.type) {
                 case "addClientToLobby":
                     const firstLobbyId = this.lobbys.keys().next().value;
+                    
                     console.log(firstLobbyId)
                     console.log(id)
 
@@ -182,11 +183,11 @@ class GameLogic {
                 
                 case "updateMovement":
 
-                    const id = obj.id;
+                    const userId = obj.id;
                     const x = obj.x;
                     const y = obj.y;
                     
-                    console.log(id)
+                    console.log(userId)
                     console.log(x)
                     console.log(y)
 
