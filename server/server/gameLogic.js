@@ -169,7 +169,9 @@ class GameLogic {
             switch (obj.type) {
                 case "addClientToLobby":
                     const firstLobbyId = this.lobbys.keys().next().value;
-                    
+                    console.log(firstLobbyId)
+                    console.log(id)
+
                     if (firstLobbyId) {
                         this.addClientToLobby(firstLobbyId, id);  // Añadir al primer lobby disponible
                     }
