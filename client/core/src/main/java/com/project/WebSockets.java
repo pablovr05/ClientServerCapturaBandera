@@ -43,6 +43,7 @@ public class WebSockets {
 
                             case "welcome":
                                 playerId = jsonMessage.getString("id");
+                                handleUpdateClientsConnected(jsonMessage);
                                 break;
                             case "newClient":
                                 handleUpdateClientsConnected(jsonMessage);
@@ -93,7 +94,7 @@ public class WebSockets {
 
     // Maneja el update de los personajes y de la instancia del juego
     private void handleUpdate(JSONObject jsonMessage) throws JSONException {
-        gameScreen.paintPlayers(jsonMessage);
+        gameScreen.paintEntities(jsonMessage);
     }
 
     public void sendMessage(String message) {

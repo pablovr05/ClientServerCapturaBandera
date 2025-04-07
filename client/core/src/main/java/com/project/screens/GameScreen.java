@@ -64,66 +64,66 @@ public class GameScreen implements Screen {
     }
 
     @Override
-public void render(float delta) {
-    ScreenUtils.clear(0, 0, 0, 1); // Limpiar la pantalla con color negro
+    public void render(float delta) {
+        ScreenUtils.clear(0, 0, 0, 1); // Limpiar la pantalla con color negro
 
-    if (latestGameState != null) {
-        // Actualizar la posición del jugador
-        try {
-            updatePlayerPosition(latestGameState);
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
+        if (latestGameState != null) {
+            // Actualizar la posición del jugador
+            try {
+                updatePlayerPosition(latestGameState);
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
+
+            // Actualizar la cámara para seguir al jugador
+            camera.position.set(playerX, playerY, 0);
+            camera.update();
+
+            // Establecer la proyección para la cámara
+            batch.setProjectionMatrix(camera.combined); 
+            shapeRenderer.setProjectionMatrix(camera.combined);
+
+            // Dibujar el fondo
+            batch.begin();
+            batch.draw(backgroundImage, 0, 0, 2048, 2048); // Escalar la imagen al tamaño deseado
+            batch.end();
+
+            try {
+                drawPlayers(latestGameState); // Dibujar otros jugadores
+                drawGold(latestGameState);
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
         }
 
-        // Actualizar la cámara para seguir al jugador
-        camera.position.set(playerX, playerY, 0);
-        camera.update();
+        // Restablecer la proyección para la UI (joystick)
+        shapeRenderer.setProjectionMatrix(new Matrix4());  // Restablecer la proyección a las coordenadas de la pantalla
+        uiBatch.setProjectionMatrix(new Matrix4()); // Restablecer la proyección también para el batch de UI
 
-        // Establecer la proyección para la cámara
-        batch.setProjectionMatrix(camera.combined); 
-        shapeRenderer.setProjectionMatrix(camera.combined);
+        // Dibujar el joystick siempre en la misma posición
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        joystick.draw(shapeRenderer);  // Usar ShapeRenderer para dibujar el joystick
+        shapeRenderer.end();
 
-        // Dibujar el fondo
-        batch.begin();
-        batch.draw(backgroundImage, 0, 0, 2048, 2048); // Escalar la imagen al tamaño deseado
-        batch.end();
+        // Actualizar la posición del toque para el joystick
+        Vector2 touchPosition = new Vector2(Gdx.input.getX(), Gdx.input.getY());
+        movementOutput = joystick.update(touchPosition); // Actualizar el estado del joystick con la posición actual del toque
 
+        // Crear un objeto JSON con el tipo "updateMovement" y los valores correspondientes
+        JSONObject message = new JSONObject();
         try {
-            drawPlayers(latestGameState); // Dibujar otros jugadores
+            message.put("type", "updateMovement");
+            message.put("x", Double.valueOf(movementOutput.x));  // Convertir float a Double
+            message.put("y", Double.valueOf(movementOutput.y));  // Convertir float a Double
+            message.put("id", webSockets.getPlayerId());  // Obtener el ID del jugador
+        
+            // Enviar el mensaje al servidor
+            webSockets.sendMessage(message.toString());
         } catch (JSONException e) {
-            throw new RuntimeException(e);
+            e.printStackTrace();
         }
     }
 
-    // Restablecer la proyección para la UI (joystick)
-    shapeRenderer.setProjectionMatrix(new Matrix4());  // Restablecer la proyección a las coordenadas de la pantalla
-    uiBatch.setProjectionMatrix(new Matrix4()); // Restablecer la proyección también para el batch de UI
-
-    // Dibujar el joystick siempre en la misma posición
-    shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-    joystick.draw(shapeRenderer);  // Usar ShapeRenderer para dibujar el joystick
-    shapeRenderer.end();
-
-    // Actualizar la posición del toque para el joystick
-    Vector2 touchPosition = new Vector2(Gdx.input.getX(), Gdx.input.getY());
-    movementOutput = joystick.update(touchPosition); // Actualizar el estado del joystick con la posición actual del toque
-
-    // Crear un objeto JSON con el tipo "updateMovement" y los valores correspondientes
-    JSONObject message = new JSONObject();
-    try {
-        message.put("type", "updateMovement");
-        message.put("x", Double.valueOf(movementOutput.x));  // Convertir float a Double
-        message.put("y", Double.valueOf(movementOutput.y));  // Convertir float a Double
-        message.put("id", webSockets.getPlayerId());  // Obtener el ID del jugador
-    
-        // Enviar el mensaje al servidor
-        webSockets.sendMessage(message.toString());
-    } catch (JSONException e) {
-        e.printStackTrace();
-    }
-}
-
- 
     private void updatePlayerPosition(JSONObject gameState) throws JSONException {
         if (!gameState.has("players")) return;
 
@@ -145,7 +145,7 @@ public void render(float delta) {
         //System.out.println("Player position: " + playerX + "," + playerY);  // Print player position
     }
 
-    public void paintPlayers(JSONObject data) throws JSONException {
+    public void paintEntities(JSONObject data) throws JSONException {
         //System.out.println("Drawing info: " + data);
         if (!data.has("gameState")) return;
         latestGameState = data.getJSONObject("gameState");
@@ -192,7 +192,11 @@ public void render(float delta) {
         }
     
         shapeRenderer.end();
-    }    
+    }
+    
+    private void drawGold(JSONObject gameState) {
+        if (!gameState.has("gold")) return;
+    }
 
     @Override
     public void resize(int width, int height) { }
