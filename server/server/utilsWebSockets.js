@@ -68,7 +68,7 @@ class Obj {
         if (!metadata) return;
     
         const id = metadata.id;
-
+    
         this.socketsClients.delete(con); // Eliminar del registro
     
         // Notificar a los demás clientes que este cliente se ha desconectado
@@ -78,8 +78,13 @@ class Obj {
             totalClients: this.getClientsIds().length,
             message: "A client has left the server",
         }));
-
+    
+        // ✅ Llamar al callback de desconexión
+        if (this.onClose && typeof this.onClose === "function") {
+            this.onClose(con, id);
+        }
     }
+    
 
     // Send a message to all websocket clients
     broadcast(msg) {
