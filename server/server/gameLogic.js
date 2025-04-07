@@ -181,34 +181,35 @@ class GameLogic {
 
                     break;
                 
-                    case "updateMovement": {
-                        const dirX = obj.x; // entre -1 y 1
-                        const dirY = obj.y;
-                        const speed = 1; // o la velocidad que tú quieras ajustar
-                    
-                        const firstLobbyId = this.lobbys.keys().next().value;
-                        if (!firstLobbyId) {
-                            console.warn("No hay lobbys creados");
-                            return;
-                        }
-                    
-                        const lobby = this.lobbys.get(firstLobbyId);
-                        let userFound = false;
-                    
-                        for (const [teamName, teamSet] of Object.entries(lobby.teams)) {
-                            if (teamSet.has(id)) {
-                                const client = this.clients.get(id);
-                                if (client && client.position) {
-                                    client.position.x += dirX * speed;
-                                    client.position.y += dirY * speed;
-                                    userFound = true;
-                                }
-                                break;
-                            }
-                        }
-                    
-                        break;
+                case "updateMovement": {
+                    const dirX = obj.x; // entre -1 y 1
+                    const dirY = obj.y;
+                    const speed = 2; // o la velocidad que tú quieras ajustar
+                
+                    const firstLobbyId = this.lobbys.keys().next().value;
+                    if (!firstLobbyId) {
+                        console.warn("No hay lobbys creados");
+                        return;
                     }
+                
+                    const lobby = this.lobbys.get(firstLobbyId);
+                    let userFound = false;
+                
+                    for (const [teamName, teamSet] of Object.entries(lobby.teams)) {
+                        if (teamSet.has(id)) {
+                            const client = this.clients.get(id);
+                            if (client && client.position) {
+                                client.position.x += dirX * speed;
+                                client.position.y += dirY * speed;
+                                userFound = true;
+                                console.log("POSICIÓN DEL PERSONAJE: " + client.position.X + "," + client.position.y)
+                            }
+                            break;
+                        }
+                    }
+                
+                    break;
+                }
                     
 
                 default:
