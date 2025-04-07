@@ -180,6 +180,18 @@ class GameLogic {
 
                     break;
                 
+                case "updateMovement":
+
+                    const id = obj.id;
+                    const x = obj.x;
+                    const y = obj.y;
+                    
+                    console.log(id)
+                    console.log(x)
+                    console.log(y)
+
+                    break;
+                
                 default:
                     break;
             }

@@ -14,7 +14,7 @@ public class WebSockets {
     private WebSocketClient webSocketClient;
     private MenuScreen menuScreen; // Instancia de MenuScreen
     private GameScreen gameScreen;
-    private int playerId;
+    private String playerId;
 
     public WebSockets(MenuScreen menuScreen) {
         this.menuScreen = menuScreen;  // Recibimos y almacenamos la instancia
@@ -42,7 +42,7 @@ public class WebSockets {
                         switch (messageType) {
 
                             case "welcome":
-                                playerId = jsonMessage.getInt("id");
+                                playerId = jsonMessage.getString("id");
                                 break;
                             case "newClient":
                                 handleUpdateClientsConnected(jsonMessage);
@@ -113,5 +113,9 @@ public class WebSockets {
 
     public void setGameScreen(GameScreen gameScreen) {
         this.gameScreen = gameScreen;
+    }
+
+    public String getPlayerId() {
+        return playerId;
     }
 }
