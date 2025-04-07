@@ -202,7 +202,7 @@ class GameLogic {
                                 client.position.x += dirX * speed;
                                 client.position.y += dirY * speed;
                                 userFound = true;
-                                console.log("POSICIÓN DEL PERSONAJE: " + client.position.X + "," + client.position.y)
+                                console.log("POSICIÓN DEL PERSONAJE: " + client.position.x + "," + client.position.y)
                             }
                             break;
                         }
