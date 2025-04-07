@@ -131,26 +131,30 @@ public class GameScreen implements Screen {
 
     private void drawPlayers(JSONObject gameState) throws JSONException {
         if (!gameState.has("players")) return;
-
+    
         JSONArray players = gameState.getJSONArray("players");
-
+    
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-
+    
         for (int i = 0; i < players.length(); i++) {
             JSONObject player = players.getJSONObject(i);
             JSONObject pos = player.getJSONObject("position");
-
+    
             float x = (float) pos.getDouble("x");
             float y = (float) pos.getDouble("y");
             String team = player.getString("team");
-
+    
             // Scale player coordinates for the screen size
             float scaleX = (float) Gdx.graphics.getWidth() / 2048f;
             float scaleY = (float) Gdx.graphics.getHeight() / 2048f;
             float screenX = x * scaleX;
             float screenY = y * scaleY;
-
-            // Set color based on player's team
+    
+            // === Dibujar borde verde fosforito ===
+            shapeRenderer.setColor(0.5f, 1f, 0f, 1f); // lime green
+            shapeRenderer.circle(screenX, screenY, 17); // radio mayor (borde)
+    
+            // === Dibujar jugador encima (relleno) ===
             switch (team.toLowerCase()) {
                 case "blue":
                     shapeRenderer.setColor(0, 0, 1, 1);
@@ -167,13 +171,12 @@ public class GameScreen implements Screen {
                 default:
                     shapeRenderer.setColor(1, 1, 1, 1);
             }
-
-            // Draw player as a circle on the screen
-            shapeRenderer.circle(screenX, screenY, 5);
+    
+            shapeRenderer.circle(screenX, screenY, 12); // radio del jugador
         }
-
+    
         shapeRenderer.end();
-    }
+    }    
 
     @Override
     public void resize(int width, int height) { }
