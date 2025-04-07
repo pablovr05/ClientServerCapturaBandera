@@ -80,7 +80,7 @@ public class GameScreen implements Screen {
             camera.update();
 
             // Establecer la proyección para la cámara
-            batch.setProjectionMatrix(camera.combined); 
+            batch.setProjectionMatrix(camera.combined);
             shapeRenderer.setProjectionMatrix(camera.combined);
 
             // Dibujar el fondo
@@ -116,7 +116,7 @@ public class GameScreen implements Screen {
             message.put("x", Double.valueOf(movementOutput.x));  // Convertir float a Double
             message.put("y", Double.valueOf(movementOutput.y));  // Convertir float a Double
             message.put("id", webSockets.getPlayerId());  // Obtener el ID del jugador
-        
+
             // Enviar el mensaje al servidor
             webSockets.sendMessage(message.toString());
         } catch (JSONException e) {
@@ -153,23 +153,23 @@ public class GameScreen implements Screen {
 
     private void drawPlayers(JSONObject gameState) throws JSONException {
         if (!gameState.has("players")) return;
-    
+
         JSONArray players = gameState.getJSONArray("players");
-    
+
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-    
+
         for (int i = 0; i < players.length(); i++) {
             JSONObject player = players.getJSONObject(i);
             JSONObject pos = player.getJSONObject("position");
-    
+
             float x = (float) pos.getDouble("x");
             float y = (float) pos.getDouble("y");
             String team = player.getString("team");
-    
+
             // === Dibujar borde verde fosforito ===
             shapeRenderer.setColor(0.5f, 1f, 0f, 1f); // lime green
             shapeRenderer.circle(x, y, 17); // radio mayor (borde)
-    
+
             // === Dibujar jugador encima (relleno) ===
             switch (team.toLowerCase()) {
                 case "blue":
@@ -187,15 +187,37 @@ public class GameScreen implements Screen {
                 default:
                     shapeRenderer.setColor(1, 1, 1, 1);
             }
-    
+
             shapeRenderer.circle(x, y, 12); // radio del jugador
         }
-    
+
         shapeRenderer.end();
     }
-    
-    private void drawGold(JSONObject gameState) {
+
+    private void drawGold(JSONObject gameState) throws JSONException {
         if (!gameState.has("gold")) return;
+
+        JSONArray golds = gameState.getJSONArray("gold");
+
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+
+        for (int i = 0; i < golds.length(); i++) {
+            JSONObject gold = golds.getJSONObject(i);
+            JSONObject pos = gold.getJSONObject("position"); // <- CORRECTO AQUÍ
+
+            float x = (float) pos.getDouble("x");
+            float y = (float) pos.getDouble("y");
+
+            // === Dibujar borde ===
+            shapeRenderer.setColor(1f, 0.84f, 0f, 1f); // gold color (amarillo oro)
+            shapeRenderer.circle(x, y, 12); // borde más grande
+
+            // === Dibujar relleno ===
+            shapeRenderer.setColor(1f, 1f, 0.2f, 1f); // relleno más claro
+            shapeRenderer.circle(x, y, 8);
+        }
+
+        shapeRenderer.end();
     }
 
     @Override
