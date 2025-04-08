@@ -38,7 +38,7 @@ public class GameScreen implements Screen {
     private Vector2 movementOutput;
 
     private float lastPlayerX, lastPlayerY;  // Para almacenar la última posición conocida
-    private float interpolationFactor = 0.1f; // Factor de interpolación (ajustable)
+    private float interpolationFactor = 0.05f; // Factor de interpolación (ajustable)
 
     public GameScreen(Game game, WebSockets webSockets) {
         this.game = game;

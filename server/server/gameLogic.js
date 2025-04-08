@@ -190,7 +190,7 @@ class GameLogic {
             // Si sí es un JSON válido
             if (!obj.type) return;
     
-            console.log("Mensaje de tipo: " + obj.type + " recibido de " + socket);
+            //console.log("Mensaje de tipo: " + obj.type + " recibido de " + socket);
     
             switch (obj.type) {
                 case "addClientToLobby":
@@ -228,7 +228,7 @@ class GameLogic {
                                 client.position.x += dirX * speed;
                                 client.position.y += dirY * speed;
                                 userFound = true;
-                                console.log("POSICIÓN DEL PERSONAJE: " + client.position.x + "," + client.position.y)
+                                //console.log("POSICIÓN DEL PERSONAJE: " + client.position.x + "," + client.position.y)
                             }
                             break;
                         }
