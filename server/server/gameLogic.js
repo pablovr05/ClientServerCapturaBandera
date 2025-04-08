@@ -183,7 +183,8 @@ class GameLogic {
         return {
             players,
             projectiles: Array.from(lobby.objects.projectiles),
-            gold: Array.from(lobby.objects.gold)
+            gold: Array.from(lobby.objects.gold),
+            spectators: Array.from(lobby.spectators),
         };
     }    
 
