@@ -38,7 +38,8 @@ public class GameScreen implements Screen {
     private Vector2 movementOutput;
 
     private float lastPlayerX, lastPlayerY;  // Para almacenar la última posición conocida
-    private float interpolationFactor = 1f; // Factor de interpolación (ajustable)
+    private float interpolationFactor = 0.1f; // Factor de interpolación (ajustable)
+
 
     public GameScreen(Game game, WebSockets webSockets) {
         this.game = game;
@@ -81,7 +82,7 @@ public class GameScreen implements Screen {
             // === Parte del mundo (con cámara) ===
             camera.position.set(playerX, playerY, 0);
 
-            System.out.println("Camera pos: " + playerX + ", " + playerY);
+            //System.out.println("Camera pos: " + playerX + ", " + playerY);
 
             camera.update();
 
@@ -140,20 +141,15 @@ public class GameScreen implements Screen {
                 float newX = (float) pos.getDouble("x");
                 float newY = (float) pos.getDouble("y");
     
-                // Interpolación: mueve suavemente el jugador hacia la nueva posición
-                playerX += newX;
-                playerY += newY;
-    
-                // Actualiza las últimas posiciones conocidas
-                lastPlayerX = playerX;
-                lastPlayerY = playerY;
+                // Quitar la interpolación y asignar directamente la nueva posición
+                playerX = newX;
+                playerY = newY;
     
                 break;
             }
         }
-    
-        System.out.println("La posición interpolada del jugador es: " + playerX + "," + playerY);
     }
+    
     
 
     public void paintEntities(JSONObject data) throws JSONException {

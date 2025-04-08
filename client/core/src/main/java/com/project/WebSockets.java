@@ -99,7 +99,7 @@ public class WebSockets {
 
     public void sendMessage(String message) {
         if (webSocketClient != null && webSocketClient.isOpen()) {
-            System.out.println("Mensaje a enviar: " + message);
+            //System.out.println("Mensaje a enviar: " + message);
             webSocketClient.send(message);
         } else {
             System.out.println("No se pudo enviar el mensaje. WebSocket no conectado.");
