@@ -49,7 +49,8 @@ class GameLogic {
             objects: {
                 projectiles: new Set(),
                 gold: new Set(),
-            }
+            },
+            spectators: new Set(),
         });
 
         // Add gold to the newly created lobby
@@ -85,6 +86,23 @@ class GameLogic {
         }
     }
     
+    addSpectatorToLobby(lobbyId, clientId) {
+        if (this.lobbys.has(lobbyId)) {
+            const lobby = this.lobbys.get(lobbyId);
+    
+            lobby.spectators.add(clientId);
+    
+            const client = this.clients.get(clientId);
+    
+            if (client && client.socket) {
+                client.socket.send(JSON.stringify({
+                    type: "joinedAsSpectator",
+                    lobbyId: lobbyId,
+                }));
+            }
+        }
+    }
+
     addClientToLobby(lobbyId, clientId) {
         if (this.lobbys.has(lobbyId)) {
             const lobby = this.lobbys.get(lobbyId);
@@ -113,7 +131,7 @@ class GameLogic {
                 }));
             }
         }
-    }    
+    }  
 
     assignInitialPosition() {
         const minX = 128;
@@ -206,6 +224,21 @@ class GameLogic {
                     console.log("Se añadió un cliente al primer servidor: " + id + " al servidor: " + firstLobbyId)
 
                     break;
+                
+                case "addSpectatorToLobby": {
+                        const firstLobbyId = this.lobbys.keys().next().value;
+                        
+                        console.log(firstLobbyId)
+                        console.log(id)
+    
+                        if (firstLobbyId) {
+                            this.addSpectatorToLobby(firstLobbyId, id);  // Añadir al primer lobby disponible
+                        }
+    
+                        console.log("Se añadió un espectador al primer servidor: " + id + " al servidor: " + firstLobbyId)
+    
+                        break;
+                }
                 
                 case "updateMovement": {
                     const dirX = obj.x; // entre -1 y 1

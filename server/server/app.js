@@ -60,6 +60,13 @@ gameLoop.run = (fps) => {
                 }
             });
         });
+
+        lobby.spectators.forEach(clientId => {
+            const client = game.clients.get(clientId);
+            if (client) {
+                client.socket.send(JSON.stringify({ type: "update", gameState }));
+            }
+        });
     });
 };
 
