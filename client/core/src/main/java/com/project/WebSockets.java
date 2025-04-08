@@ -23,7 +23,7 @@ public class WebSockets {
 
     private void connectWebSocket() {
         try {
-            URI serverUri = new URI("wss://bandera3.ieti.site/ws");
+            URI serverUri = new URI("wss://bandera3.ieti.site");
 
             webSocketClient = new WebSocketClient(serverUri) {
                 @Override

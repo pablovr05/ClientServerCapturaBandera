@@ -38,18 +38,19 @@ ws.onClose = (socket, id) => {
     game.removeClient(id);
 };
 
+const prevStates = new Map();
 
 gameLoop.run = (fps) => {
-    // Se actualiza el estado del juego
     game.updateGame(fps);
 
-    // Enviar el estado del juego solo para los lobbies activos
     game.lobbys.forEach((lobby, lobbyId) => {
         const gameState = game.getGameState(lobbyId);
-        //console.log(`Enviando estado del juego al lobby ${lobbyId}:`);
-        //console.log(JSON.stringify({ type: "update", gameState }, null, 2));
+        const gameStateStr = JSON.stringify(gameState);
 
-        // Recorrer los equipos y enviar el estado a los clientes
+        if (prevStates.get(lobbyId) === gameStateStr) return; // Nada cambió
+
+        prevStates.set(lobbyId, gameStateStr);
+
         Object.keys(lobby.teams).forEach(teamKey => {
             const team = lobby.teams[teamKey];
             team.forEach(clientId => {

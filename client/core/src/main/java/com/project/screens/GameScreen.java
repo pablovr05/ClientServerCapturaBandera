@@ -20,104 +20,107 @@ import com.project.clases.Joystick;
 public class GameScreen implements Screen {
     private final Game game;
     private SpriteBatch batch;
-    private SpriteBatch uiBatch; // Batch para la capa UI (donde dibujaremos el joystick)
+    private SpriteBatch uiBatch;
     private ShapeRenderer shapeRenderer;
+    private ShapeRenderer uiShapeRenderer;
     private BitmapFont font, titleFont;
     private Texture backgroundImage;
     private WebSockets webSockets;
 
     private OrthographicCamera camera;
 
-    private JSONObject latestGameState; // Aquí se guarda el estado actual
+    private JSONObject latestGameState;
 
-    private float playerX, playerY; // Posición del jugador
+    private float playerX, playerY;
 
-    private Joystick joystick; // Declarar el joystick
+    private Joystick joystick;
 
     private Vector2 movementOutput;
-    private Vector2 newMovementOutput;
+
+    private float lastPlayerX, lastPlayerY;  // Para almacenar la última posición conocida
+    private float interpolationFactor = 0.1f; // Factor de interpolación (ajustable)
 
     public GameScreen(Game game, WebSockets webSockets) {
         this.game = game;
         this.webSockets = webSockets;
+
         movementOutput = new Vector2();
-        newMovementOutput = new Vector2();
 
         camera = new OrthographicCamera();
-        camera.setToOrtho(false, 800, 600); // Tamaño de la cámara
+        camera.setToOrtho(false, 800, 600);
 
-        batch = new SpriteBatch(); // Batch para el dibujo normal (mapa y jugadores)
-        uiBatch = new SpriteBatch(); // Batch para la capa UI (Joystick)
+        batch = new SpriteBatch(); // para el mundo
+        uiBatch = new SpriteBatch(); // para la UI
 
-        shapeRenderer = new ShapeRenderer();
+        shapeRenderer = new ShapeRenderer(); // para mundo
+        uiShapeRenderer = new ShapeRenderer(); // para UI
+
         font = new BitmapFont();
         titleFont = new BitmapFont();
         backgroundImage = new Texture("mapa.png");
 
-        // Inicializar el joystick (posición y radio)
-        joystick = new Joystick(175, 175, 75); // Posición en la esquina inferior derecha
+        joystick = new Joystick(175, 175, 75);
     }
 
     @Override
-    public void show() {
-        // Inicialización adicional si es necesario
-    }
+    public void show() {}
 
     @Override
     public void render(float delta) {
-        ScreenUtils.clear(0, 0, 0, 1); // Limpiar la pantalla con color negro
+    
+        ScreenUtils.clear(0, 0, 0, 1);
 
         if (latestGameState != null) {
-            // Actualizar la posición del jugador
+
             try {
                 updatePlayerPosition(latestGameState);
             } catch (JSONException e) {
                 throw new RuntimeException(e);
             }
 
-            // Actualizar la cámara para seguir al jugador
+            // === Parte del mundo (con cámara) ===
             camera.position.set(playerX, playerY, 0);
+
+            System.out.println("Camera pos: " + playerX + ", " + playerY);
+
             camera.update();
 
-            // Establecer la proyección para la cámara
             batch.setProjectionMatrix(camera.combined);
             shapeRenderer.setProjectionMatrix(camera.combined);
 
-            // Dibujar el fondo
             batch.begin();
-            batch.draw(backgroundImage, 0, 0, 2048, 2048); // Escalar la imagen al tamaño deseado
+            batch.draw(backgroundImage, 0, 0, 2048, 2048);
             batch.end();
 
             try {
-                drawPlayers(latestGameState); // Dibujar otros jugadores
+                drawPlayers(latestGameState);
                 drawGold(latestGameState);
             } catch (JSONException e) {
                 throw new RuntimeException(e);
             }
         }
 
-        // Restablecer la proyección para la UI (joystick)
-        shapeRenderer.setProjectionMatrix(new Matrix4());  // Restablecer la proyección a las coordenadas de la pantalla
-        uiBatch.setProjectionMatrix(new Matrix4()); // Restablecer la proyección también para el batch de UI
+        // === Parte de la UI (con proyección fija) ===
+        uiShapeRenderer.setProjectionMatrix(new Matrix4().setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
+        uiBatch.setProjectionMatrix(new Matrix4().setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
 
-        // Dibujar el joystick siempre en la misma posición
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        joystick.draw(shapeRenderer);  // Usar ShapeRenderer para dibujar el joystick
-        shapeRenderer.end();
+        // Dibujar joystick
+        uiShapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        joystick.draw(uiShapeRenderer);
+        uiShapeRenderer.end();
 
-        // Actualizar la posición del toque para el joystick
+        // Procesar movimiento del joystick
         Vector2 touchPosition = new Vector2(Gdx.input.getX(), Gdx.input.getY());
-        movementOutput = joystick.update(touchPosition); // Actualizar el estado del joystick con la posición actual del toque
+        movementOutput = joystick.update(touchPosition);
 
-        // Crear un objeto JSON con el tipo "updateMovement" y los valores correspondientes
+        // Enviar movimiento al servidor
         JSONObject message = new JSONObject();
         try {
             message.put("type", "updateMovement");
-            message.put("x", Double.valueOf(movementOutput.x));  // Convertir float a Double
-            message.put("y", Double.valueOf(movementOutput.y));  // Convertir float a Double
-            message.put("id", webSockets.getPlayerId());  // Obtener el ID del jugador
+            message.put("x", (double) movementOutput.x);
+            message.put("y", (double) movementOutput.y);
+            message.put("id", webSockets.getPlayerId());
 
-            // Enviar el mensaje al servidor
             webSockets.sendMessage(message.toString());
         } catch (JSONException e) {
             e.printStackTrace();
@@ -126,27 +129,34 @@ public class GameScreen implements Screen {
 
     private void updatePlayerPosition(JSONObject gameState) throws JSONException {
         if (!gameState.has("players")) return;
-
+    
         JSONArray players = gameState.getJSONArray("players");
-        String clientId = webSockets.getPlayerId();  // Get player ID
-
-        // Find the player with the matching clientId
+        String clientId = webSockets.getPlayerId();
+    
         for (int i = 0; i < players.length(); i++) {
             JSONObject player = players.getJSONObject(i);
-
-            // Compare player ID with the client ID
             if (player.getString("id").equals(clientId)) {
                 JSONObject pos = player.getJSONObject("position");
-                playerX = pos.getLong("x");
-                playerY = pos.getLong("y");
-                break;  // Stop loop once the player is found
+                float newX = (float) pos.getDouble("x");
+                float newY = (float) pos.getDouble("y");
+    
+                // Interpolación: mueve suavemente el jugador hacia la nueva posición
+                playerX += (newX - playerX) * interpolationFactor;
+                playerY += (newY - playerY) * interpolationFactor;
+    
+                // Actualiza las últimas posiciones conocidas
+                lastPlayerX = playerX;
+                lastPlayerY = playerY;
+    
+                break;
             }
         }
-        //System.out.println("Player position: " + playerX + "," + playerY);  // Print player position
+    
+        System.out.println("La posición interpolada del jugador es: " + playerX + "," + playerY);
     }
+    
 
     public void paintEntities(JSONObject data) throws JSONException {
-        //System.out.println("Drawing info: " + data);
         if (!data.has("gameState")) return;
         latestGameState = data.getJSONObject("gameState");
     }
@@ -157,7 +167,6 @@ public class GameScreen implements Screen {
         JSONArray players = gameState.getJSONArray("players");
 
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-
         for (int i = 0; i < players.length(); i++) {
             JSONObject player = players.getJSONObject(i);
             JSONObject pos = player.getJSONObject("position");
@@ -166,31 +175,19 @@ public class GameScreen implements Screen {
             float y = (float) pos.getDouble("y");
             String team = player.getString("team");
 
-            // === Dibujar borde verde fosforito ===
-            shapeRenderer.setColor(0.5f, 1f, 0f, 1f); // lime green
-            shapeRenderer.circle(x, y, 17); // radio mayor (borde)
+            shapeRenderer.setColor(0.5f, 1f, 0f, 1f);
+            shapeRenderer.circle(x, y, 17);
 
-            // === Dibujar jugador encima (relleno) ===
             switch (team.toLowerCase()) {
-                case "blue":
-                    shapeRenderer.setColor(0, 0, 1, 1);
-                    break;
-                case "red":
-                    shapeRenderer.setColor(1, 0, 0, 1);
-                    break;
-                case "purple":
-                    shapeRenderer.setColor(0.5f, 0, 0.5f, 1);
-                    break;
-                case "yellow":
-                    shapeRenderer.setColor(1, 1, 0, 1);
-                    break;
-                default:
-                    shapeRenderer.setColor(1, 1, 1, 1);
+                case "blue": shapeRenderer.setColor(0, 0, 1, 1); break;
+                case "red": shapeRenderer.setColor(1, 0, 0, 1); break;
+                case "purple": shapeRenderer.setColor(0.5f, 0, 0.5f, 1); break;
+                case "yellow": shapeRenderer.setColor(1, 1, 0, 1); break;
+                default: shapeRenderer.setColor(1, 1, 1, 1); break;
             }
 
-            shapeRenderer.circle(x, y, 12); // radio del jugador
+            shapeRenderer.circle(x, y, 12);
         }
-
         shapeRenderer.end();
     }
 
@@ -200,42 +197,33 @@ public class GameScreen implements Screen {
         JSONArray golds = gameState.getJSONArray("gold");
 
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-
         for (int i = 0; i < golds.length(); i++) {
             JSONObject gold = golds.getJSONObject(i);
-            JSONObject pos = gold.getJSONObject("position"); // <- CORRECTO AQUÍ
+            JSONObject pos = gold.getJSONObject("position");
 
             float x = (float) pos.getDouble("x");
             float y = (float) pos.getDouble("y");
 
-            // === Dibujar borde ===
-            shapeRenderer.setColor(1f, 0.84f, 0f, 1f); // gold color (amarillo oro)
-            shapeRenderer.circle(x, y, 12); // borde más grande
+            shapeRenderer.setColor(1f, 0.84f, 0f, 1f);
+            shapeRenderer.circle(x, y, 12);
 
-            // === Dibujar relleno ===
-            shapeRenderer.setColor(1f, 1f, 0.2f, 1f); // relleno más claro
+            shapeRenderer.setColor(1f, 1f, 0.2f, 1f);
             shapeRenderer.circle(x, y, 8);
         }
-
         shapeRenderer.end();
     }
 
-    @Override
-    public void resize(int width, int height) { }
-
-    @Override
-    public void pause() { }
-
-    @Override
-    public void resume() { }
-
-    @Override
-    public void hide() { }
+    @Override public void resize(int width, int height) {}
+    @Override public void pause() {}
+    @Override public void resume() {}
+    @Override public void hide() {}
 
     @Override
     public void dispose() {
         batch.dispose();
+        uiBatch.dispose();
         shapeRenderer.dispose();
+        uiShapeRenderer.dispose();
         font.dispose();
         titleFont.dispose();
         backgroundImage.dispose();
