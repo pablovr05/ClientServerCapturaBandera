@@ -68,11 +68,10 @@ public class GameScreen implements Screen {
 
     @Override
     public void render(float delta) {
-    
+
         ScreenUtils.clear(0, 0, 0, 1);
 
         if (latestGameState != null) {
-
             try {
                 updatePlayerPosition(latestGameState);
             } catch (JSONException e) {
@@ -81,9 +80,6 @@ public class GameScreen implements Screen {
 
             // === Parte del mundo (con cámara) ===
             camera.position.set(playerX, playerY, 0);
-
-            //System.out.println("Camera pos: " + playerX + ", " + playerY);
-
             camera.update();
 
             batch.setProjectionMatrix(camera.combined);
@@ -110,6 +106,31 @@ public class GameScreen implements Screen {
         joystick.draw(uiShapeRenderer);
         uiShapeRenderer.end();
 
+        // Mostrar contador de jugadores
+        if (latestGameState != null && latestGameState.has("players")) {
+            JSONArray players = null;
+            try {
+                players = latestGameState.getJSONArray("players");
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
+            int numberOfPlayers = players.length();
+
+            // Establecer la posición en la esquina superior derecha
+            float xPosition = Gdx.graphics.getWidth() - 150;  // Ajustar un margen de 150 píxeles desde el borde
+            float yPosition = Gdx.graphics.getHeight() - 50;  // Ajustar 50 píxeles desde la parte superior
+
+            // Cambiar el color del texto a negro
+            font.setColor(0, 0, 0, 1);  // Color negro
+
+            // Aumentar el tamaño del texto
+            font.getData().setScale(1.5f);  // Ajusta este valor según lo grande que lo quieras
+
+            uiBatch.begin();
+            font.draw(uiBatch, "Players: " + numberOfPlayers, xPosition, yPosition);  // Dibuja el texto
+            uiBatch.end();
+        }
+
         // Procesar movimiento del joystick
         Vector2 touchPosition = new Vector2(Gdx.input.getX(), Gdx.input.getY());
         movementOutput = joystick.update(touchPosition);
@@ -128,29 +149,30 @@ public class GameScreen implements Screen {
         }
     }
 
+
     private void updatePlayerPosition(JSONObject gameState) throws JSONException {
         if (!gameState.has("players")) return;
-    
+
         JSONArray players = gameState.getJSONArray("players");
         String clientId = webSockets.getPlayerId();
-    
+
         for (int i = 0; i < players.length(); i++) {
             JSONObject player = players.getJSONObject(i);
             if (player.getString("id").equals(clientId)) {
                 JSONObject pos = player.getJSONObject("position");
                 float newX = (float) pos.getDouble("x");
                 float newY = (float) pos.getDouble("y");
-    
+
                 // Quitar la interpolación y asignar directamente la nueva posición
                 playerX = newX;
                 playerY = newY;
-    
+
                 break;
             }
         }
     }
-    
-    
+
+
 
     public void paintEntities(JSONObject data) throws JSONException {
         if (!data.has("gameState")) return;
