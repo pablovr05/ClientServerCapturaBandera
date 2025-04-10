@@ -60,7 +60,7 @@ gameLoop.run = (fps) => {
             team.forEach(clientId => {
                 const client = game.clients.get(clientId);
                 if (client) {
-                    client.socket.send(JSON.stringify({ type: "update", updatedGameState }));
+                    client.socket.send(JSON.stringify({ type: "update", gameState }));
                 }
             });
         });
@@ -68,7 +68,7 @@ gameLoop.run = (fps) => {
         lobby.spectators.forEach(clientId => {
             const client = game.clients.get(clientId);
             if (client) {
-                client.socket.send(JSON.stringify({ type: "update", updatedGameState }));
+                client.socket.send(JSON.stringify({ type: "update", gameState }));
             }
         });
     });
