@@ -263,12 +263,13 @@ class GameLogic {
                     for (const [teamName, teamSet] of Object.entries(lobby.teams)) {
                         if (teamSet.has(id)) {
                             const client = this.clients.get(id);
+                            console.log(obj)
+                            console.log(client)
                             if (client && client.position) {
                                 client.position.x += dirX * speed;
                                 client.position.y += dirY * speed;
                                 client.state = state;
                                 userFound = true;
-                                console.log(obj)
                             }
                             break;
                         }
