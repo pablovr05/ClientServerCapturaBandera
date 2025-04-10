@@ -41,7 +41,6 @@ ws.onClose = (socket, id) => {
 const prevStates = new Map();
 
 gameLoop.run = (fps) => {
-    game.updateGame(fps);
 
     game.lobbys.forEach((lobby, lobbyId) => {
         const gameState = game.getGameState(lobbyId);
@@ -54,8 +53,7 @@ gameLoop.run = (fps) => {
 
         const prevGameState = prevStates.get(lobbyId)
 
-        console.log(`Estado anterior para el lobby ${lobbyId}:`, prevGameState);
-        console.log(`Estado actual para el lobby ${lobbyId}:`, gameStateStr);
+        game.updateGame()
 
         Object.keys(lobby.teams).forEach(teamKey => {
             const team = lobby.teams[teamKey];

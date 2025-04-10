@@ -161,8 +161,10 @@ class GameLogic {
         return this.lobbys.get(lobbyId) || new Set();
     }
 
-    updateGame(fps) {
-        //console.log("Se actualiza el juego");
+    updateGame(prevGameState, gameStateStr) {
+        console.log("Se actualiza el juego");
+        console.log(`Estado anterior para el lobby ${lobbyId}:`, prevGameState);
+        console.log(`Estado actual para el lobby ${lobbyId}:`, gameStateStr);
     }
 
     getGameState(lobbyId) {
