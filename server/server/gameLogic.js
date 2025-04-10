@@ -250,7 +250,6 @@ class GameLogic {
                 case "updateMovement": {
                     const dirX = obj.x; // entre -1 y 1
                     const dirY = obj.y;
-                    const direction = obj.state;
                     const speed = 2; // o la velocidad que tú quieras ajustar
                 
                     const firstLobbyId = this.lobbys.keys().next().value;
@@ -270,7 +269,7 @@ class GameLogic {
                             if (client && client.position) {
                                 client.position.x += dirX * speed;
                                 client.position.y += dirY * speed;
-                                client.state = state;
+                                client.state = obj.state;
                                 userFound = true;
                             }
                             break;
