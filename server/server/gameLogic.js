@@ -120,6 +120,8 @@ class GameLogic {
             const position = this.assignInitialPosition(clientId);
             const client = this.clients.get(clientId);
             client.position = position;
+            client.state = "IDLE"
+            client.animationState = "0"
     
             // Enviar mensaje al cliente
             if (client && client.socket) {
@@ -128,8 +130,8 @@ class GameLogic {
                     lobbyId: lobbyId,
                     team: Object.keys(lobby.teams).find(key => lobby.teams[key].has(clientId)),
                     position: position,
-                    state: "IDLE",
-                    animationState: 0
+                    state: client.state,
+                    animationState: client.animationState,
                 }));
             }
         }
