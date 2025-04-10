@@ -44,7 +44,12 @@ gameLoop.run = (fps) => {
     game.updateGame(fps);
 
     game.lobbys.forEach((lobby, lobbyId) => {
+        const prevGameState = prevStates.get(lobbyId)
         const gameState = game.getGameState(lobbyId);
+
+        console.log(`Estado anterior para el lobby ${lobbyId}:`, prevGameState);
+        console.log(`Estado actual para el lobby ${lobbyId}:`, gameStateStr);
+
         const gameStateStr = JSON.stringify(gameState);
 
         if (prevStates.get(lobbyId) === gameStateStr) return; // Nada cambió
@@ -55,8 +60,6 @@ gameLoop.run = (fps) => {
             const team = lobby.teams[teamKey];
             team.forEach(clientId => {
                 const client = game.clients.get(clientId);
-                console.log(client.state)
-                console.log(client.animationState)
                 if (client) {
                     client.socket.send(JSON.stringify({ type: "update", gameState }));
                 }
