@@ -165,6 +165,7 @@ class GameLogic {
         console.log("Se actualiza el juego");
         console.log(`Estado anterior para el lobby ${lobbyId}:`, prevGameState);
         console.log(`Estado actual para el lobby ${lobbyId}:`, gameStateStr);
+        return gameStateStr;
     }
 
     getGameState(lobbyId) {

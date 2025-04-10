@@ -53,7 +53,7 @@ gameLoop.run = (fps) => {
 
         const prevGameState = prevStates.get(lobbyId)
 
-        game.updateGame()
+        const updatedGameState = game.updateGame()
 
         Object.keys(lobby.teams).forEach(teamKey => {
             const team = lobby.teams[teamKey];
