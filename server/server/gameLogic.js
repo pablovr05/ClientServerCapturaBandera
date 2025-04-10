@@ -220,9 +220,6 @@ class GameLogic {
             switch (obj.type) {
                 case "addClientToLobby":
                     const firstLobbyId = this.lobbys.keys().next().value;
-                    
-                    console.log(firstLobbyId)
-                    console.log(id)
 
                     if (firstLobbyId) {
                         this.addClientToLobby(firstLobbyId, id);  // Añadir al primer lobby disponible
@@ -234,9 +231,6 @@ class GameLogic {
                 
                 case "addSpectatorToLobby": {
                         const firstLobbyId = this.lobbys.keys().next().value;
-                        
-                        console.log(firstLobbyId)
-                        console.log(id)
     
                         if (firstLobbyId) {
                             this.addSpectatorToLobby(firstLobbyId, id);  // Añadir al primer lobby disponible
@@ -264,8 +258,6 @@ class GameLogic {
                     for (const [teamName, teamSet] of Object.entries(lobby.teams)) {
                         if (teamSet.has(id)) {
                             const client = this.clients.get(id);
-                            console.log(obj)
-                            console.log(client)
                             if (client && client.position) {
                                 client.position.x += dirX * speed;
                                 client.position.y += dirY * speed;

@@ -55,6 +55,8 @@ gameLoop.run = (fps) => {
             const team = lobby.teams[teamKey];
             team.forEach(clientId => {
                 const client = game.clients.get(clientId);
+                console.log(client.state)
+                console.log(client.animationState)
                 if (client) {
                     client.socket.send(JSON.stringify({ type: "update", gameState }));
                 }
