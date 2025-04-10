@@ -125,4 +125,16 @@ public class Joystick {
         return angle(new Vector2(vectorB.x - vectorA.x, vectorB.y - vectorA.y));
     }
 
+    public String getDirection(Vector2 movementOutput) {
+        float x = movementOutput.x;
+        float y = movementOutput.y;
+
+        if (x == 0 && y == 0) {
+            return "IDLE";
+        } else if (x > 0) {
+            return "RIGHT";
+        }
+        return "LEFT";
+    }
+
 }

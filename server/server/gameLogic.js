@@ -127,7 +127,9 @@ class GameLogic {
                     type: "joinedLobby",
                     lobbyId: lobbyId,
                     team: Object.keys(lobby.teams).find(key => lobby.teams[key].has(clientId)),
-                    position: position
+                    position: position,
+                    state: "IDLE",
+                    animationState: 0
                 }));
             }
         }
@@ -174,6 +176,8 @@ class GameLogic {
                     players.push({
                         id: clientId,
                         position: client.position,
+                        state: client.state,
+                        animationState: client.animationState,
                         team: teamName
                     });
                 }
@@ -244,6 +248,7 @@ class GameLogic {
                 case "updateMovement": {
                     const dirX = obj.x; // entre -1 y 1
                     const dirY = obj.y;
+                    const direction = obj.state;
                     const speed = 2; // o la velocidad que tú quieras ajustar
                 
                     const firstLobbyId = this.lobbys.keys().next().value;
@@ -261,8 +266,9 @@ class GameLogic {
                             if (client && client.position) {
                                 client.position.x += dirX * speed;
                                 client.position.y += dirY * speed;
+                                client.state = state;
                                 userFound = true;
-                                //console.log("POSICIÓN DEL PERSONAJE: " + client.position.x + "," + client.position.y)
+                                console.log(obj)
                             }
                             break;
                         }

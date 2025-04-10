@@ -141,6 +141,7 @@ public class GameScreen implements Screen {
             message.put("type", "updateMovement");
             message.put("x", (double) movementOutput.x);
             message.put("y", (double) movementOutput.y);
+            message.put("state", joystick.getDirection(movementOutput));
             message.put("id", webSockets.getPlayerId());
 
             webSockets.sendMessage(message.toString());
@@ -171,8 +172,6 @@ public class GameScreen implements Screen {
             }
         }
     }
-
-
 
     public void paintEntities(JSONObject data) throws JSONException {
         if (!data.has("gameState")) return;
