@@ -6,6 +6,7 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Matrix4;
@@ -16,6 +17,9 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import com.project.clases.Joystick;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public class GameScreen implements Screen {
     private final Game game;
@@ -37,6 +41,23 @@ public class GameScreen implements Screen {
 
     private Vector2 movementOutput;
 
+    private Texture warriorBlueSheet;
+    private Texture warriorRedSheet;
+    private Texture warriorPurpleSheet;
+    private Texture warriorYellowSheet;
+    private Texture goldSheet;
+
+    private TextureRegion[][] blueFrames;
+    private TextureRegion[][] redFrames;
+    private TextureRegion[][] purpleFrames;
+    private TextureRegion[][] yellowFrames;
+    private TextureRegion[][] goldFrames;
+
+    private float animationTimer = 0f;
+    private float frameDuration = 0.1f; // 10 fps
+
+    private Map<String, String> playerDirections = new HashMap<>();
+
     public GameScreen(Game game, WebSockets webSockets) {
         this.game = game;
         this.webSockets = webSockets;
@@ -57,6 +78,36 @@ public class GameScreen implements Screen {
         backgroundImage = new Texture("mapa.png");
 
         joystick = new Joystick(175, 175, 75);
+
+        initTextures();
+    }
+
+    private void initTextures() {    
+        warriorBlueSheet = new Texture("Troops/Warrior/Blue/Warrior_Blue.png");
+        warriorRedSheet = new Texture("Troops/Warrior/Red/Warrior_Red.png");
+        warriorPurpleSheet = new Texture("Troops/Warrior/Purple/Warrior_Purple.png");
+        warriorYellowSheet = new Texture("Troops/Warrior/Yellow/Warrior_Yellow.png");
+        goldSheet = new Texture("G_Spawn.png");
+    
+        blueFrames = extractFrames(warriorBlueSheet, 192, 192, 6);
+        redFrames = extractFrames(warriorRedSheet, 192, 192, 6);
+        purpleFrames = extractFrames(warriorPurpleSheet, 192, 192, 6);
+        yellowFrames = extractFrames(warriorYellowSheet, 192, 192, 6);
+        goldFrames = extractFrames(goldSheet, 128, 128, 7);
+    }
+
+    private TextureRegion[][] extractFrames(Texture sheet, int frameWidth, int frameHeight, int framesPerRow) {
+        TextureRegion[][] allFrames = new TextureRegion[2][framesPerRow];
+        for (int row = 0; row < 2; row++) {
+            for (int col = 0; col < framesPerRow; col++) {
+                TextureRegion frame = new TextureRegion(sheet, col * frameWidth, row * frameHeight, frameWidth, frameHeight);
+                if (row == 1) { // LEFT será fila 1 invertido
+                    frame.flip(true, false);
+                }
+                allFrames[row][col] = frame;
+            }
+        }
+        return allFrames;
     }
 
     @Override
@@ -64,6 +115,8 @@ public class GameScreen implements Screen {
 
     @Override
     public void render(float delta) {
+
+        animationTimer += delta;
 
         ScreenUtils.clear(0, 0, 0, 1);
 
@@ -149,25 +202,34 @@ public class GameScreen implements Screen {
 
     private void updatePlayerPosition(JSONObject gameState) throws JSONException {
         if (!gameState.has("players")) return;
-
+        
         JSONArray players = gameState.getJSONArray("players");
-        String clientId = webSockets.getPlayerId();
-
+        
         for (int i = 0; i < players.length(); i++) {
             JSONObject player = players.getJSONObject(i);
-            if (player.getString("id").equals(clientId)) {
-                JSONObject pos = player.getJSONObject("position");
-                float newX = (float) pos.getDouble("x");
-                float newY = (float) pos.getDouble("y");
-
-                // Quitar la interpolación y asignar directamente la nueva posición
+            String playerId = player.getString("id"); // Usar el id del jugador para identificar a todos
+            
+            JSONObject pos = player.getJSONObject("position");
+            float newX = (float) pos.getDouble("x");
+            float newY = (float) pos.getDouble("y");
+    
+            // Quitar la interpolación y asignar directamente la nueva posición
+            if (playerId.equals(webSockets.getPlayerId())) {
                 playerX = newX;
                 playerY = newY;
-
-                break;
+            }
+    
+            // Actualizar dirección solo si el estado ha cambiado
+            String state = player.getString("state").toUpperCase();
+            
+            // Si el estado no es "IDLE" y ha cambiado, se actualiza la dirección
+            if (!state.equals("IDLE") && !state.equals(playerDirections.get(playerId))) {
+                playerDirections.put(playerId, state); // Guardamos la dirección de todos los jugadores
+                System.out.println("Updated direction for player " + playerId + ": " + state);
             }
         }
     }
+    
 
     public void paintEntities(JSONObject data) throws JSONException {
         if (!data.has("gameState")) return;
@@ -179,32 +241,43 @@ public class GameScreen implements Screen {
 
         JSONArray players = gameState.getJSONArray("players");
 
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        batch.begin();
         for (int i = 0; i < players.length(); i++) {
             JSONObject player = players.getJSONObject(i);
             JSONObject pos = player.getJSONObject("position");
 
             float x = (float) pos.getDouble("x");
             float y = (float) pos.getDouble("y");
-            String team = player.getString("team");
-            String state = player.getString("state");
+            String team = player.getString("team").toLowerCase();
+            String state = player.getString("state").toUpperCase();
 
-            System.out.println("Dibujando a personaje en: " + x + "," + y + " del equipo: " + team + " con estado: " + state);
+            String lastDirection = playerDirections.getOrDefault(player.getString("id"), "RIGHT");
 
-            shapeRenderer.setColor(0.5f, 1f, 0f, 1f);
-            shapeRenderer.circle(x, y, 17);
+            // Fila de animación según estado
+            int row = (state.equals("RIGHT") || state.equals("LEFT")) ? 1 : 0;
+            int frameIndex = ((int)(animationTimer / frameDuration)) % 6;
 
-            switch (team.toLowerCase()) {
-                case "blue": shapeRenderer.setColor(0, 0, 1, 1); break;
-                case "red": shapeRenderer.setColor(1, 0, 0, 1); break;
-                case "purple": shapeRenderer.setColor(0.5f, 0, 0.5f, 1); break;
-                case "yellow": shapeRenderer.setColor(1, 1, 0, 1); break;
-                default: shapeRenderer.setColor(1, 1, 1, 1); break;
+            TextureRegion[][] frames = null;
+            switch (team) {
+                case "blue":   frames = blueFrames;   break;
+                case "red":    frames = redFrames;    break;
+                case "purple": frames = purpleFrames; break;
+                case "yellow": frames = yellowFrames; break;
             }
 
-            shapeRenderer.circle(x, y, 12);
+            if (frames != null) {
+                TextureRegion frame = frames[row][frameIndex];
+
+                if (state.equals("RIGHT") || (state.equals("IDLE") && lastDirection.equals("LEFT"))) {
+                    frame = new TextureRegion(frame); // Evitar modificar original
+                    frame.flip(true, false);  // Volteamos el sprite
+                }
+
+                float scale = 0.85f;  // Ajusta la escala según lo necesites
+                batch.draw(frame, x - (96 * scale), y - (96 * scale), frame.getRegionWidth() * scale, frame.getRegionHeight() * scale); 
+            }
         }
-        shapeRenderer.end();
+        batch.end();
     }
 
     private void drawGold(JSONObject gameState) throws JSONException {
@@ -212,7 +285,7 @@ public class GameScreen implements Screen {
 
         JSONArray golds = gameState.getJSONArray("gold");
 
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        batch.begin();
         for (int i = 0; i < golds.length(); i++) {
             JSONObject gold = golds.getJSONObject(i);
             JSONObject pos = gold.getJSONObject("position");
@@ -220,13 +293,16 @@ public class GameScreen implements Screen {
             float x = (float) pos.getDouble("x");
             float y = (float) pos.getDouble("y");
 
-            shapeRenderer.setColor(1f, 0.84f, 0f, 1f);
-            shapeRenderer.circle(x, y, 12);
+            int frameIndex = ((int)(animationTimer / frameDuration)) % 7;
+            TextureRegion[][] frames = goldFrames;
 
-            shapeRenderer.setColor(1f, 1f, 0.2f, 1f);
-            shapeRenderer.circle(x, y, 8);
+            TextureRegion frame = frames[0][frameIndex];
+
+            float scale = 1f;  // Ajusta la escala según lo necesites
+            batch.draw(frame, x - (96 * scale), y - (96 * scale), frame.getRegionWidth() * scale, frame.getRegionHeight() * scale); 
+
         }
-        shapeRenderer.end();
+        batch.end();
     }
 
     @Override public void resize(int width, int height) {}
@@ -243,5 +319,10 @@ public class GameScreen implements Screen {
         font.dispose();
         titleFont.dispose();
         backgroundImage.dispose();
+        warriorBlueSheet.dispose();
+        warriorRedSheet.dispose();
+        warriorPurpleSheet.dispose();
+        warriorYellowSheet.dispose();
+        goldSheet.dispose();
     }
 }
