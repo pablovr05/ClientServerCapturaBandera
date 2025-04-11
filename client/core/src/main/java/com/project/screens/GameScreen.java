@@ -3,6 +3,7 @@ package com.project.screens;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -21,6 +22,8 @@ import com.project.clases.Joystick;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.json.JsonObject;
+
 public class GameScreen implements Screen {
     private final Game game;
     private SpriteBatch batch;
@@ -28,7 +31,6 @@ public class GameScreen implements Screen {
     private ShapeRenderer shapeRenderer;
     private ShapeRenderer uiShapeRenderer;
     private BitmapFont font, titleFont;
-    private Texture backgroundImage;
     private WebSockets webSockets;
 
     private OrthographicCamera camera;
@@ -47,18 +49,32 @@ public class GameScreen implements Screen {
     private Texture warriorYellowSheet;
     private Texture goldSheet;
 
+    private Texture grassSheet;
+    private Texture waterSheet;
+    private Texture foamSheet;
+    private Texture decoSheet;
+    private Texture towerSheet;
+
     private TextureRegion[][] blueFrames;
     private TextureRegion[][] redFrames;
     private TextureRegion[][] purpleFrames;
     private TextureRegion[][] yellowFrames;
     private TextureRegion[][] goldFrames;
 
+    private TextureRegion[][] waterFrames;
+    private TextureRegion[][] foamFrames;
+    private TextureRegion[][] grassFrames;
+    private TextureRegion[][] decoFrames;
+    private TextureRegion[][] towerFrames;
+
+    private JSONObject gameData;
+
     private float animationTimer = 0f;
     private float frameDuration = 0.1f; // 10 fps
 
     private Map<String, String> playerDirections = new HashMap<>();
 
-    public GameScreen(Game game, WebSockets webSockets) {
+    public GameScreen(Game game, WebSockets webSockets) throws JSONException {
         this.game = game;
         this.webSockets = webSockets;
 
@@ -75,35 +91,50 @@ public class GameScreen implements Screen {
 
         font = new BitmapFont();
         titleFont = new BitmapFont();
-        backgroundImage = new Texture("mapa.png");
 
         joystick = new Joystick(175, 175, 75);
 
         initTextures();
     }
 
-    private void initTextures() {    
+    private void initTextures() throws JSONException {
+        //Animaciones
         warriorBlueSheet = new Texture("Troops/Warrior/Blue/Warrior_Blue.png");
         warriorRedSheet = new Texture("Troops/Warrior/Red/Warrior_Red.png");
         warriorPurpleSheet = new Texture("Troops/Warrior/Purple/Warrior_Purple.png");
         warriorYellowSheet = new Texture("Troops/Warrior/Yellow/Warrior_Yellow.png");
         goldSheet = new Texture("G_Spawn.png");
-    
-        blueFrames = extractFrames(warriorBlueSheet, 192, 192, 6);
-        redFrames = extractFrames(warriorRedSheet, 192, 192, 6);
-        purpleFrames = extractFrames(warriorPurpleSheet, 192, 192, 6);
-        yellowFrames = extractFrames(warriorYellowSheet, 192, 192, 6);
-        goldFrames = extractFrames(goldSheet, 128, 128, 7);
+
+        blueFrames = extractFrames(warriorBlueSheet, 192, 192, 8, 6);
+        redFrames = extractFrames(warriorRedSheet, 192, 192, 8, 6);
+        purpleFrames = extractFrames(warriorPurpleSheet, 192, 192, 8, 6);
+        yellowFrames = extractFrames(warriorYellowSheet, 192, 192, 8, 6);
+        goldFrames = extractFrames(goldSheet, 128, 128, 8, 7);
+
+        //Mapa
+
+        FileHandle file = Gdx.files.internal("game_data.json");
+        String jsonString = file.readString();
+        gameData = new JSONObject(jsonString);
+
+        grassSheet = new Texture("tilemap_Flat.png");
+        waterSheet = new Texture("water.png");
+        foamSheet = new Texture("foam.png");
+        decoSheet = new Texture("deco.png");
+        towerSheet = new Texture("towers.png");
+
+        grassFrames = extractFrames(grassSheet, 64, 64, 4, 10);
+        waterFrames = extractFrames(waterSheet, 64, 64, 1, 1);
+        foamFrames = extractFrames(foamSheet, 64, 64, 3, 24);
+        decoFrames = extractFrames(decoSheet, 64, 64, 1, 15);
+        towerFrames = extractFrames(towerSheet, 64, 64, 4, 8);
     }
 
-    private TextureRegion[][] extractFrames(Texture sheet, int frameWidth, int frameHeight, int framesPerRow) {
-        TextureRegion[][] allFrames = new TextureRegion[2][framesPerRow];
-        for (int row = 0; row < 2; row++) {
+    private TextureRegion[][] extractFrames(Texture sheet, int frameWidth, int frameHeight, int totalRows, int framesPerRow) {
+        TextureRegion[][] allFrames = new TextureRegion[totalRows][framesPerRow];
+        for (int row = 0; row < totalRows; row++) {
             for (int col = 0; col < framesPerRow; col++) {
                 TextureRegion frame = new TextureRegion(sheet, col * frameWidth, row * frameHeight, frameWidth, frameHeight);
-                if (row == 1) { // LEFT será fila 1 invertido
-                    frame.flip(true, false);
-                }
                 allFrames[row][col] = frame;
             }
         }
@@ -111,14 +142,15 @@ public class GameScreen implements Screen {
     }
 
     @Override
-    public void show() {}
+    public void show() {
+    }
 
     @Override
     public void render(float delta) {
-
         animationTimer += delta;
 
-        ScreenUtils.clear(0, 0, 0, 1);
+        // Limpiar la pantalla con un fondo negro
+        ScreenUtils.clear(0.278f, 0.671f, 0.663f, 1f);
 
         if (latestGameState != null) {
             try {
@@ -134,9 +166,13 @@ public class GameScreen implements Screen {
             batch.setProjectionMatrix(camera.combined);
             shapeRenderer.setProjectionMatrix(camera.combined);
 
-            batch.begin();
-            batch.draw(backgroundImage, 0, 0, 2048, 2048);
-            batch.end();
+
+            // === Luego dibujar el mapa ===
+            try {
+                drawMap(0, 0);
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
 
             try {
                 drawPlayers(latestGameState);
@@ -199,29 +235,80 @@ public class GameScreen implements Screen {
         }
     }
 
+    private void drawMap(int x, int y) throws JSONException {
+        batch.begin();
+    
+        JSONArray layers = gameData.getJSONArray("levels").getJSONObject(0).getJSONArray("layers");
+    
+        for (int i = 0; i < layers.length(); i++) {
+            JSONObject layer = layers.getJSONObject(i);
+            String layerName = layer.getString("name");
+            int tileWidth = layer.getInt("tilesWidth");
+            int tileHeight = layer.getInt("tilesHeight");
+    
+            // Obtener el tile map de esta capa
+            JSONArray tileMap = layer.getJSONArray("tileMap");
+    
+            // Set de texturas por capa
+            TextureRegion[][] currentFrameSet = getTextureForLayer(layerName);
+            if (currentFrameSet != null) {
+                int positionX = x;
+                int positionY = y;
+    
+                for (int row = tileMap.length() - 1; row > -1; row--) {
+                    positionX = x;
+                    JSONArray rowTiles = tileMap.getJSONArray(row);
+    
+                    for (int col = 0; col < rowTiles.length(); col++) {
+                        int tile = rowTiles.getInt(col);
+                        if (tile != -1) {
+                            int tileRow = tile / currentFrameSet[0].length;
+                            int tileCol = tile % currentFrameSet[0].length;
+    
+                            batch.draw(currentFrameSet[tileRow][tileCol], positionX, positionY);
+                        }
+                        positionX += tileWidth;
+                    }
+                    positionY += tileHeight;
+                }
+            }
+        }
+        batch.end();
+    }
+    
+    private TextureRegion[][] getTextureForLayer(String layerName) {
+        switch (layerName) {
+            case "water0": return waterFrames;
+            case "water1": return foamFrames;
+            case "grass": return grassFrames;
+            case "deco": return decoFrames;
+            case "towers": return towerFrames;
+            default: return null;
+        }
+    }
 
     private void updatePlayerPosition(JSONObject gameState) throws JSONException {
         if (!gameState.has("players")) return;
-        
+
         JSONArray players = gameState.getJSONArray("players");
-        
+
         for (int i = 0; i < players.length(); i++) {
             JSONObject player = players.getJSONObject(i);
             String playerId = player.getString("id"); // Usar el id del jugador para identificar a todos
-            
+
             JSONObject pos = player.getJSONObject("position");
             float newX = (float) pos.getDouble("x");
             float newY = (float) pos.getDouble("y");
-    
+
             // Quitar la interpolación y asignar directamente la nueva posición
             if (playerId.equals(webSockets.getPlayerId())) {
                 playerX = newX;
                 playerY = newY;
             }
-    
+
             // Actualizar dirección solo si el estado ha cambiado
             String state = player.getString("state").toUpperCase();
-            
+
             // Si el estado no es "IDLE" y ha cambiado, se actualiza la dirección
             if (!state.equals("IDLE") && !state.equals(playerDirections.get(playerId))) {
                 playerDirections.put(playerId, state); // Guardamos la dirección de todos los jugadores
@@ -229,7 +316,7 @@ public class GameScreen implements Screen {
             }
         }
     }
-    
+
 
     public void paintEntities(JSONObject data) throws JSONException {
         if (!data.has("gameState")) return;
@@ -240,8 +327,8 @@ public class GameScreen implements Screen {
         if (!gameState.has("players")) return;
 
         JSONArray players = gameState.getJSONArray("players");
-
         batch.begin();
+
         for (int i = 0; i < players.length(); i++) {
             JSONObject player = players.getJSONObject(i);
             JSONObject pos = player.getJSONObject("position");
@@ -253,10 +340,6 @@ public class GameScreen implements Screen {
 
             String lastDirection = playerDirections.getOrDefault(player.getString("id"), "RIGHT");
 
-            // Fila de animación según estado
-            int row = (state.equals("RIGHT") || state.equals("LEFT")) ? 1 : 0;
-            int frameIndex = ((int)(animationTimer / frameDuration)) % 6;
-
             TextureRegion[][] frames = null;
             switch (team) {
                 case "blue":   frames = blueFrames;   break;
@@ -266,15 +349,23 @@ public class GameScreen implements Screen {
             }
 
             if (frames != null) {
+
+                int row = (state.equals("RIGHT") || state.equals("LEFT")) ? 1 : 0;
+                int frameIndex = ((int)(animationTimer / frameDuration)) % 6;
+
                 TextureRegion frame = frames[row][frameIndex];
 
-                if (state.equals("RIGHT") || (state.equals("IDLE") && lastDirection.equals("LEFT"))) {
+                if (state.equals("LEFT") || (state.equals("IDLE") && lastDirection.equals("LEFT"))) {
                     frame = new TextureRegion(frame); // Evitar modificar original
                     frame.flip(true, false);  // Volteamos el sprite
                 }
 
+                if (!state.equals("IDLE")) {
+
+                }
+
                 float scale = 0.85f;  // Ajusta la escala según lo necesites
-                batch.draw(frame, x - (96 * scale), y - (96 * scale), frame.getRegionWidth() * scale, frame.getRegionHeight() * scale); 
+                batch.draw(frame, x - (96 * scale), y - (96 * scale), frame.getRegionWidth() * scale, frame.getRegionHeight() * scale);
             }
         }
         batch.end();
@@ -299,7 +390,7 @@ public class GameScreen implements Screen {
             TextureRegion frame = frames[0][frameIndex];
 
             float scale = 1f;  // Ajusta la escala según lo necesites
-            batch.draw(frame, x - (96 * scale), y - (96 * scale), frame.getRegionWidth() * scale, frame.getRegionHeight() * scale); 
+            batch.draw(frame, x - (96 * scale), y - (96 * scale), frame.getRegionWidth() * scale, frame.getRegionHeight() * scale);
 
         }
         batch.end();
@@ -318,11 +409,14 @@ public class GameScreen implements Screen {
         uiShapeRenderer.dispose();
         font.dispose();
         titleFont.dispose();
-        backgroundImage.dispose();
         warriorBlueSheet.dispose();
         warriorRedSheet.dispose();
         warriorPurpleSheet.dispose();
         warriorYellowSheet.dispose();
+        grassSheet.dispose();
+        waterSheet.dispose();
+        foamSheet.dispose();
+        decoSheet.dispose();
         goldSheet.dispose();
     }
 }
