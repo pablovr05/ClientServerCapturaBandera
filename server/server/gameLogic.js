@@ -235,6 +235,9 @@ class GameLogic {
                 }
                 
                 case "updateMovement": {
+
+                    console.log(obj)
+                    
                     const dirX = obj.x; // entre -1 y 1
                     const dirY = obj.y;
                     const speed = 2; // o la velocidad que tú quieras ajustar
