@@ -37,10 +37,6 @@ public class GameScreen implements Screen {
 
     private Vector2 movementOutput;
 
-    private float lastPlayerX, lastPlayerY;  // Para almacenar la última posición conocida
-    private float interpolationFactor = 0.1f; // Factor de interpolación (ajustable)
-
-
     public GameScreen(Game game, WebSockets webSockets) {
         this.game = game;
         this.webSockets = webSockets;
@@ -191,6 +187,9 @@ public class GameScreen implements Screen {
             float x = (float) pos.getDouble("x");
             float y = (float) pos.getDouble("y");
             String team = player.getString("team");
+            String state = player.getString("state");
+
+            System.out.println("Dibujando a personaje en: " + x + "," + y + " del equipo: " + team + " con estado: " + state);
 
             shapeRenderer.setColor(0.5f, 1f, 0f, 1f);
             shapeRenderer.circle(x, y, 17);
