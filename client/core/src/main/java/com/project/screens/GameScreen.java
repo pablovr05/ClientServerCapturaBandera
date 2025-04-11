@@ -81,7 +81,7 @@ public class GameScreen implements Screen {
         movementOutput = new Vector2();
 
         camera = new OrthographicCamera();
-        camera.setToOrtho(false, 800, 600);
+        camera.setToOrtho(false, 1000, 800);
 
         batch = new SpriteBatch(); // para el mundo
         uiBatch = new SpriteBatch(); // para la UI

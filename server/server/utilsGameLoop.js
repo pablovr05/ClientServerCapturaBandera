@@ -1,6 +1,6 @@
 'use strict';
 
-const TARGET_FPS = 60;
+const TARGET_FPS = 35;
 const TARGET_MS = 1000 / TARGET_FPS;
 
 class GameLoop {

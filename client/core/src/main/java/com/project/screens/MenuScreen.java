@@ -17,6 +17,8 @@ import com.project.WebSockets;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.Screen;
 
+import org.json.JSONException;
+
 public class MenuScreen implements Screen {
     private final Game game;
     private Stage stage;
@@ -76,7 +78,12 @@ public class MenuScreen implements Screen {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 // Cambiar a la pantalla del juego
-                GameScreen gameScreen = new GameScreen(game, webSockets);
+                GameScreen gameScreen = null;
+                try {
+                    gameScreen = new GameScreen(game, webSockets);
+                } catch (JSONException e) {
+                    throw new RuntimeException(e);
+                }
                 webSockets.setGameScreen(gameScreen);
                 connectToLobby();
                 game.setScreen(gameScreen);
@@ -90,7 +97,7 @@ public class MenuScreen implements Screen {
 
         // Creamos un fondo solo para los elementos de la tabla
         table.setBackground(new Image(new TextureRegion(new Texture("marco.png"))).getDrawable());
-        
+
         table.setWidth(750);
         table.setHeight(750);
 
@@ -158,5 +165,5 @@ public class MenuScreen implements Screen {
         String message = "{\"type\": \"addClientToLobby\", \"code\": 555555}";
         // Enviar el mensaje al servidor
         webSockets.sendMessage(message);
-    }    
+    }
 }
