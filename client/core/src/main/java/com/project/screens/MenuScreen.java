@@ -16,6 +16,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.Align;
 import com.project.WebSockets;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.Screen;
@@ -61,12 +62,12 @@ public class MenuScreen implements Screen {
         playersLabel.setColor(Color.BLACK);
 
         // Cargar la textura del botón desde tu archivo de imagen
-        Texture buttonTexture = new Texture(Gdx.files.internal("water.png"));
+        Texture buttonTexture = new Texture(Gdx.files.internal("button.png"));
         Drawable buttonBackground = new TextureRegionDrawable(new TextureRegion(buttonTexture));
 
         // Crear un estilo de botón personalizado
         BitmapFont font = new BitmapFont(); 
-        font.getData().setScale(2f); // Tamaño del texto
+        font.getData().setScale(1.5f); // Tamaño del texto
 
         TextButton.TextButtonStyle buttonStyle = new TextButton.TextButtonStyle();
         buttonStyle.up = buttonBackground;
@@ -75,7 +76,10 @@ public class MenuScreen implements Screen {
         // Crear el botón
         TextButton startButton = new TextButton("Start Game", buttonStyle);
         startButton.setSize(300, 100);
-        startButton.getLabel().setColor(Color.WHITE); // Color del texto
+        startButton.getLabel().setColor(Color.BLACK); // Color del texto
+
+        startButton.getLabel().setAlignment(Align.top | Align.center); 
+        startButton.getLabelCell().padTop(10);
 
         // Listener para iniciar el juego
         startButton.addListener(new ChangeListener() {
