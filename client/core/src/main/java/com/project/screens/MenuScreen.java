@@ -3,6 +3,7 @@ package com.project.screens;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -13,6 +14,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.project.WebSockets;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.Screen;
@@ -57,27 +60,27 @@ public class MenuScreen implements Screen {
         playersLabel.setWidth(100);
         playersLabel.setColor(Color.BLACK);
 
-        // Crear el estilo para el botón
-        TextButton.TextButtonStyle buttonStyle = new TextButton.TextButtonStyle();
+        // Cargar la textura del botón desde tu archivo de imagen
+        Texture buttonTexture = new Texture(Gdx.files.internal("water.png"));
+        Drawable buttonBackground = new TextureRegionDrawable(new TextureRegion(buttonTexture));
 
-        // Asignar la fuente que estás utilizando
+        // Crear un estilo de botón personalizado
+        BitmapFont font = new BitmapFont(); 
+        font.getData().setScale(2f); // Tamaño del texto
+
+        TextButton.TextButtonStyle buttonStyle = new TextButton.TextButtonStyle();
+        buttonStyle.up = buttonBackground;
         buttonStyle.font = font;
 
-        // Establecer el color del texto a rojo
-        buttonStyle.fontColor = Color.RED;
+        // Crear el botón
+        TextButton startButton = new TextButton("Start Game", buttonStyle);
+        startButton.setSize(300, 100);
+        startButton.getLabel().setColor(Color.WHITE); // Color del texto
 
-        // Crear el botón con el estilo definido
-        startButton = new TextButton("Start Game", buttonStyle);
-
-        // Establecer el color de fondo si lo deseas (esto solo afectará al texto, no al fondo del botón)
-        startButton.setColor(Color.BLACK);
-
-        // Establecer el tamaño del botón
-        startButton.setSize(250, 80);
+        // Listener para iniciar el juego
         startButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                // Cambiar a la pantalla del juego
                 GameScreen gameScreen = null;
                 try {
                     gameScreen = new GameScreen(game, webSockets);
@@ -87,9 +90,9 @@ public class MenuScreen implements Screen {
                 webSockets.setGameScreen(gameScreen);
                 connectToLobby();
                 game.setScreen(gameScreen);
-
             }
         });
+
 
         // Crear la tabla para los elementos UI alineados a la izquierda
         Table table = new Table();

@@ -302,8 +302,13 @@ public class GameScreen implements Screen {
 
             // Quitar la interpolación y asignar directamente la nueva posición
             if (playerId.equals(webSockets.getPlayerId())) {
-                playerX = newX;
-                playerY = newY;
+                // Dentro de tu clase de render/update en libGDX
+                float delta = Gdx.graphics.getDeltaTime();
+
+                // Si quieres interpolar suavemente la posición recibida desde el servidor:
+                float lerpFactor = 10f * delta;
+                playerX += (newX - playerX) * lerpFactor;
+                playerY += (newY - playerY) * lerpFactor;
             }
 
             // Actualizar dirección solo si el estado ha cambiado
