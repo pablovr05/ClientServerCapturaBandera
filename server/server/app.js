@@ -60,7 +60,7 @@ gameLoop.run = (fps) => {
         const playerCount = Object.values(lobby.teams).reduce((acc, team) => acc + team.size, 0);
         console.log(`Jugadores en el lobby ${lobbyId}: ${playerCount}`);
 
-        // Cambiar el contador si hay 3 jugadores en el lobby
+        // Cambiar el contador a 3 segundos si hay 3 jugadores
         if (playerCount >= 3 && lobby.countdown !== COUNTDOWN_3_SECONDS) {
             console.log(`Cambiar a 3 segundos el contador para el lobby ${lobbyId}`);
             lobby.countdown = COUNTDOWN_3_SECONDS;  // Cambia a 3 segundos
@@ -70,12 +70,12 @@ gameLoop.run = (fps) => {
         const elapsedTime = Date.now() - lobby.gameStartTime;
         console.log(`Tiempo transcurrido para el lobby ${lobbyId}: ${elapsedTime} ms`);
 
+        // Si el contador es de 60 segundos, verificar si debe iniciar el juego
         if (lobby.countdown === COUNTDOWN_60_SECONDS) {
-            // Si el contador es de 60 segundos, verificar si debe iniciar el juego
-            if (elapsedTime >= COUNTDOWN_60_SECONDS) {
-                console.log(`El tiempo de 60 segundos ha expirado para el lobby ${lobbyId}`);
+            if (elapsedTime >= COUNTDOWN_60_SECONDS || playerCount >= 3) {
+                console.log(`El tiempo de 60 segundos ha expirado o hay 3 jugadores en el lobby ${lobbyId}`);
 
-                // El tiempo se acabó, el juego empieza con duración de 3 segundos
+                // El tiempo se acabó o hay suficientes jugadores, el juego empieza con duración de 3 segundos
                 if (!lobby.isGameOver) {
                     lobby.isGameOver = true;
                     console.log(`Iniciando el juego en el lobby ${lobbyId}`);
@@ -89,7 +89,7 @@ gameLoop.run = (fps) => {
                                 console.log(`Enviando mensaje a ${clientId} en el equipo ${teamKey}`);
                                 client.socket.send(JSON.stringify({
                                     type: "gameStart",
-                                    message: `¡El juego ha comenzado! Durará 180 segundos.`
+                                    message: `¡El juego ha comenzado! Durará 3 segundos.`
                                 }));
                             }
                         });
@@ -102,7 +102,7 @@ gameLoop.run = (fps) => {
                             console.log(`Enviando mensaje a espectador ${clientId}`);
                             client.socket.send(JSON.stringify({
                                 type: "gameStart",
-                                message: "El juego ha comenzado, dura 180 segundos."
+                                message: "El juego ha comenzado, dura 3 segundos."
                             }));
                         }
                     });
@@ -192,6 +192,7 @@ gameLoop.run = (fps) => {
 };
 
 gameLoop.start();
+
 
 
 // Gestionar el tancament del servidor
