@@ -353,7 +353,7 @@ class GameLogic {
                                     if (client) {
                                         if (client.team === towerColor) {
                                             // El jugador ha tocado una torre de su propio color
-                                            if (client.hasKey) {
+                                            if (client.hasGold) {
                                                 // Si el jugador tiene la llave
                                                 console.log(`Jugador ${client.id} (${client.team}) ha tocado su propia torre con la llave en la posición (${client.position.x}, ${client.position.y})`);
                                                 // Realiza alguna acción especial si el jugador tiene la llave
@@ -364,7 +364,7 @@ class GameLogic {
                                             }
                                         } else {
                                             // El jugador ha tocado una torre de otro color
-                                            if (client.hasKey) {
+                                            if (client.hasGold) {
                                                 // Si el jugador tiene la llave, puede interactuar con la torre de otro color
                                                 console.log(`Jugador ${client.id} (${client.team}) ha tocado una torre del equipo ${towerColor} con la llave en la posición (${client.position.x}, ${client.position.y})`);
                                                 // Aquí podría haber alguna acción especial, como robar algo, desbloquear un área, etc.
