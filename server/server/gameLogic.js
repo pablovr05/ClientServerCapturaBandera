@@ -332,7 +332,7 @@ class GameLogic {
 
                                 const towerColor = this.getTowerColorAtPosition(firstLobbyId, newX, newY);
                                 if (towerColor) {
-                                    console.log(`Jugador ${id} (${client.team}) ha tocado una torre del equipo ${towerColor} en la posición (${client.position.x}, ${client.position.y})`);
+                                    console.log(`Jugador ${client} (${client.team}) ha tocado una torre del equipo ${towerColor} en la posición (${client.position.x}, ${client.position.y})`);
                                 }
                 
                                 if (this.isPositionValid(newX, newY)) {
