@@ -21,15 +21,14 @@ class GameLogic {
     checkPlayerCountForGameStart(lobbyId) {
         const lobby = this.lobbys.get(lobbyId);
         if (!lobby) return;
-
+    
         const playerCount = this.getTotalPlayerCountInLobby(lobbyId);
-        
-        if (playerCount >= 2 && !lobby.gameStarted) {
+    
+        // ✅ Solo iniciar el contador si hay al menos 2 jugadores, el juego no ha empezado y no hay contador corriendo
+        if (playerCount >= 2 && !lobby.gameStarted && !this.gameTimers.has(lobbyId)) {
             this.startGameCountdown(lobbyId);
-        } else if (playerCount === 0) {
-            this.resetGameStartCountdown(lobbyId);
         }
-    }
+    }    
 
     // Método que obtiene el total de jugadores en el lobby
     getTotalPlayerCountInLobby(lobbyId) {
@@ -43,29 +42,42 @@ class GameLogic {
     startGameCountdown(lobbyId) {
         const lobby = this.lobbys.get(lobbyId);
         if (!lobby) return;
-
+    
         if (lobby.gameStarted) return;
-
-        lobby.timeToStart = COUNTDOWN_60_SECONDS; // Establece el contador en 60 segundos
-
-        // Iniciar el contador
+    
+        lobby.timeToStart = COUNTDOWN_60_SECONDS;
+    
         this.gameTimers.set(lobbyId, setInterval(() => {
-            lobby.timeToStart -= 1000; // Disminuir 1 segundo
-
-            // Enviar la cuenta regresiva a todos los jugadores y espectadores
+            const playerCount = this.getTotalPlayerCountInLobby(lobbyId);
+    
+            // 🚨 Si hay menos de 2 jugadores, detener y NO reiniciar el contador
+            if (playerCount < 2) {
+                console.log(`Contador detenido en lobby ${lobbyId}, jugadores insuficientes.`);
+    
+                clearInterval(this.gameTimers.get(lobbyId));
+                this.gameTimers.delete(lobbyId);
+    
+                lobby.timeToStart = COUNTDOWN_60_SECONDS;
+                this.broadcastCountdown(lobbyId, lobby.timeToStart);
+    
+                return;
+            }
+    
+            lobby.timeToStart -= 1000;
+    
             this.broadcastCountdown(lobbyId, lobby.timeToStart);
-
+    
             if (lobby.timeToStart <= 0) {
                 clearInterval(this.gameTimers.get(lobbyId));
                 this.gameTimers.delete(lobbyId);
-                lobby.gameStarted = true;  // La partida ha comenzado
+    
+                lobby.gameStarted = true;
                 console.log(`La partida en el lobby ${lobbyId} ha comenzado!`);
-
-                // Empezar la partida
                 this.startGame(lobbyId);
             }
         }, 1000));
     }
+    
 
     // Método para reiniciar el contador cuando no haya jugadores
     resetGameStartCountdown(lobbyId) {

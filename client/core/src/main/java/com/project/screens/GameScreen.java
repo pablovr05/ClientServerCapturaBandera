@@ -111,8 +111,6 @@ public class GameScreen implements Screen {
         yellowFrames = extractFrames(warriorYellowSheet, 192, 192, 8, 6);
         goldFrames = extractFrames(goldSheet, 128, 128, 8, 7);
 
-        //Mapa
-
         FileHandle file = Gdx.files.internal("game_data.json");
         String jsonString = file.readString();
         gameData = new JSONObject(jsonString);
