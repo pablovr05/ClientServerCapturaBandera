@@ -442,8 +442,7 @@ class GameLogic {
                 }
             }
         }
-    }    
-            
+    }
 }
 
 const instance = new GameLogic();
