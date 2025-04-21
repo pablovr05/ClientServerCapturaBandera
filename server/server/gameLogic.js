@@ -106,6 +106,8 @@ class GameLogic {
             timeLeft: timeLeft / 1000,  // Convertir a segundos
         };
 
+        console.log( "Tiempo restante para empezar " + timeLeft / 1000)
+
         for (const clientId of lobby.teams.blue) {
             const client = this.clients.get(clientId);
             if (client && client.socket) {
@@ -209,8 +211,6 @@ class GameLogic {
 
     removeClient(id) {
         console.log(`Eliminando cliente con ID: ${id}`);
-
-        this.checkPlayerCountForGameStart(lobbyId)
     
         // Eliminar de los lobbys
         for (const [lobbyId, lobby] of this.lobbys.entries()) {
@@ -218,6 +218,7 @@ class GameLogic {
                 if (teamSet.has(id)) {
                     teamSet.delete(id);
                     console.log(`Cliente ${id} eliminado del equipo "${teamName}" en el lobby ${lobbyId}`);
+                    this.checkPlayerCountForGameStart(lobbyId)
                 }
             }
         }
