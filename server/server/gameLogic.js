@@ -371,15 +371,18 @@ class GameLogic {
     } 
 
     checkGoldInteraction(lobbyId, x, y) {
+        console.log(x, y)
+        console.log(1)
         const lobby = this.lobbys.get(lobbyId);
         if (!lobby) return;
-    
+        console.log(2)
         for (const gold of lobby.objects.gold) {
             const dx = gold.position.x - x;
             const dy = gold.position.y - y;
             const distance = Math.sqrt(dx * dx + dy * dy);
-    
+            console.log(3)
             if (distance < 32) { // Si la distancia es menor a 32 píxeles, lo recogió
+                console.log(4)
                 const client = Array.from(lobby.teams.blue).find(clientId => this.clients.get(clientId)?.position.x === x && this.clients.get(clientId)?.position.y === y) ||
                               Array.from(lobby.teams.red).find(clientId => this.clients.get(clientId)?.position.x === x && this.clients.get(clientId)?.position.y === y) ||
                               Array.from(lobby.teams.yellow).find(clientId => this.clients.get(clientId)?.position.x === x && this.clients.get(clientId)?.position.y === y) ||
