@@ -137,10 +137,10 @@ class GameLogic {
 
     addGoldToLobby(lobbyId) {
         // Define the boundaries for random position generation
-        const minX = 128;
-        const minY = 128;
-        const maxX = 1920;
-        const maxY = 1920;
+        const minX = 512;
+        const minY = 512;
+        const maxX = 1536;
+        const maxY = 1536;
         
         // Generate a random position for the gold within the boundaries
         const x = Math.floor(Math.random() * (maxX - minX + 1)) + minX;
@@ -334,6 +334,8 @@ class GameLogic {
                                 const newX = client.position.x + dirX * speed;
                                 const newY = client.position.y + dirY * speed;
 
+                                checkGoldInteraction(firstLobbyId, newX, newY)
+
                                 const towerColor = this.getTowerColorAtPosition(firstLobbyId, newX, newY);
                                 if (towerColor) {
                                     console.log(`Jugador ${client} (${client.team}) (${client.hasGold}) ha tocado una torre del equipo ${towerColor} en la posición (${client.position.x}, ${client.position.y})`);
@@ -413,6 +415,33 @@ class GameLogic {
         }
     
         return null; // No hay torre en esa posición
+    }
+    
+    checkGoldInteraction(lobbyId, x, y) {
+        const lobby = this.lobbys.get(lobbyId);
+        if (!lobby) return;
+    
+        for (const gold of lobby.objects.gold) {
+            const dx = gold.position.x - x;
+            const dy = gold.position.y - y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+    
+            if (distance < 32) { // Si la distancia es menor a 32 píxeles, lo recogió
+                const client = Array.from(lobby.teams.blue).find(clientId => this.clients.get(clientId)?.position.x === x && this.clients.get(clientId)?.position.y === y) ||
+                              Array.from(lobby.teams.red).find(clientId => this.clients.get(clientId)?.position.x === x && this.clients.get(clientId)?.position.y === y) ||
+                              Array.from(lobby.teams.yellow).find(clientId => this.clients.get(clientId)?.position.x === x && this.clients.get(clientId)?.position.y === y) ||
+                              Array.from(lobby.teams.purple).find(clientId => this.clients.get(clientId)?.position.x === x && this.clients.get(clientId)?.position.y === y);
+                              
+                const clientObj = this.clients.get(client);
+                if (clientObj && !clientObj.hasGold) {
+                    clientObj.hasGold = true;
+                    lobby.objects.gold.delete(gold);
+                    
+                    console.log(`Jugador ${clientObj.id} recogió el oro en (${gold.position.x}, ${gold.position.y})`);
+                    break; // Sale del bucle una vez se ha recogido el oro
+                }
+            }
+        }
     }    
             
 }
