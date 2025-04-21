@@ -317,7 +317,7 @@ class GameLogic {
                 case "updateMovement": {
                     const dirX = obj.x; // entre -1 y 1
                     const dirY = obj.y;
-                    const speed = 2;
+                    const speed = 3;
                 
                     const firstLobbyId = this.lobbys.keys().next().value;
                     if (!firstLobbyId) {
@@ -331,8 +331,17 @@ class GameLogic {
                         if (teamSet.has(id)) {
                             const client = this.clients.get(id);
                             if (client && client.position) {
-                                const newX = client.position.x + dirX * speed;
-                                const newY = client.position.y + dirY * speed;
+
+                                let newX, newY;
+
+                                // Si el cliente tiene oro, reducir la velocidad
+                                if (client.hasGold) {
+                                    newX = client.position.x + dirX * speed / 1.5;
+                                    newY = client.position.y + dirY * speed / 1.5;
+                                } else {
+                                    newX = client.position.x + dirX * speed;
+                                    newY = client.position.y + dirY * speed;
+                                }
 
                                 this.checkGoldInteraction(firstLobbyId, newX, newY)
 
