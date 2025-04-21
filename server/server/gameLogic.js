@@ -253,10 +253,9 @@ class GameLogic {
                 }
                 
                 case "updateMovement": {
-                    
                     const dirX = obj.x; // entre -1 y 1
                     const dirY = obj.y;
-                    const speed = 2; // o la velocidad que tú quieras ajustar
+                    const speed = 2;
                 
                     const firstLobbyId = this.lobbys.keys().next().value;
                     if (!firstLobbyId) {
@@ -265,16 +264,25 @@ class GameLogic {
                     }
                 
                     const lobby = this.lobbys.get(firstLobbyId);
-                    let userFound = false;
                 
                     for (const [teamName, teamSet] of Object.entries(lobby.teams)) {
                         if (teamSet.has(id)) {
                             const client = this.clients.get(id);
                             if (client && client.position) {
-                                client.position.x += dirX * speed;
-                                client.position.y += dirY * speed;
-                                client.state = obj.state;
-                                userFound = true;
+                                const newX = client.position.x + dirX * speed;
+                                const newY = client.position.y + dirY * speed;
+                
+                                if (this.isPositionValid(newX, newY)) {
+                                    client.position.x = newX;
+                                    client.position.y = newY;
+                                    client.state = obj.state;
+                                } else {
+                                    // Opcional: enviar mensaje de colisión al cliente
+                                    client.socket?.send(JSON.stringify({
+                                        type: "collision",
+                                        message: "Movimiento bloqueado por colisión"
+                                    }));
+                                }
                             }
                             break;
                         }
@@ -282,7 +290,6 @@ class GameLogic {
                 
                     break;
                 }
-                    
 
                 default:
                     break;
@@ -291,7 +298,30 @@ class GameLogic {
         } catch (error) {
             console.error("Error en handleMessage:", error);
         }
-    }    
+    } 
+    
+    isPositionValid(x, y) {
+        const tileSize = 64;
+        const col = Math.floor(x / tileSize);
+        const row = Math.floor(y / tileSize);
+    
+        // Asegúrate que esté dentro del rango del mapa
+        if (col < 0 || col >= 32 || row < 0 || row >= 32) return false;
+    
+        const layers = this.mapData?.layers;
+        if (!layers || layers.length < 5) return true; // Si no hay mapa cargado, permite mover
+    
+        const getTile = (layerIndex) => {
+            const layer = layers[layerIndex];
+            const index = row * layer.width + col;
+            return layer.data[index];
+        };
+    
+        const isWater = getTile(0) !== -1;   // capa 0 → mar
+        const isTower = getTile(4) !== -1;   // capa 4 → torres
+    
+        return !(isWater || isTower); // Bloqueamos si hay agua o torre
+    }        
 }
 
 const instance = new GameLogic();
