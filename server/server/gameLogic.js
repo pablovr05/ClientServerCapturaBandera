@@ -317,7 +317,7 @@ class GameLogic {
                 case "updateMovement": {
                     const dirX = obj.x; // entre -1 y 1
                     const dirY = obj.y;
-                    const speed = 3;
+                    const speed = 2;
                 
                     const firstLobbyId = this.lobbys.keys().next().value;
                     if (!firstLobbyId) {
@@ -346,10 +346,37 @@ class GameLogic {
                                 this.checkGoldInteraction(firstLobbyId, newX, newY)
 
                                 const towerColor = this.getTowerColorAtPosition(firstLobbyId, newX, newY);
+
                                 if (towerColor) {
-                                    console.log(`Jugador ${client} (${client.team}) (${client.hasGold}) ha tocado una torre del equipo ${towerColor} en la posición (${client.position.x}, ${client.position.y})`);
+                                    const client = this.clients.get(id); // Obtén el cliente correspondiente
+
+                                    if (client) {
+                                        if (client.team === towerColor) {
+                                            // El jugador ha tocado una torre de su propio color
+                                            if (client.hasKey) {
+                                                // Si el jugador tiene la llave
+                                                console.log(`Jugador ${client.id} (${client.team}) ha tocado su propia torre con la llave en la posición (${client.position.x}, ${client.position.y})`);
+                                                // Realiza alguna acción especial si el jugador tiene la llave
+                                            } else {
+                                                // Si no tiene la llave
+                                                console.log(`Jugador ${client.id} (${client.team}) ha tocado su propia torre sin la llave en la posición (${client.position.x}, ${client.position.y})`);
+                                                // Tal vez puedas notificar que no puede hacer nada
+                                            }
+                                        } else {
+                                            // El jugador ha tocado una torre de otro color
+                                            if (client.hasKey) {
+                                                // Si el jugador tiene la llave, puede interactuar con la torre de otro color
+                                                console.log(`Jugador ${client.id} (${client.team}) ha tocado una torre del equipo ${towerColor} con la llave en la posición (${client.position.x}, ${client.position.y})`);
+                                                // Aquí podría haber alguna acción especial, como robar algo, desbloquear un área, etc.
+                                            } else {
+                                                // Si no tiene la llave
+                                                console.log(`Jugador ${client.id} (${client.team}) ha tocado una torre del equipo ${towerColor} sin la llave en la posición (${client.position.x}, ${client.position.y})`);
+                                                // Tal vez no permitas ninguna acción o envíes un mensaje indicando que no puede interactuar
+                                            }
+                                        }
+                                    }
                                 }
-                
+
                                 if (this.isPositionValid(newX, newY)) {
                                     client.position.x = newX;
                                     client.position.y = newY;
@@ -378,31 +405,6 @@ class GameLogic {
             console.error("Error en handleMessage:", error);
         }
     } 
-
-    checkGoldInteraction(lobbyId, x, y) {
-        const lobby = this.lobbys.get(lobbyId);
-        if (!lobby) return;
-        for (const gold of lobby.objects.gold) {
-            const dx = gold.position.x - x;
-            const dy = gold.position.y - y;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-            if (distance < 64) { // Si la distancia es menor a 32 píxeles, lo recogió
-                const client = Array.from(lobby.teams.blue).find(clientId => this.clients.get(clientId)?.position.x === x && this.clients.get(clientId)?.position.y === y) ||
-                              Array.from(lobby.teams.red).find(clientId => this.clients.get(clientId)?.position.x === x && this.clients.get(clientId)?.position.y === y) ||
-                              Array.from(lobby.teams.yellow).find(clientId => this.clients.get(clientId)?.position.x === x && this.clients.get(clientId)?.position.y === y) ||
-                              Array.from(lobby.teams.purple).find(clientId => this.clients.get(clientId)?.position.x === x && this.clients.get(clientId)?.position.y === y);
-                              
-                const clientObj = this.clients.get(client);
-                if (clientObj && !clientObj.hasGold) {
-                    clientObj.hasGold = true;
-                    lobby.objects.gold.delete(gold);
-                    
-                    console.log(`Jugador ${clientObj.id} recogió el oro en (${gold.position.x}, ${gold.position.y})`);
-                    break; // Sale del bucle una vez se ha recogido el oro
-                }
-            }
-        }
-    }
     
     isPositionValid(x, y) {
         const tileSize = 64;
@@ -449,6 +451,31 @@ class GameLogic {
         }
     
         return null; // No hay torre en esa posición
+    }
+
+    checkGoldInteraction(lobbyId, x, y) {
+        const lobby = this.lobbys.get(lobbyId);
+        if (!lobby) return;
+        for (const gold of lobby.objects.gold) {
+            const dx = gold.position.x - x;
+            const dy = gold.position.y - y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            if (distance < 96) { // Si la distancia es menor a 32 píxeles, lo recogió
+                const client = Array.from(lobby.teams.blue).find(clientId => this.clients.get(clientId)?.position.x === x && this.clients.get(clientId)?.position.y === y) ||
+                              Array.from(lobby.teams.red).find(clientId => this.clients.get(clientId)?.position.x === x && this.clients.get(clientId)?.position.y === y) ||
+                              Array.from(lobby.teams.yellow).find(clientId => this.clients.get(clientId)?.position.x === x && this.clients.get(clientId)?.position.y === y) ||
+                              Array.from(lobby.teams.purple).find(clientId => this.clients.get(clientId)?.position.x === x && this.clients.get(clientId)?.position.y === y);
+                              
+                const clientObj = this.clients.get(client);
+                if (clientObj && !clientObj.hasGold) {
+                    clientObj.hasGold = true;
+                    lobby.objects.gold.delete(gold);
+                    
+                    console.log(`Jugador ${clientObj.id} recogió el oro en (${gold.position.x}, ${gold.position.y})`);
+                    break; // Sale del bucle una vez se ha recogido el oro
+                }
+            }
+        }
     }
 }
 
