@@ -308,25 +308,26 @@ class GameLogic {
         // Verifica que esté dentro de los límites del mapa
         if (col < 0 || col >= 32 || row < 0 || row >= 32) return false;
     
+        // Invertir el eje Y: la fila 0 es la última fila en la representación del mapa
+        const invertedRow = 31 - row;
+    
         const level = this.mapData?.levels?.[0];
         if (!level) return true; // Si no hay mapa cargado, no bloqueamos
     
-        // Busca las capas importantes por nombre
+        // Buscar las capas importantes por nombre
         const waterLayer = level.layers.find(layer => layer.name === "water0");
-        const towerLayer = level.layers.find(layer => layer.name === "towers"); // Ajusta el nombre real
-
-        console.log(waterLayer)
-        console.log(towerLayer)
+        const towerLayer = level.layers.find(layer => layer.name === "torres4"); // Ajusta el nombre real
     
         // Si no existen esas capas, no bloqueamos por ellas
         if (!waterLayer || !towerLayer) return true;
     
-        const isWater = waterLayer.tileMap?.[row]?.[col] !== -1;
-        const isTower = towerLayer.tileMap?.[row]?.[col] !== -1;
+        const isWater = waterLayer.tileMap?.[invertedRow]?.[col] !== -1;
+        const isTower = towerLayer.tileMap?.[invertedRow]?.[col] !== -1;
     
         // Si hay agua o torre en esa casilla, no se puede mover ahí
         return !(isWater || isTower);
     }
+    
             
 }
 
