@@ -329,15 +329,16 @@ class GameLogic {
                             if (client && client.position) {
                                 const newX = client.position.x + dirX * speed;
                                 const newY = client.position.y + dirY * speed;
+
+                                const towerColor = this.getTowerColorAtPosition(firstLobbyId, newX, newY);
+                                if (towerColor) {
+                                    console.log(`Jugador ${id} (${client.team}) ha tocado una torre del equipo ${towerColor} en la posición (${client.position.x}, ${client.position.y})`);
+                                }
                 
                                 if (this.isPositionValid(newX, newY)) {
                                     client.position.x = newX;
                                     client.position.y = newY;
                                     client.state = obj.state;
-                                    const towerColor = this.getTowerColorAtPosition(firstLobbyId, client.position.x, client.position.y);
-                                    if (towerColor) {
-                                        console.log(`Jugador ${id} (${client.team}) ha tocado una torre del equipo ${towerColor} en la posición (${client.position.x}, ${client.position.y})`);
-                                    }
 
                                 } else {
                                     // Opcional: enviar mensaje de colisión al cliente
