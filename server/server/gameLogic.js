@@ -319,6 +319,12 @@ class GameLogic {
     
         const isWater = getTile(0) !== -1;   // capa 0 → mar
         const isTower = getTile(4) !== -1;   // capa 4 → torres
+
+        console.log(isWater)
+        console.log(isTower)
+
+        console.log(getTile(0))
+        console.log(getTile(4))
     
         return !(isWater || isTower); // Bloqueamos si hay agua o torre
     }        
