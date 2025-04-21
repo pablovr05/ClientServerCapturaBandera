@@ -369,7 +369,7 @@ class GameLogic {
     addClientToLobby(lobbyId, clientId) {
         if (this.lobbys.has(lobbyId)) {
 
-            checkPlayerCountForGameStart(lobbyId)
+            this.checkPlayerCountForGameStart(lobbyId)
 
             const lobby = this.lobbys.get(lobbyId);
             
