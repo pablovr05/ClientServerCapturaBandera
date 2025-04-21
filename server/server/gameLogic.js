@@ -362,24 +362,9 @@ class GameLogic {
                                         if (client.team === towerColor) {
                                             // El jugador ha tocado una torre de su propio color
                                             if (client.hasGold) {
-                                                // Si el jugador tiene la llave
-                                                console.log(`Jugador ${client.id} (${client.team}) ha tocado su propia torre con la llave en la posición (${client.position.x}, ${client.position.y})`);
-                                                // Realiza alguna acción especial si el jugador tiene la llave
-                                            } else {
-                                                // Si no tiene la llave
-                                                console.log(`Jugador ${client.id} (${client.team}) ha tocado su propia torre sin la llave en la posición (${client.position.x}, ${client.position.y})`);
-                                                // Tal vez puedas notificar que no puede hacer nada
-                                            }
-                                        } else {
-                                            // El jugador ha tocado una torre de otro color
-                                            if (client.hasGold) {
-                                                // Si el jugador tiene la llave, puede interactuar con la torre de otro color
-                                                console.log(`Jugador ${client.id} (${client.team}) ha tocado una torre del equipo ${towerColor} con la llave en la posición (${client.position.x}, ${client.position.y})`);
-                                                // Aquí podría haber alguna acción especial, como robar algo, desbloquear un área, etc.
-                                            } else {
-                                                // Si no tiene la llave
-                                                console.log(`Jugador ${client.id} (${client.team}) ha tocado una torre del equipo ${towerColor} sin la llave en la posición (${client.position.x}, ${client.position.y})`);
-                                                // Tal vez no permitas ninguna acción o envíes un mensaje indicando que no puede interactuar
+                                                console.log(`Jugador ${client.id} (${client.team}) ha tocado su propia torre con la llave)`);
+
+                                                this.endGame(firstLobbyId, client);
                                             }
                                         }
                                     }
@@ -485,6 +470,33 @@ class GameLogic {
             }
         }
     }
+
+    endGame(lobbyId, winnerClient) {
+        const lobby = this.lobbys.get(lobbyId);
+        if (!lobby) return;
+    
+        // Finalizamos el juego
+        console.log(`El juego ha terminado. El ganador es el jugador ${winnerClient.id} del equipo ${winnerClient.team}`);
+    
+        // Broadcast a todos los jugadores y espectadores en el lobby
+        const message = {
+            type: "gameOver",
+            winner: winnerClient.id,
+            team: winnerClient.team,
+            message: "¡El juego ha terminado! El ganador es " + winnerClient.id + " del equipo " + winnerClient.team
+        };
+    
+        // Enviar el mensaje a todos los clientes en el lobby
+        for (const [clientId, client] of this.clients.entries()) {
+            if (lobby.teams.blue.has(clientId) || lobby.teams.red.has(clientId) || lobby.teams.yellow.has(clientId) || lobby.teams.purple.has(clientId) || lobby.spectators.has(clientId)) {
+                client.socket.send(JSON.stringify(message));
+            }
+        }
+    
+        // Opcional: Limpiar el lobby (puedes eliminar o reiniciar el lobby después del fin del juego)
+        this.lobbys.delete(lobbyId);
+        console.log(`Lobby ${lobbyId} eliminado tras el fin del juego.`);
+    }    
 }
 
 const instance = new GameLogic();
