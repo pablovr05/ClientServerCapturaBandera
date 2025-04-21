@@ -488,7 +488,7 @@ class GameLogic {
         const lobby = this.lobbys.get(lobbyId);
         if (!lobby) return;
     
-        // Finalizamos el juego
+        // Mostrar mensaje del ganador
         console.log(`El juego ha terminado. El ganador es el jugador ${winnerClient.id} del equipo ${winnerClient.team}`);
     
         // Broadcast a todos los jugadores y espectadores en el lobby
@@ -506,10 +506,27 @@ class GameLogic {
             }
         }
     
-        // Opcional: Limpiar el lobby (puedes eliminar o reiniciar el lobby después del fin del juego)
-        this.lobbys.delete(lobbyId);
-        console.log(`Lobby ${lobbyId} eliminado tras el fin del juego.`);
-    }    
+        // Reiniciar el estado de los jugadores
+        for (const [teamName, teamSet] of Object.entries(lobby.teams)) {
+            for (const clientId of teamSet) {
+                const client = this.clients.get(clientId);
+                if (client) {
+                    client.hasGold = false;  // Reiniciar estado del oro
+                    client.position = this.assignInitialPosition();  // Asignar nuevas posiciones
+                    client.state = "IDLE";  // Reiniciar el estado
+                }
+            }
+        }
+    
+        // Generar un nuevo oro
+        this.addGoldToLobby(lobbyId);
+    
+        // Iniciar el ciclo del juego nuevamente
+        console.log("Nuevo oro generado y jugadores reiniciados, el ciclo del juego reiniciado.");
+    
+        // Opcional: Puedes configurar un nuevo ciclo de juego aquí, o simplemente dejarlo como está.
+    }
+    
 }
 
 const instance = new GameLogic();
