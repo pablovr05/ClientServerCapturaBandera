@@ -235,6 +235,7 @@ class GameLogic {
                 }
             }
         }
+        this.checkPlayerCountForGameStart(lobbyId);
     }
     
     generateLobbyCode() {
@@ -726,6 +727,8 @@ class GameLogic {
         console.log("Nuevo oro generado y jugadores reiniciados, el ciclo del juego reiniciado.");
 
         this.resetGameStartCountdown(lobbyId)
+
+        this.checkPlayerCountForGameStart(lobbyId);
     
         // Opcional: Puedes configurar un nuevo ciclo de juego aquí, o simplemente dejarlo como está.
     }
