@@ -76,6 +76,8 @@ class GameLogic {
                 this.startGame(lobbyId);
             }
         }, 1000));
+
+        this.checkPlayerCountForGameStart(lobbyId)
     }
     
 
@@ -230,7 +232,6 @@ class GameLogic {
                 if (teamSet.has(id)) {
                     teamSet.delete(id);
                     console.log(`Cliente ${id} eliminado del equipo "${teamName}" en el lobby ${lobbyId}`);
-                    this.checkPlayerCountForGameStart(lobbyId)
                 }
             }
         }
