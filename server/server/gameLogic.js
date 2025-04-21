@@ -209,6 +209,8 @@ class GameLogic {
 
     removeClient(id) {
         console.log(`Eliminando cliente con ID: ${id}`);
+
+        this.checkPlayerCountForGameStart(lobbyId)
     
         // Eliminar de los lobbys
         for (const [lobbyId, lobby] of this.lobbys.entries()) {
@@ -708,6 +710,8 @@ class GameLogic {
     
         // Iniciar el ciclo del juego nuevamente
         console.log("Nuevo oro generado y jugadores reiniciados, el ciclo del juego reiniciado.");
+
+        this.resetGameStartCountdown(lobbyId)
     
         // Opcional: Puedes configurar un nuevo ciclo de juego aquí, o simplemente dejarlo como está.
     }
