@@ -305,29 +305,29 @@ class GameLogic {
         const col = Math.floor(x / tileSize);
         const row = Math.floor(y / tileSize);
     
-        // Asegúrate que esté dentro del rango del mapa
+        // Verifica que esté dentro de los límites del mapa
         if (col < 0 || col >= 32 || row < 0 || row >= 32) return false;
     
-        const layers = this.mapData?.layers;
-        if (!layers || layers.length < 5) return true; // Si no hay mapa cargado, permite mover
+        const level = this.mapData?.levels?.[0];
+        if (!level) return true; // Si no hay mapa cargado, no bloqueamos
     
-        const getTile = (layerIndex) => {
-            const layer = layers[layerIndex];
-            const index = row * layer.width + col;
-            return layer.data[index];
-        };
-    
-        const isWater = getTile(0) !== -1;   // capa 0 → mar
-        const isTower = getTile(4) !== -1;   // capa 4 → torres
+        // Busca las capas importantes por nombre
+        const waterLayer = level.layers.find(layer => layer.name === "water0");
+        const towerLayer = level.layers.find(layer => layer.name === "towers"); // Ajusta el nombre real
 
-        console.log(isWater)
-        console.log(isTower)
-
-        console.log(getTile(0))
-        console.log(getTile(4))
+        console.log(waterLayer)
+        console.log(towerLayer)
     
-        return !(isWater || isTower); // Bloqueamos si hay agua o torre
-    }        
+        // Si no existen esas capas, no bloqueamos por ellas
+        if (!waterLayer || !towerLayer) return true;
+    
+        const isWater = waterLayer.tileMap?.[row]?.[col] !== -1;
+        const isTower = towerLayer.tileMap?.[row]?.[col] !== -1;
+    
+        // Si hay agua o torre en esa casilla, no se puede mover ahí
+        return !(isWater || isTower);
+    }
+            
 }
 
 const instance = new GameLogic();
