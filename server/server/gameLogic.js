@@ -385,8 +385,6 @@ class GameLogic {
     addClientToLobby(lobbyId, clientId) {
         if (this.lobbys.has(lobbyId)) {
 
-            this.checkPlayerCountForGameStart(lobbyId)
-
             const lobby = this.lobbys.get(lobbyId);
             
             // Verificar si el lobby ya tiene 4 jugadores
@@ -431,6 +429,8 @@ class GameLogic {
             }
     
             console.log(`Jugador ${clientId} ha sido agregado al lobby ${lobbyId} en el equipo ${teamName}`);
+
+            this.checkPlayerCountForGameStart(lobbyId)
         }
     }
     
