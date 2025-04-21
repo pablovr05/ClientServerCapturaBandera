@@ -1,15 +1,191 @@
 const fs = require('fs');
 const path = require('path');
+
+const GAME_DURATION = 3 * 1000;  // Duración del juego de 3 segundos
+const COUNTDOWN_60_SECONDS = 60 * 1000;  // Contador de 60 segundos
+
 class GameLogic {
     constructor() {
         if (!GameLogic.instance) {
             this.clients = new Map();
             this.lobbys = new Map();
             this.mapData = this.loadMapData(); // cargamos el mapa
+            this.gameTimers = new Map();  // Mantener un timer para cada lobby
     
             GameLogic.instance = this;
         }
         return GameLogic.instance;
+    }
+
+    // Método que se llama cuando hay un cambio en la cantidad de jugadores
+    checkPlayerCountForGameStart(lobbyId) {
+        const lobby = this.lobbys.get(lobbyId);
+        if (!lobby) return;
+
+        const playerCount = this.getTotalPlayerCountInLobby(lobbyId);
+        
+        if (playerCount >= 2 && !lobby.gameStarted) {
+            this.startGameCountdown(lobbyId);
+        } else if (playerCount === 0) {
+            this.resetGameStartCountdown(lobbyId);
+        }
+    }
+
+    // Método que obtiene el total de jugadores en el lobby
+    getTotalPlayerCountInLobby(lobbyId) {
+        const lobby = this.lobbys.get(lobbyId);
+        if (!lobby) return 0;
+
+        return Object.values(lobby.teams).reduce((total, teamSet) => total + teamSet.size, 0);
+    }
+
+    // Método para iniciar el contador para comenzar la partida
+    startGameCountdown(lobbyId) {
+        const lobby = this.lobbys.get(lobbyId);
+        if (!lobby) return;
+
+        if (lobby.gameStarted) return;
+
+        lobby.timeToStart = COUNTDOWN_60_SECONDS; // Establece el contador en 60 segundos
+
+        // Iniciar el contador
+        this.gameTimers.set(lobbyId, setInterval(() => {
+            lobby.timeToStart -= 1000; // Disminuir 1 segundo
+
+            // Enviar la cuenta regresiva a todos los jugadores y espectadores
+            this.broadcastCountdown(lobbyId, lobby.timeToStart);
+
+            if (lobby.timeToStart <= 0) {
+                clearInterval(this.gameTimers.get(lobbyId));
+                this.gameTimers.delete(lobbyId);
+                lobby.gameStarted = true;  // La partida ha comenzado
+                console.log(`La partida en el lobby ${lobbyId} ha comenzado!`);
+
+                // Empezar la partida
+                this.startGame(lobbyId);
+            }
+        }, 1000));
+    }
+
+    // Método para reiniciar el contador cuando no haya jugadores
+    resetGameStartCountdown(lobbyId) {
+        const lobby = this.lobbys.get(lobbyId);
+        if (!lobby) return;
+
+        if (lobby.gameStarted) return;
+
+        if (this.gameTimers.has(lobbyId)) {
+            clearInterval(this.gameTimers.get(lobbyId));
+            this.gameTimers.delete(lobbyId);
+        }
+
+        // Resetear el tiempo de inicio a 60 segundos
+        lobby.timeToStart = COUNTDOWN_60_SECONDS;
+        this.broadcastCountdown(lobbyId, lobby.timeToStart);  // Informar a todos los jugadores
+    }
+
+    // Método para iniciar el juego
+    startGame(lobbyId) {
+        const lobby = this.lobbys.get(lobbyId);
+        if (!lobby) return;
+
+        // Empezar el juego
+        console.log(`Iniciando la partida en el lobby ${lobbyId}`);
+        lobby.gameStarted = true;
+        // Notificar a todos los jugadores que el juego ha comenzado
+        this.broadcastGameStarted(lobbyId);
+    }
+
+    // Método para notificar la cuenta atrás a todos los jugadores y espectadores
+    broadcastCountdown(lobbyId, timeLeft) {
+        const lobby = this.lobbys.get(lobbyId);
+        if (!lobby) return;
+
+        const message = {
+            type: "countdown",
+            timeLeft: timeLeft / 1000,  // Convertir a segundos
+        };
+
+        for (const clientId of lobby.teams.blue) {
+            const client = this.clients.get(clientId);
+            if (client && client.socket) {
+                client.socket.send(JSON.stringify(message));
+            }
+        }
+
+        for (const clientId of lobby.teams.red) {
+            const client = this.clients.get(clientId);
+            if (client && client.socket) {
+                client.socket.send(JSON.stringify(message));
+            }
+        }
+
+        for (const clientId of lobby.teams.yellow) {
+            const client = this.clients.get(clientId);
+            if (client && client.socket) {
+                client.socket.send(JSON.stringify(message));
+            }
+        }
+
+        for (const clientId of lobby.teams.purple) {
+            const client = this.clients.get(clientId);
+            if (client && client.socket) {
+                client.socket.send(JSON.stringify(message));
+            }
+        }
+
+        for (const clientId of lobby.spectators) {
+            const client = this.clients.get(clientId);
+            if (client && client.socket) {
+                client.socket.send(JSON.stringify(message));
+            }
+        }
+    }
+
+    // Método para notificar que el juego ha comenzado
+    broadcastGameStarted(lobbyId) {
+        const lobby = this.lobbys.get(lobbyId);
+        if (!lobby) return;
+
+        const message = {
+            type: "gameStarted",
+            message: "El juego ha comenzado!",
+        };
+
+        for (const clientId of lobby.teams.blue) {
+            const client = this.clients.get(clientId);
+            if (client && client.socket) {
+                client.socket.send(JSON.stringify(message));
+            }
+        }
+
+        for (const clientId of lobby.teams.red) {
+            const client = this.clients.get(clientId);
+            if (client && client.socket) {
+                client.socket.send(JSON.stringify(message));
+            }
+        }
+
+        for (const clientId of lobby.teams.yellow) {
+            const client = this.clients.get(clientId);
+            if (client && client.socket) {
+                client.socket.send(JSON.stringify(message));
+            }
+        }
+
+        for (const clientId of lobby.teams.purple) {
+            const client = this.clients.get(clientId);
+            if (client && client.socket) {
+                client.socket.send(JSON.stringify(message));
+            }
+        }
+
+        for (const clientId of lobby.spectators) {
+            const client = this.clients.get(clientId);
+            if (client && client.socket) {
+                client.socket.send(JSON.stringify(message));
+            }
+        }
     }
     
     loadMapData() {
@@ -55,8 +231,8 @@ class GameLogic {
 
     createLobby() {
         const lobbyId = this.generateLobbyCode();
-        
-        // Create the lobby with initial teams and objects
+
+        // Crear el lobby con equipos e inicialización de objetos
         this.lobbys.set(lobbyId, {
             teams: {
                 blue: new Set(),
@@ -74,12 +250,15 @@ class GameLogic {
                 red: new Set(),
                 yellow: new Set(),
                 purple: new Set(),
-            }
+            },
+            // Variables del juego para este lobby
+            gameStarted: false,  // Si el juego ha comenzado en este lobby
+            timeToStart: 60 * 1000,  // Tiempo para iniciar el juego en milisegundos (60 segundos)
         });
 
-        // Add gold to the newly created lobby
+        // Añadir oro y torres al lobby recién creado
         this.addGoldToLobby(lobbyId);
-        this.addTeamTowersToLobby(lobbyId)
+        this.addTeamTowersToLobby(lobbyId);
 
         return lobbyId;
     }
@@ -189,6 +368,9 @@ class GameLogic {
 
     addClientToLobby(lobbyId, clientId) {
         if (this.lobbys.has(lobbyId)) {
+
+            checkPlayerCountForGameStart(lobbyId)
+
             const lobby = this.lobbys.get(lobbyId);
             
             // Verificar si el lobby ya tiene 4 jugadores
@@ -347,6 +529,8 @@ class GameLogic {
                     }
                 
                     const lobby = this.lobbys.get(firstLobbyId);
+
+                    if (!lobby.gameStarted) break;
                 
                     for (const [teamName, teamSet] of Object.entries(lobby.teams)) {
                         if (teamSet.has(id)) {
@@ -413,6 +597,7 @@ class GameLogic {
     } 
     
     isPositionValid(x, y) {
+
         const tileSize = 64;
         const col = Math.floor(x / tileSize);
         const row = Math.floor(y / tileSize);
@@ -526,7 +711,6 @@ class GameLogic {
     
         // Opcional: Puedes configurar un nuevo ciclo de juego aquí, o simplemente dejarlo como está.
     }
-    
 }
 
 const instance = new GameLogic();
