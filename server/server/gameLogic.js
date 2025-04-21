@@ -1,12 +1,30 @@
+const fs = require('fs');
+const path = require('path');
 class GameLogic {
     constructor() {
         if (!GameLogic.instance) {
             this.clients = new Map();
             this.lobbys = new Map();
+            this.mapData = this.loadMapData(); // cargamos el mapa
+    
             GameLogic.instance = this;
         }
         return GameLogic.instance;
     }
+    
+    loadMapData() {
+        const filePath = path.join(__dirname, 'assets', 'game_data.json');
+        try {
+            const data = fs.readFileSync(filePath, 'utf8');
+            const map = JSON.parse(data);
+            console.log("Mapa cargado correctamente.");
+            return map;
+        } catch (err) {
+            console.error("Error cargando el mapa:", err);
+            return null;
+        }
+    }
+    
 
     addClient(id, socket) {
         this.clients.set(id, { socket });
