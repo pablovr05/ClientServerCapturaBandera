@@ -195,17 +195,21 @@ class GameLogic {
     
             const position = this.assignInitialPosition(clientId);
             const client = this.clients.get(clientId);
+            const teamName = Object.keys(lobby.teams).find(key => lobby.teams[key].has(clientId));
             client.position = position;
             client.state = "IDLE"
+            client.team = teamName;
+            client.hasGold = false;
     
             // Enviar mensaje al cliente
             if (client && client.socket) {
                 client.socket.send(JSON.stringify({
                     type: "joinedLobby",
                     lobbyId: lobbyId,
-                    team: Object.keys(lobby.teams).find(key => lobby.teams[key].has(clientId)),
                     position: position,
                     state: client.state,
+                    team: teamName,
+                    hasGold: false,
                 }));
             }
         }
@@ -332,7 +336,7 @@ class GameLogic {
 
                                 const towerColor = this.getTowerColorAtPosition(firstLobbyId, newX, newY);
                                 if (towerColor) {
-                                    console.log(`Jugador ${client} (${client.team}) ha tocado una torre del equipo ${towerColor} en la posición (${client.position.x}, ${client.position.y})`);
+                                    console.log(`Jugador ${client} (${client.team}) (${client.hasGold}) ha tocado una torre del equipo ${towerColor} en la posición (${client.position.x}, ${client.position.y})`);
                                 }
                 
                                 if (this.isPositionValid(newX, newY)) {
