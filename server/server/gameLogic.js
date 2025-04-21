@@ -395,7 +395,7 @@ class GameLogic {
     getTowerColorAtPosition(lobbyId, x, y) {
         const tileSize = 64;
         const col = Math.floor(x / tileSize);
-        const row = 31 - Math.floor(y / tileSize); // invertido como en el mapa
+        const row = Math.floor(y / tileSize); // invertido como en el mapa
     
         const key = `${col},${row}`;
         const lobby = this.lobbys.get(lobbyId);
