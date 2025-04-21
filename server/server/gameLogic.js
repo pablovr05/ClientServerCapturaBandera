@@ -69,13 +69,71 @@ class GameLogic {
                 gold: new Set(),
             },
             spectators: new Set(),
+            teamTowers: {
+                blue: new Set(),
+                red: new Set(),
+                yellow: new Set(),
+                purple: new Set(),
+            }
         });
 
         // Add gold to the newly created lobby
         this.addGoldToLobby(lobbyId);
+        this.addTeamTowersToLobby(lobbyId)
 
         return lobbyId;
     }
+
+    addTeamTowersToLobby(lobbyId) {
+        const lobby = this.lobbys.get(lobbyId);
+        if (!lobby) return;
+    
+        const level = this.mapData?.levels?.[0];
+        const towerLayer = level?.layers?.find(layer => layer.name === "towers");
+        if (!towerLayer || !towerLayer.tileMap) return;
+    
+        const tileToTeamMap = {
+            14: "yellow",
+            15: "yellow",
+            22: "yellow",
+            23: "yellow",
+            30: "yellow",
+            31: "yellow",
+            12: "red",
+            13: "red",
+            20: "red",
+            21: "red",
+            28: "red",
+            29: "red",
+            10: "purple",
+            11: "purple",
+            18: "purple",
+            19: "purple",
+            26: "purple",
+            27: "purple",
+            8: "blue",
+            9: "blue",
+            16: "blue",
+            17: "blue",
+            24: "blue",
+            25: "blue",
+        };
+    
+        for (let row = 0; row < towerLayer.tileMap.length; row++) {
+            for (let col = 0; col < towerLayer.tileMap[row].length; col++) {
+                const tileId = towerLayer.tileMap[row][col];
+                const team = tileToTeamMap[tileId];
+    
+                if (team && lobby.teamTowers[team]) {
+                    const key = `${col},${31 - row}`; // invertido en Y como en isPositionValid
+                    lobby.teamTowers[team].add(key);
+                }
+            }
+        }
+    
+        console.log(`Towers added to lobby ${lobbyId}`);
+    }
+    
 
     addGoldToLobby(lobbyId) {
         // Define the boundaries for random position generation
@@ -276,6 +334,11 @@ class GameLogic {
                                     client.position.x = newX;
                                     client.position.y = newY;
                                     client.state = obj.state;
+                                    const towerColor = this.getTowerColorAtPosition(firstLobbyId, client.position.x, client.position.y);
+                                    if (towerColor) {
+                                        console.log(`Jugador ${id} (${client.team}) ha tocado una torre del equipo ${towerColor} en la posición (${client.position.x}, ${client.position.y})`);
+                                    }
+
                                 } else {
                                     // Opcional: enviar mensaje de colisión al cliente
                                     client.socket?.send(JSON.stringify({
@@ -329,6 +392,23 @@ class GameLogic {
         return !(isWater || isTower);
     }
     
+    getTowerColorAtPosition(lobbyId, x, y) {
+        const tileSize = 64;
+        const col = Math.floor(x / tileSize);
+        const row = 31 - Math.floor(y / tileSize); // invertido como en el mapa
+    
+        const key = `${col},${row}`;
+        const lobby = this.lobbys.get(lobbyId);
+        if (!lobby) return null;
+    
+        for (const [teamColor, towerPositions] of Object.entries(lobby.teamTowers)) {
+            if (towerPositions.has(key)) {
+                return teamColor; // Devuelve el color de la torre en esa posición
+            }
+        }
+    
+        return null; // No hay torre en esa posición
+    }    
             
 }
 
