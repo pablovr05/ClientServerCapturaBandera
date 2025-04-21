@@ -190,8 +190,18 @@ class GameLogic {
     addClientToLobby(lobbyId, clientId) {
         if (this.lobbys.has(lobbyId)) {
             const lobby = this.lobbys.get(lobbyId);
+            
+            // Verificar si el lobby ya tiene 4 jugadores
+            const totalPlayersInLobby = Object.values(lobby.teams).reduce((total, team) => total + team.size, 0);
+            
+            if (totalPlayersInLobby >= 4) {
+                // Si ya hay 4 jugadores en el lobby, no agregar más
+                console.log(`No se puede agregar más jugadores al lobby ${lobbyId}. Ya tiene 4 jugadores.`);
+                return; // No agregamos al nuevo jugador
+            }
+            
+            // Si hay espacio, agregar el jugador al equipo con menos jugadores
             const teams = Object.values(lobby.teams);
-    
             let teamWithLeastPlayers = teams[0];
             for (let team of teams) {
                 if (team.size < teamWithLeastPlayers.size) {
@@ -201,11 +211,12 @@ class GameLogic {
     
             teamWithLeastPlayers.add(clientId);
     
+            // Asignar la posición inicial del jugador
             const position = this.assignInitialPosition(clientId);
             const client = this.clients.get(clientId);
             const teamName = Object.keys(lobby.teams).find(key => lobby.teams[key].has(clientId));
             client.position = position;
-            client.state = "IDLE"
+            client.state = "IDLE";
             client.team = teamName;
             client.hasGold = false;
     
@@ -220,9 +231,11 @@ class GameLogic {
                     hasGold: false,
                 }));
             }
+    
+            console.log(`Jugador ${clientId} ha sido agregado al lobby ${lobbyId} en el equipo ${teamName}`);
         }
-    }  
-
+    }
+    
     assignInitialPosition() {
         const minX = 128;
         const minY = 128;
