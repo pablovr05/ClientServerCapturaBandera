@@ -565,7 +565,7 @@ class GameLogic {
                                     newY = client.position.y + dirY * speed;
                                 }
 
-                                this.this.checkGoldInteraction(firstLobbyId, newX, newY, id);
+                                this.checkGoldInteraction(firstLobbyId, newX, newY, id);
 
                                 const towerColor = this.getTowerColorAtPosition(firstLobbyId, newX, newY);
 
