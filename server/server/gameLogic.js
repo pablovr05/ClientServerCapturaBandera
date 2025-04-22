@@ -701,10 +701,11 @@ class GameLogic {
         };
 
         crearPartida({
-            gameId: 'game_003',
-            estat: 'en curso',
-            totalplayers: 4,
-            spectators: 2
+            gameId: Math.floor(Math.random() * (999999 - 100000 + 1)) + 100000,
+            estat: 1,
+            totalplayers: lobby.getTotalPlayerCountInLobby(lobbyId),
+            spectators: lobby.spectators.length,
+            winner: winnerClient.team,
         }).then(id => {
             console.log('Partida creada con éxito, id:', id);
         }).catch(err => {

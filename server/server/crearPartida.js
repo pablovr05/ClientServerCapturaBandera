@@ -4,7 +4,7 @@ const uri = 'mongodb://localhost:27017';
 const dbName = 'miJuego';
 const collectionName = 'partidas';
 
-async function crearPartida({ gameId, estat, totalplayers, spectators }) {
+async function crearPartida({ gameId, estat, totalplayers, spectators, winner }) {
     const client = new MongoClient(uri);
 
     try {
@@ -17,7 +17,8 @@ async function crearPartida({ gameId, estat, totalplayers, spectators }) {
             date: new Date(),
             estat,
             totalplayers,
-            spectators
+            spectators,
+            winner
         };
 
         const resultado = await partidas.insertOne(nuevaPartida);
@@ -59,5 +60,25 @@ async function obtenerPartidas() {
     }
 }
 
+async function clearMongoDb() {
+    const client = new MongoClient(uri);
 
-module.exports = { crearPartida, obtenerPartidas };
+    try {
+        await client.connect();
+        const db = client.db(dbName);
+        const partidas = db.collection(collectionName);
+
+        // Eliminar todas las entradas en la colección 'partidas'
+        const resultado = await partidas.deleteMany({});
+        console.log(`✅ Se eliminaron ${resultado.deletedCount} partidas de la base de datos`);
+
+    } catch (error) {
+        console.error('❌ Error al borrar las partidas:', error);
+    } finally {
+        await client.close();
+    }
+}
+
+
+
+module.exports = { crearPartida, obtenerPartidas, clearMongoDb };

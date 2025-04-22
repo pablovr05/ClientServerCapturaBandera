@@ -2,7 +2,7 @@ const express = require('express');
 const game = require('./gameLogic.js');
 const Obj = require('./utilsWebSockets.js');
 const GameLoop = require('./utilsGameLoop.js');
-const { obtenerPartidas } = require('./crearPartida');
+const { obtenerPartidas, clearMongoDb } = require('./crearPartida');
 
 let gameLoop = new GameLoop();
 
@@ -16,6 +16,8 @@ const ws = new Obj();
 const app = express();
 app.use(express.static('public'));
 app.use(express.json());
+
+clearMongoDb()
 
 app.get('/api/games', async (req, res) => {
     console.log("📡 Petición GET /api/games recibida");
