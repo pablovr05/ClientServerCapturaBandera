@@ -696,7 +696,7 @@ class GameLogic {
             type: "gameOver",
             winner: winnerClient.id,
             team: winnerClient.team,
-            message: "¡El juego ha terminado! El ganador es " + winnerClient.id + " del equipo " + winnerClient.team
+            message: "¡El juego ha terminado! El ganador es el equipo " + winnerClient.team
         };
     
         // Enviar el mensaje a todos los clientes en el lobby
