@@ -17,9 +17,17 @@ const app = express();
 app.use(express.static('public'));
 app.use(express.json());
 
-app.get('/api/games', (req, res) => {
-    console.log("HOLAAA")
-    res.json({ obtenerPartidas });
+app.get('/api/games', async (req, res) => {
+    console.log("📡 Petición GET /api/games recibida");
+
+    try {
+        const partidas = await obtenerPartidas();
+        console.log("✅ Enviando partidas al cliente...");
+        res.json(partidas);
+    } catch (error) {
+        console.error("❌ Error al obtener partidas en el endpoint:", error);
+        res.status(500).json({ error: "Error interno del servidor" });
+    }
 });
 
 // Inicialitzar servidor HTTP
