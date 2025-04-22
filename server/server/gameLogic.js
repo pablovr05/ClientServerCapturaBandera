@@ -232,10 +232,10 @@ class GameLogic {
                 if (teamSet.has(id)) {
                     teamSet.delete(id);
                     console.log(`Cliente ${id} eliminado del equipo "${teamName}" en el lobby ${lobbyId}`);
+                    this.checkPlayerCountForGameStart(lobbyId);
                 }
             }
         }
-        this.checkPlayerCountForGameStart(lobbyId);
     }
     
     generateLobbyCode() {
