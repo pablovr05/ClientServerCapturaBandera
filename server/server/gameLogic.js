@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const { crearPartida } = require('./crearPartida');
 
 const GAME_DURATION = 3 * 1000;  // Duración del juego de 3 segundos
 const COUNTDOWN_30_SECONDS = 30 * 1000;  // Contador de 60 segundos
@@ -698,6 +699,17 @@ class GameLogic {
             team: winnerClient.team,
             message: "¡El juego ha terminado! El ganador es el equipo " + winnerClient.team
         };
+
+        crearPartida({
+            gameId: 'game_003',
+            estat: 'en curso',
+            totalplayers: 4,
+            spectators: 2
+        }).then(id => {
+            console.log('Partida creada con éxito, id:', id);
+        }).catch(err => {
+            console.error('Error al crear partida:', err.message);
+        });
     
         // Enviar el mensaje a todos los clientes en el lobby
         for (const [clientId, client] of this.clients.entries()) {
