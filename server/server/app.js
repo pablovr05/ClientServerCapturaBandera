@@ -16,6 +16,11 @@ const app = express();
 app.use(express.static('public'));
 app.use(express.json());
 
+app.get('/api/games', (req, res) => {
+    const lobbyList = Array.from(game.lobbys.keys());
+    res.json({ lobbys: lobbyList });
+});
+
 // Inicialitzar servidor HTTP
 const httpServer = app.listen(port, () => {
     console.log(`Servidor HTTP escoltant a: http://localhost:${port}`);
