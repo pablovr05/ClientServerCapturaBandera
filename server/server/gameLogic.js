@@ -565,7 +565,7 @@ class GameLogic {
                                     newY = client.position.y + dirY * speed;
                                 }
 
-                                this.checkGoldInteraction(firstLobbyId, newX, newY)
+                                this.this.checkGoldInteraction(firstLobbyId, newX, newY, id);
 
                                 const towerColor = this.getTowerColorAtPosition(firstLobbyId, newX, newY);
 
@@ -661,30 +661,28 @@ class GameLogic {
         return null; // No hay torre en esa posición
     }
 
-    checkGoldInteraction(lobbyId, x, y) {
+    checkGoldInteraction(lobbyId, x, y, clientId) {
         const lobby = this.lobbys.get(lobbyId);
         if (!lobby) return;
+    
         for (const gold of lobby.objects.gold) {
             const dx = gold.position.x - x;
             const dy = gold.position.y - y;
             const distance = Math.sqrt(dx * dx + dy * dy);
-            if (distance < 96) { // Si la distancia es menor a 32 píxeles, lo recogió
-                const client = Array.from(lobby.teams.blue).find(clientId => this.clients.get(clientId)?.position.x === x && this.clients.get(clientId)?.position.y === y) ||
-                              Array.from(lobby.teams.red).find(clientId => this.clients.get(clientId)?.position.x === x && this.clients.get(clientId)?.position.y === y) ||
-                              Array.from(lobby.teams.yellow).find(clientId => this.clients.get(clientId)?.position.x === x && this.clients.get(clientId)?.position.y === y) ||
-                              Array.from(lobby.teams.purple).find(clientId => this.clients.get(clientId)?.position.x === x && this.clients.get(clientId)?.position.y === y);
-                              
-                const clientObj = this.clients.get(client);
+    
+            if (distance < 96) { // Ya estás bien con esta tolerancia
+                const clientObj = this.clients.get(clientId);
                 if (clientObj && !clientObj.hasGold) {
                     clientObj.hasGold = true;
                     lobby.objects.gold.delete(gold);
-                    
+    
                     console.log(`Jugador ${clientObj.id} recogió el oro en (${gold.position.x}, ${gold.position.y})`);
-                    break; // Sale del bucle una vez se ha recogido el oro
+                    break;
                 }
             }
         }
     }
+    
 
     endGame(lobbyId, winnerClient) {
         const lobby = this.lobbys.get(lobbyId);
