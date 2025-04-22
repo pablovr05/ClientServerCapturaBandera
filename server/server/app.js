@@ -18,6 +18,7 @@ app.use(express.static('public'));
 app.use(express.json());
 
 app.get('/api/games', (req, res) => {
+    console.log("HOLAAA")
     res.json({ obtenerPartidas });
 });
 
