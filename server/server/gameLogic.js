@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 
 const GAME_DURATION = 3 * 1000;  // Duración del juego de 3 segundos
-const COUNTDOWN_60_SECONDS = 60 * 1000;  // Contador de 60 segundos
+const COUNTDOWN_30_SECONDS = 30 * 1000;  // Contador de 60 segundos
 
 class GameLogic {
     constructor() {
@@ -45,7 +45,7 @@ class GameLogic {
     
         if (lobby.gameStarted) return;
     
-        lobby.timeToStart = COUNTDOWN_60_SECONDS;
+        lobby.timeToStart = COUNTDOWN_30_SECONDS;
     
         this.gameTimers.set(lobbyId, setInterval(() => {
             const playerCount = this.getTotalPlayerCountInLobby(lobbyId);
@@ -57,7 +57,7 @@ class GameLogic {
                 clearInterval(this.gameTimers.get(lobbyId));
                 this.gameTimers.delete(lobbyId);
     
-                lobby.timeToStart = COUNTDOWN_60_SECONDS;
+                lobby.timeToStart = COUNTDOWN_30_SECONDS;
                 this.broadcastCountdown(lobbyId, lobby.timeToStart);
     
                 return;
@@ -94,7 +94,7 @@ class GameLogic {
         }
 
         // Resetear el tiempo de inicio a 60 segundos
-        lobby.timeToStart = COUNTDOWN_60_SECONDS;
+        lobby.timeToStart = COUNTDOWN_30_SECONDS;
         this.broadcastCountdown(lobbyId, lobby.timeToStart);  // Informar a todos los jugadores
     }
 
@@ -670,7 +670,7 @@ class GameLogic {
             const dy = gold.position.y - y;
             const distance = Math.sqrt(dx * dx + dy * dy);
     
-            if (distance < 96) { // Ya estás bien con esta tolerancia
+            if (distance < 32) { // Ya estás bien con esta tolerancia
                 const clientObj = this.clients.get(clientId);
                 if (clientObj && !clientObj.hasGold) {
                     clientObj.hasGold = true;
