@@ -5,7 +5,7 @@ const dbName = 'miJuego';
 const collectionName = 'partidas';
 
 async function crearPartida({ gameId, estat, totalplayers, spectators }) {
-    const client = new MongoClient(uri, { useUnifiedTopology: true });
+    const client = new MongoClient(uri);
 
     try {
         await client.connect();
@@ -31,4 +31,24 @@ async function crearPartida({ gameId, estat, totalplayers, spectators }) {
     }
 }
 
-module.exports = { crearPartida };
+async function obtenerPartidas() {
+    const client = new MongoClient(uri);
+
+    try {
+        await client.connect();
+        const db = client.db(dbName);
+        const partidas = db.collection(collectionName);
+
+        const lista = await partidas.find().toArray();
+        return lista;
+
+    } catch (error) {
+        console.error('❌ Error al obtener partidas:', error);
+        return [];
+    } finally {
+        await client.close();
+    }
+}
+
+
+module.exports = { crearPartida, obtenerPartidas };

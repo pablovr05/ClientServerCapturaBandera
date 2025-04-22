@@ -2,6 +2,7 @@ const express = require('express');
 const game = require('./gameLogic.js');
 const Obj = require('./utilsWebSockets.js');
 const GameLoop = require('./utilsGameLoop.js');
+const { obtenerPartidas } = require('./crearPartida');
 
 let gameLoop = new GameLoop();
 
@@ -17,8 +18,7 @@ app.use(express.static('public'));
 app.use(express.json());
 
 app.get('/api/games', (req, res) => {
-    const lobbyList = Array.from(game.lobbys.keys());
-    res.json({ lobbys: lobbyList });
+    res.json({ obtenerPartidas });
 });
 
 // Inicialitzar servidor HTTP
