@@ -726,6 +726,8 @@ class GameLogic {
         // Iniciar el ciclo del juego nuevamente
         console.log("Nuevo oro generado y jugadores reiniciados, el ciclo del juego reiniciado.");
 
+        lobby.gameStarted = false;
+
         this.resetGameStartCountdown(lobbyId)
 
         this.checkPlayerCountForGameStart(lobbyId);
