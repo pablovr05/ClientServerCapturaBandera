@@ -703,7 +703,7 @@ class GameLogic {
         crearPartida({
             gameId: Math.floor(Math.random() * (999999 - 100000 + 1)) + 100000,
             estat: 1,
-            totalplayers: lobby.getTotalPlayerCountInLobby(lobbyId),
+            totalplayers: this.getTotalPlayerCountInLobby(lobbyId),
             spectators: lobby.spectators.length,
             winner: winnerClient.team,
         }).then(id => {
