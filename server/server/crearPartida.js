@@ -35,17 +35,26 @@ async function obtenerPartidas() {
     const client = new MongoClient(uri);
 
     try {
+        console.log('🔌 Conectando a MongoDB...');
         await client.connect();
+        console.log('✅ Conectado a MongoDB');
+
         const db = client.db(dbName);
+        console.log(`📂 Usando base de datos: ${dbName}`);
+
         const partidas = db.collection(collectionName);
+        console.log(`📄 Accediendo a la colección: ${collectionName}`);
 
         const lista = await partidas.find().toArray();
+        console.log(`📦 Se han recuperado ${lista.length} partidas`);
+
         return lista;
 
     } catch (error) {
         console.error('❌ Error al obtener partidas:', error);
         return [];
     } finally {
+        console.log('🔒 Cerrando conexión con MongoDB...');
         await client.close();
     }
 }
