@@ -30,3 +30,5 @@ async function crearPartida({ gameId, estat, totalplayers, spectators }) {
         await client.close();
     }
 }
+
+module.exports = { crearPartida };
