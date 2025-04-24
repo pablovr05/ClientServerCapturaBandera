@@ -54,6 +54,8 @@ public class WebSockets {
                             case "update":
                                 handleUpdate(jsonMessage);
                                 break;
+                            case "performAttack":
+                                System.out.println(jsonMessage);
                             default:
                                 System.out.println("Tipo de mensaje desconocido: " + messageType);
                                 break;

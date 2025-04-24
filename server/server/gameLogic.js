@@ -553,8 +553,20 @@ class GameLogic {
                         if (teamSet.has(id)) {
                             const client = this.clients.get(id);
                             if (client && client.state === "IDLE") {
-                                console.log(client.state)
                                 console.log(viewState)
+
+                                const message = {
+                                    type: "performAttack",
+                                    attacker: client.id,
+                                    viewState: viewState,
+                                    message: "El jugador con id: " + client.id + " está atacando en dirección: " + viewState,
+                                };
+
+                                for (const [clientId, client] of this.clients.entries()) {
+                                    if (lobby.teams.blue.has(clientId) || lobby.teams.red.has(clientId) || lobby.teams.yellow.has(clientId) || lobby.teams.purple.has(clientId) || lobby.spectators.has(clientId)) {
+                                        client.socket.send(JSON.stringify(message));
+                                    }
+                                }
                             }
                             break;
                         }
