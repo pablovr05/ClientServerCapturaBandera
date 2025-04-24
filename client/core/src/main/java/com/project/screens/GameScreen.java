@@ -17,12 +17,13 @@ import com.project.WebSockets;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import com.project.clases.AttackEffect;
 import com.project.clases.Joystick;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.json.JsonObject;
 
 public class GameScreen implements Screen {
     private final Game game;
@@ -82,6 +83,9 @@ public class GameScreen implements Screen {
     private boolean buttonEnabled = true;
 
     private Map<String, String> playerDirections = new HashMap<>();
+
+    private final ArrayList<AttackEffect> activeAttacks = new ArrayList<>();
+
 
     public GameScreen(Game game, WebSockets webSockets) throws JSONException {
         this.game = game;
@@ -288,6 +292,8 @@ public class GameScreen implements Screen {
         } catch (JSONException e) {
             e.printStackTrace();
         }
+
+        drawAttacks(delta);
     }
 
     private void drawMap(int x, int y) throws JSONException {
@@ -382,6 +388,66 @@ public class GameScreen implements Screen {
         if (!data.has("gameState")) return;
         latestGameState = data.getJSONObject("gameState");
     }
+
+    public void handleAttack(JSONObject jsonAttackMessage) throws JSONException {
+        System.out.println(jsonAttackMessage);
+        String attackerId = jsonAttackMessage.getString("attacker");
+        String direction = jsonAttackMessage.getString("viewState");
+
+        // Buscar al jugador en la lista y obtener su posición
+        if (latestGameState != null && latestGameState.has("players")) {
+            JSONArray players = latestGameState.getJSONArray("players");
+
+            for (int i = 0; i < players.length(); i++) {
+                JSONObject player = players.getJSONObject(i);
+                if (player.getString("id").equals(attackerId)) {
+                    JSONObject pos = player.getJSONObject("position");
+                    float x = (float) pos.getDouble("x");
+                    float y = (float) pos.getDouble("y");
+
+                    activeAttacks.add(new AttackEffect(x, y, direction));
+                    break;
+                }
+            }
+        }
+    }
+
+    private void drawAttacks(float delta) {
+        batch.begin();
+    
+        for (int i = activeAttacks.size() - 1; i >= 0; i--) {
+            AttackEffect atk = activeAttacks.get(i);
+            atk.timer += delta;
+    
+            float attackDuration = 0.5f; // Medio segundo de animación
+    
+            // Puedes dibujar una línea, un sprite, o un efecto
+            shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+            shapeRenderer.setColor(1, 0, 0, 1); // Rojo
+    
+            float offset = 64;
+    
+            float ax = atk.x;
+            float ay = atk.y;
+    
+            switch (atk.direction.toUpperCase()) {
+                case "UP":    ay += offset; break;
+                case "DOWN":  ay -= offset; break;
+                case "LEFT":  ax -= offset; break;
+                case "RIGHT": ax += offset; break;
+            }
+    
+            shapeRenderer.circle(ax, ay, 20); // Ataque visual
+            shapeRenderer.end();
+    
+            if (atk.timer >= attackDuration) {
+                activeAttacks.remove(i);
+            }
+        }
+    
+        batch.end();
+    }
+    
 
     private void drawPlayers(JSONObject gameState) throws JSONException {
         if (!gameState.has("players")) return;

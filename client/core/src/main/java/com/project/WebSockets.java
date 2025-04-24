@@ -10,6 +10,8 @@ import com.project.screens.MenuScreen;
 
 import java.net.URI;
 
+import javax.json.JsonObject;
+
 public class WebSockets {
     private WebSocketClient webSocketClient;
     private MenuScreen menuScreen; // Instancia de MenuScreen
@@ -55,7 +57,7 @@ public class WebSockets {
                                 handleUpdate(jsonMessage);
                                 break;
                             case "performAttack":
-                                System.out.println(jsonMessage);
+                                handleAttack(jsonMessage);
                                 break;
                             default:
                                 System.out.println("Tipo de mensaje desconocido: " + messageType);
@@ -98,6 +100,10 @@ public class WebSockets {
     // Maneja el update de los personajes y de la instancia del juego
     private void handleUpdate(JSONObject jsonMessage) throws JSONException {
         gameScreen.paintEntities(jsonMessage);
+    }
+
+    private void handleAttack(JSONObject jsonMessage) throws JSONException {
+        gameScreen.handleAttack(jsonMessage);
     }
 
     public void sendMessage(String message) {

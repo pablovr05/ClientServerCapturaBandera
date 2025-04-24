@@ -557,7 +557,7 @@ class GameLogic {
 
                                 const message = {
                                     type: "performAttack",
-                                    attacker: client.id,
+                                    attacker: id,
                                     viewState: viewState,
                                     message: "El jugador con id: " + client.id + " está atacando en dirección: " + viewState,
                                 };
@@ -567,7 +567,7 @@ class GameLogic {
                                         client.socket.send(JSON.stringify(message));
                                     }
                                 }
-                                
+
                             }
                             break;
                         }
