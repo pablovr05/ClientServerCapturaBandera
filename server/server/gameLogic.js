@@ -559,6 +559,7 @@ class GameLogic {
                                     type: "performAttack",
                                     attacker: id,
                                     viewState: viewState,
+                                    team: client.team,
                                     message: "El jugador con id: " + client.id + " está atacando en dirección: " + viewState,
                                 };
 

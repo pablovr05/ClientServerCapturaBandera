@@ -404,68 +404,134 @@ public class GameScreen implements Screen {
                     JSONObject pos = player.getJSONObject("position");
                     float x = (float) pos.getDouble("x");
                     float y = (float) pos.getDouble("y");
+                    String team = (String) player.get("team");
 
-                    activeAttacks.add(new AttackEffect(x, y, direction));
+                    activeAttacks.add(new AttackEffect(x, y, direction, attackerId, team));
                     break;
                 }
             }
         }
     }
 
+    
     private void drawAttacks(float delta) {
         batch.begin();
-    
+        
+        // Imprimir los ataques activos directamente
+        System.out.println("Active Attacks: " + activeAttacks.toString());
+        
         for (int i = activeAttacks.size() - 1; i >= 0; i--) {
             AttackEffect atk = activeAttacks.get(i);
+            
             atk.timer += delta;
-    
-            float attackDuration = 0.5f; // Medio segundo de animación
-    
-            // Puedes dibujar una línea, un sprite, o un efecto
-            shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-            shapeRenderer.setColor(1, 0, 0, 1); // Rojo
-    
-            float offset = 64;
-    
-            float ax = atk.x;
-            float ay = atk.y;
-    
-            switch (atk.direction.toUpperCase()) {
-                case "UP":    ay += offset; break;
-                case "DOWN":  ay -= offset; break;
-                case "LEFT":  ax -= offset; break;
-                case "RIGHT": ax += offset; break;
+            
+            int frameIndex = ((int)(atk.timer / frameDuration)) % 6;
+        
+            // Seleccionamos los frames según el equipo del jugador
+            TextureRegion[][] attackFrames = null;
+            switch (atk.playerTeam.toLowerCase()) {  // Usamos .toLowerCase() para evitar problemas de mayúsculas/minúsculas
+                case "blue":
+                    attackFrames = blueFrames;
+                    break;
+                case "red":
+                    attackFrames = redFrames;
+                    break;
+                case "purple":
+                    attackFrames = purpleFrames;
+                    break;
+                case "yellow":
+                    attackFrames = yellowFrames;
+                    break;
+                default:
+                    System.out.println("Equipo no válido: " + atk.playerTeam); // Depuración del equipo
+                    continue; // Si el equipo no es válido, saltamos a la siguiente animación
             }
-    
-            shapeRenderer.circle(ax, ay, 20); // Ataque visual
-            shapeRenderer.end();
-    
-            if (atk.timer >= attackDuration) {
+        
+            // Determinamos la fila y la animación según la dirección
+            int row = -1;
+            switch (atk.direction.toUpperCase()) {
+                case "RIGHT":
+                    row = 2; // Fila para RIGHT
+                    break;
+                case "LEFT":
+                    row = 3; // Fila para LEFT
+                    break;
+                case "TOP":
+                    row = 7; // Fila para UP
+                    break;
+                case "BOTTOM":
+                    row = 5; // Fila para DOWN
+                    break;
+                default:
+                    System.out.println("Dirección no válida: " + atk.direction); // Depuración de la dirección
+                    continue; // Si no es una dirección válida, saltamos a la siguiente animación.
+            }
+        
+            if (row == -1) {
+                continue; // Si no es una fila válida, saltamos a la siguiente animación.
+            }
+        
+            // Obtenemos el frame de la fila correspondiente
+            TextureRegion frame = attackFrames[row][frameIndex];
+        
+            // Posicionamos el ataque en la pantalla
+            float scale = 1.0f;
+            float width = frame.getRegionWidth() * scale;
+            float height = frame.getRegionHeight() * scale;
+            float drawX = atk.x - width / 2;
+            float drawY = atk.y - height / 2;
+            
+            // Aquí es donde se aplica la inversión solo cuando sea necesario
+            if (atk.direction.equals("LEFT")) {
+                batch.draw(frame, drawX + width, drawY, -width, height);  // Dibuja invertido
+            } else {
+                batch.draw(frame, drawX, drawY, width, height);  // Dibuja normalmente
+            }
+        
+            // Eliminar el ataque después de 0.5 segundos
+            if (atk.timer >= 0.5f) { // Fin del ataque (0.5 segundos)
                 activeAttacks.remove(i);
+                break;  // Asegura que no se sigan procesando ataques una vez removidos
             }
         }
-    
+        
         batch.end();
     }
     
-
+    
+    
+    
     private void drawPlayers(JSONObject gameState) throws JSONException {
         if (!gameState.has("players")) return;
-
+    
         JSONArray players = gameState.getJSONArray("players");
         batch.begin();
-
+    
         for (int i = 0; i < players.length(); i++) {
             JSONObject player = players.getJSONObject(i);
             JSONObject pos = player.getJSONObject("position");
-
+    
             float x = (float) pos.getDouble("x");
             float y = (float) pos.getDouble("y");
             String team = player.getString("team").toLowerCase();
             String state = player.getString("state").toUpperCase();
-
+            String playerId = player.getString("id");
+    
+            // Verificar si el jugador está realizando un ataque
+            boolean isAttacking = false;
+            for (AttackEffect atk : activeAttacks) {
+                if (atk.attackerId.equals(playerId)) {
+                    isAttacking = true;
+                    break;
+                }
+            }
+    
+            if (isAttacking) {
+                continue;  // Si está atacando, no dibujamos al jugador
+            }
+    
             String lastDirection = playerDirections.getOrDefault(player.getString("id"), "RIGHT");
-
+    
             TextureRegion[][] frames = null;
             switch (team) {
                 case "blue":   frames = blueFrames;   break;
@@ -473,29 +539,26 @@ public class GameScreen implements Screen {
                 case "purple": frames = purpleFrames; break;
                 case "yellow": frames = yellowFrames; break;
             }
-
+    
             if (frames != null) {
-
+    
                 int row = (state.equals("RIGHT") || state.equals("LEFT")) ? 1 : 0;
                 int frameIndex = ((int)(animationTimer / frameDuration)) % 6;
-
+    
                 TextureRegion frame = frames[row][frameIndex];
-
+    
                 if (state.equals("LEFT") || (state.equals("IDLE") && lastDirection.equals("LEFT"))) {
                     frame = new TextureRegion(frame); // Evitar modificar original
                     frame.flip(true, false);  // Volteamos el sprite
                 }
-
-                if (!state.equals("IDLE")) {
-
-                }
-
+    
                 float scale = 0.85f;  // Ajusta la escala según lo necesites
                 batch.draw(frame, x - (96 * scale), y - (96 * scale), frame.getRegionWidth() * scale, frame.getRegionHeight() * scale);
             }
         }
         batch.end();
     }
+    
 
     private void drawGold(JSONObject gameState) throws JSONException {
         if (!gameState.has("gold")) return;
