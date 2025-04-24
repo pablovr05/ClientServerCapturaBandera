@@ -552,7 +552,7 @@ class GameLogic {
                     for (const [teamName, teamSet] of Object.entries(lobby.teams)) {
                         if (teamSet.has(id)) {
                             const client = this.clients.get(id);
-                            if (client && client.state === "IDLE") {
+                            if (client && client.state === "IDLE" && client.hasGold === false) {
                                 console.log(viewState)
 
                                 const message = {
@@ -567,6 +567,7 @@ class GameLogic {
                                         client.socket.send(JSON.stringify(message));
                                     }
                                 }
+                                
                             }
                             break;
                         }

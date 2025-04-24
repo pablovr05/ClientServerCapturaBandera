@@ -56,6 +56,7 @@ public class WebSockets {
                                 break;
                             case "performAttack":
                                 System.out.println(jsonMessage);
+                                break;
                             default:
                                 System.out.println("Tipo de mensaje desconocido: " + messageType);
                                 break;
