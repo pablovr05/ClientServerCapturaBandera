@@ -218,17 +218,14 @@ public class GameScreen implements Screen {
                 JSONObject message = new JSONObject();
                 try {
                     message.put("type", "attack");
-                    message.put("viewState", joystick.getDirectionView(movementOutput));
+                    message.put("viewState", joystick.getDirectionView());
                     message.put("id", webSockets.getPlayerId());
-
                     webSockets.sendMessage(message.toString());
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
         }
-
-
 
         // Dibujar joystick
         uiShapeRenderer.begin(ShapeRenderer.ShapeType.Filled);

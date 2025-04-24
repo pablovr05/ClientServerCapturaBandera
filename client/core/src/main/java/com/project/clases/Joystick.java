@@ -19,6 +19,7 @@ public class Joystick {
 
     boolean isPressed = false;
 
+    String directionView; 
 
     public Joystick(float x, float y, float radius) {
         // Set values
@@ -79,6 +80,12 @@ public class Joystick {
     
         // Retornar los valores de entrada horizontal y vertical como un Vector2
         //System.out.println("Horizontal: " + horizontalInput + ", Vertical: " + verticalInput);
+
+        String dir = calculateDirectioView(horizontalInput, verticalInput);
+
+        if (dir != null) {
+            directionView = dir;
+        }
     
         return new Vector2(horizontalInput, verticalInput); // Retorna los valores de dirección
     }
@@ -137,12 +144,10 @@ public class Joystick {
         return "LEFT";
     }
 
-    public String getDirectionView(Vector2 movementOutput) {
-        float x = movementOutput.x;
-        float y = movementOutput.y;
+    public String calculateDirectioView(float x , float y) {
     
         if (x == 0 && y == 0) {
-            return "IDLE";
+            return null;
         }
     
         if (Math.abs(x) > Math.abs(y)) {
@@ -150,5 +155,9 @@ public class Joystick {
         } else {
             return y > 0 ? "TOP" : "BOTTOM";
         }
+    }
+
+    public String getDirectionView() {
+        return directionView;
     }
 }
