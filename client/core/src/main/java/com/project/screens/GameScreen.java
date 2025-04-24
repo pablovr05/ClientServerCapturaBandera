@@ -94,7 +94,8 @@ public class GameScreen implements Screen {
         movementOutput = new Vector2();
 
         camera = new OrthographicCamera();
-        camera.setToOrtho(false, 1000, 800);
+        camera.setToOrtho(false, Gdx.graphics.getWidth() / 1.25f, Gdx.graphics.getHeight() / 1.25f);
+
 
         batch = new SpriteBatch(); // para el mundo
         uiBatch = new SpriteBatch(); // para la UI
@@ -134,7 +135,7 @@ public class GameScreen implements Screen {
         decoSheet = new Texture("deco.png");
         towerSheet = new Texture("towers.png");
 
-        buttonTexture = new Texture(Gdx.files.internal("button.png"));
+        buttonTexture = new Texture(Gdx.files.internal("swingB.png"));
 
         grassFrames = extractFrames(grassSheet, 64, 64, 4, 10);
         waterFrames = extractFrames(waterSheet, 64, 64, 1, 1);
@@ -233,22 +234,27 @@ public class GameScreen implements Screen {
 
         // Dibujar joystick
         uiShapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        joystick.draw(uiShapeRenderer);
+        joystick.draw(uiShapeRenderer);  // Dibuja el joystick
+        uiShapeRenderer.end();  // Finaliza el ShapeRenderer
 
-        uiShapeRenderer.setColor(0.9f, 0.1f, 0.1f, 1);
-        uiShapeRenderer.circle(buttonX, buttonY, buttonRadius);
+        uiBatch.begin();  // Comienza el SpriteBatch para dibujar la textura del botón
 
-        // Si está en cooldown, dibujar la animación de recarga
+        // Dibuja el botón usando la textura
+        uiBatch.draw(buttonTexture, buttonX - buttonRadius, buttonY - buttonRadius, buttonRadius * 2, buttonRadius * 2);
+
+        // Si el botón está en cooldown, dibuja el rastro gris
         if (!buttonEnabled) {
             float cooldownPercent = timeSinceLastPress / buttonCooldown;
-            float angle = 360 * (1 - cooldownPercent); // de lleno a vacío
+            float angle = 360 * (1 - cooldownPercent); // Ángulo para el arco de cooldown
 
-            uiShapeRenderer.setColor(0.1f, 0.1f, 0.1f, 0.6f); // color del overlay (gris semitransparente)
-            uiShapeRenderer.arc(buttonX, buttonY, buttonRadius, 90, angle); // empieza desde arriba (90°)
+            // Dibujar el rastro gris de cooldown
+            uiShapeRenderer.setColor(0.3f, 0.3f, 0.3f, 0.6f);
+            uiShapeRenderer.begin(ShapeRenderer.ShapeType.Filled);  // Comienza el ShapeRenderer para el arco
+            uiShapeRenderer.arc(buttonX, buttonY, buttonRadius, 90, angle); // Dibuja el arco de recarga
+            uiShapeRenderer.end();  // Finaliza el ShapeRenderer
         }
 
-
-        uiShapeRenderer.end();
+        uiBatch.end();  // Finaliza el SpriteBatch
 
         // Mostrar contador de jugadores
         if (latestGameState != null && latestGameState.has("players")) {
