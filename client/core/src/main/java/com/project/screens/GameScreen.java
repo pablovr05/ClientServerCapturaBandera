@@ -72,6 +72,15 @@ public class GameScreen implements Screen {
     private float animationTimer = 0f;
     private float frameDuration = 0.1f; // 10 fps
 
+    private Texture buttonTexture;
+    private float buttonX;
+    private float buttonY;
+    private float buttonRadius = 75;
+
+    private float buttonCooldown = 2f; // segundos de cooldown
+    private float timeSinceLastPress = 0f;
+    private boolean buttonEnabled = true;
+
     private Map<String, String> playerDirections = new HashMap<>();
 
     public GameScreen(Game game, WebSockets webSockets) throws JSONException {
@@ -150,6 +159,15 @@ public class GameScreen implements Screen {
         // Limpiar la pantalla con un fondo negro
         ScreenUtils.clear(0.278f, 0.671f, 0.663f, 1f);
 
+        if (!buttonEnabled) {
+            timeSinceLastPress += delta;
+            if (timeSinceLastPress >= buttonCooldown) {
+                buttonEnabled = true;
+                timeSinceLastPress = 0f;
+                System.out.println("Botón listo para usarse nuevamente.");
+            }
+        }        
+
         if (latestGameState != null) {
             try {
                 updatePlayerPosition(latestGameState);
@@ -184,9 +202,41 @@ public class GameScreen implements Screen {
         uiShapeRenderer.setProjectionMatrix(new Matrix4().setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
         uiBatch.setProjectionMatrix(new Matrix4().setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
 
+        Vector2 touchPos = new Vector2(Gdx.input.getX(), Gdx.input.getY());
+        Vector2 unprojected = new Vector2(touchPos.x, Gdx.graphics.getHeight() - touchPos.y);
+
+        if (Gdx.input.isTouched()) {
+            float dist = unprojected.dst(buttonX, buttonY);
+
+            if (dist <= buttonRadius && buttonEnabled) {
+                System.out.println("Botón tocado!");
+                buttonEnabled = false; // desactiva el botón
+                timeSinceLastPress = 0f;
+
+                // Aquí ponés la acción que quieras ejecutar:
+                // atacar, construir, lanzar habilidad, etc.
+            }
+        }
+
+
+
         // Dibujar joystick
         uiShapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         joystick.draw(uiShapeRenderer);
+
+        uiShapeRenderer.setColor(0.9f, 0.1f, 0.1f, 1);
+        uiShapeRenderer.circle(buttonX, buttonY, buttonRadius);
+
+        // Si está en cooldown, dibujar la animación de recarga
+        if (!buttonEnabled) {
+            float cooldownPercent = timeSinceLastPress / buttonCooldown;
+            float angle = 360 * (1 - cooldownPercent); // de lleno a vacío
+
+            uiShapeRenderer.setColor(0.1f, 0.1f, 0.1f, 0.6f); // color del overlay (gris semitransparente)
+            uiShapeRenderer.arc(buttonX, buttonY, buttonRadius, 90, angle); // empieza desde arriba (90°)
+        }
+
+
         uiShapeRenderer.end();
 
         // Mostrar contador de jugadores
@@ -399,7 +449,12 @@ public class GameScreen implements Screen {
         batch.end();
     }
 
-    @Override public void resize(int width, int height) {}
+    @Override
+    public void resize(int width, int height) {
+        buttonX = width - buttonRadius - 100; // 25 px de margen desde la derecha
+        buttonY = buttonRadius + 100;         // 25 px desde abajo
+    }
+
     @Override public void pause() {}
     @Override public void resume() {}
     @Override public void hide() {}
@@ -421,5 +476,6 @@ public class GameScreen implements Screen {
         foamSheet.dispose();
         decoSheet.dispose();
         goldSheet.dispose();
+        buttonTexture.dispose();
     }
 }
