@@ -534,6 +534,34 @@ class GameLogic {
     
                         break;
                 }
+
+                case "attack": {
+
+                    const viewState = obj.viewState; 
+
+                    const firstLobbyId = this.lobbys.keys().next().value;
+                    if (!firstLobbyId) {
+                        console.warn("No hay lobbys creados");
+                        return;
+                    }
+
+                    const lobby = this.lobbys.get(firstLobbyId);
+                
+                    if (!lobby.gameStarted) break;
+
+                    for (const [teamName, teamSet] of Object.entries(lobby.teams)) {
+                        if (teamSet.has(id)) {
+                            const client = this.clients.get(id);
+                            if (client && client.state === "IDLE") {
+                                console.log(client.state)
+                                console.log(viewState)
+                            }
+                            break;
+                        }
+                    }
+
+                    break;
+                }
                 
                 case "updateMovement": {
                     const dirX = obj.x; // entre -1 y 1

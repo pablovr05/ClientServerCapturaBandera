@@ -137,4 +137,18 @@ public class Joystick {
         return "LEFT";
     }
 
+    public String getDirectionView(Vector2 movementOutput) {
+        float x = movementOutput.x;
+        float y = movementOutput.y;
+    
+        if (x == 0 && y == 0) {
+            return "IDLE";
+        }
+    
+        if (Math.abs(x) > Math.abs(y)) {
+            return x > 0 ? "RIGHT" : "LEFT";
+        } else {
+            return y > 0 ? "TOP" : "BOTTOM";
+        }
+    }
 }

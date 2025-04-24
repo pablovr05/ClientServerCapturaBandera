@@ -130,6 +130,8 @@ public class GameScreen implements Screen {
         decoSheet = new Texture("deco.png");
         towerSheet = new Texture("towers.png");
 
+        buttonTexture = new Texture(Gdx.files.internal("button.png"));
+
         grassFrames = extractFrames(grassSheet, 64, 64, 4, 10);
         waterFrames = extractFrames(waterSheet, 64, 64, 1, 1);
         foamFrames = extractFrames(foamSheet, 64, 64, 3, 24);
@@ -213,8 +215,16 @@ public class GameScreen implements Screen {
                 buttonEnabled = false; // desactiva el botón
                 timeSinceLastPress = 0f;
 
-                // Aquí ponés la acción que quieras ejecutar:
-                // atacar, construir, lanzar habilidad, etc.
+                JSONObject message = new JSONObject();
+                try {
+                    message.put("type", "attack");
+                    message.put("viewState", joystick.getDirectionView(movementOutput));
+                    message.put("id", webSockets.getPlayerId());
+
+                    webSockets.sendMessage(message.toString());
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
         }
 
