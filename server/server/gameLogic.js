@@ -559,6 +559,7 @@ class GameLogic {
                             const client = this.clients.get(id);
                             if (client && client.state === "IDLE" && client.hasGold === false) {
                                 console.log(`Jugador ${client.id} está en estado IDLE y no tiene oro. Procediendo con el ataque...`);
+                                console.log(`Posición del atacante (${client.id}): (${client.position.x}, ${client.position.y})`);
                 
                                 const message = {
                                     type: "performAttack",
@@ -591,6 +592,7 @@ class GameLogic {
                                 console.log(`Área de ataque calculada:`);
                                 console.table(attackArea); // Imprime en la consola la matriz del área de ataque
                 
+                                // Mostrar la posición de los otros jugadores y verificar si son atacados
                                 for (const [otherId, otherClient] of this.clients.entries()) {
                                     if (otherId === id) continue;
                 
@@ -600,6 +602,9 @@ class GameLogic {
                 
                                     if (!sameTeam && isInGame) {
                                         const pos = otherClient.position;
+                
+                                        // Mostrar la posición de los otros jugadores
+                                        console.log(`Posición del jugador ${otherId}: (${pos.x}, ${pos.y})`);
                 
                                         // Verifica si la posición del enemigo está en el área de ataque
                                         const wasHit = attackArea.some(tile =>
@@ -636,7 +641,6 @@ class GameLogic {
                 
                     break;
                 }                
-                
                 
                 case "updateMovement": {
                     const dirX = obj.x; // entre -1 y 1
