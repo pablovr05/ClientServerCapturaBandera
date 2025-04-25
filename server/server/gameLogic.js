@@ -567,7 +567,7 @@ class GameLogic {
 
                                 if (viewState === "TOP" || viewState === "BOTTOM") {
                                     attackerTileX = (attackerX + tileSize / 2) / tileSize;
-                                    attackerTileY = (attackerY + tileSize / 4) / tileSize;
+                                    attackerTileY = (attackerY + tileSize / 100) / tileSize;
                                 }                                
 
                                 console.log(`Jugador ${client.id} está en estado IDLE y no tiene oro. Procediendo con el ataque...`);
