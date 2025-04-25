@@ -366,6 +366,35 @@ class GameLogic {
             console.warn(`Lobby with ID ${lobbyId} not found`);
         }
     }
+
+    addGoldToLobbyCords(lobbyId, x, y) {
+        // Verifica si el lobby existe
+        const lobby = this.lobbys.get(lobbyId);
+        if (lobby) {
+            // Crea un objeto de oro con las coordenadas especificadas
+            const gold = {
+                type: 'gold',
+                position: { x, y }
+            };
+    
+            // Asegúrate de que el lobby tenga una propiedad "objects" para almacenar los objetos
+            if (!lobby.objects) {
+                lobby.objects = {};
+            }
+    
+            // Asegúrate de que el lobby tenga un conjunto para el tipo de oro
+            if (!lobby.objects.gold) {
+                lobby.objects.gold = new Set();
+            }
+    
+            // Añadir el objeto de oro al conjunto
+            lobby.objects.gold.add(gold);
+            console.log(`Gold added to lobby ${lobbyId} at position: (${x}, ${y})`);
+        } else {
+            console.warn(`Lobby with ID ${lobbyId} not found`);
+        }
+    }
+    
     
     addSpectatorToLobby(lobbyId, clientId) {
         if (this.lobbys.has(lobbyId)) {
@@ -410,7 +439,7 @@ class GameLogic {
             teamWithLeastPlayers.add(clientId);
     
             // Asignar la posición inicial del jugador
-            const position = this.assignInitialPosition(clientId);
+            const position = this.assignInitialPosition();
             const client = this.clients.get(clientId);
             const teamName = Object.keys(lobby.teams).find(key => lobby.teams[key].has(clientId));
             client.position = position;
@@ -437,17 +466,25 @@ class GameLogic {
     }
     
     assignInitialPosition() {
-        const minX = 128;
-        const minY = 128;
-        const maxX = 1920;
-        const maxY = 1920;
+        const centerX = 960;  // Centro en X
+        const centerY = 960;  // Centro en Y
+        
+        // Rango de la zona en píxeles
+        const offsetX = 704;  // 1408 / 2
+        const offsetY = 704;  // 1408 / 2
+        
+        // Calculando los límites de la zona
+        const minX = centerX - offsetX;
+        const maxX = centerX + offsetX;
+        const minY = centerY - offsetY;
+        const maxY = centerY + offsetY;
     
-        // Genera una posición válida dentro de los límites
+        // Generar posición aleatoria dentro de los límites
         const x = Math.floor(Math.random() * (maxX - minX + 1)) + minX;
         const y = Math.floor(Math.random() * (maxY - minY + 1)) + minY;
     
         return { x, y };
-    }
+    }    
 
     createProjectile(team, x, y, direction) {
         const projectile = { team, x, y, direction };
@@ -627,6 +664,18 @@ class GameLogic {
                 
                                             for (const c of this.clients.values()) {
                                                 c.socket.send(JSON.stringify(hitMessage));
+                                            }
+
+                                            const playerLastX = otherClient.position.x
+                                            const playerLastY = otherClient.position.y
+
+                                            const position = this.assignInitialPosition();
+
+                                            otherClient.position = position;
+
+                                            if (otherClient.hasGold === true) {
+                                                otherClient.hasGold = false;
+                                                this.addGoldToLobbyCords(firstLobbyId, playerLastX, playerLastY)
                                             }
                 
                                             // Puedes agregar lógica de daño aquí
