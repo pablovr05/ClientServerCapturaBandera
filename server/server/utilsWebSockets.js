@@ -28,18 +28,19 @@ class Obj {
     // A websocket client connects
     newConnection(con) {
 
-        const clientIP = con._socket.remoteAddress;
+        const clientIP = con.upgradeReq ? con.upgradeReq.headers['x-forwarded-for'] : con._socket.remoteAddress;
 
-        // Si la dirección tiene el formato ::ffff:<IP>, extraemos solo la dirección IPv4
-        const ipv4Regex = /^::ffff:(\d+\.\d+\.\d+\.\d+)$/;
-        const match = clientIP.match(ipv4Regex);
+// Si la dirección tiene el formato ::ffff:<IP>, extraemos solo la dirección IPv4
+const ipv4Regex = /^::ffff:(\d+\.\d+\.\d+\.\d+)$/;
+const match = clientIP.match(ipv4Regex);
 
-        let clientIpAddress = clientIP; // Por defecto, usamos la IP tal cual
-        if (match) {
-            clientIpAddress = match[1];  // Extraemos solo la parte IPv4
-        }
+let clientIpAddress = clientIP; // Por defecto, usamos la IP tal cual
+if (match) {
+    clientIpAddress = match[1];  // Extraemos solo la parte IPv4
+}
 
-        console.log("Client connected with IP: " + clientIpAddress);      
+console.log("Client connected with IP: " + clientIpAddress);
+
             
         // Generar ID únic per al client
         const id = "C" + uuidv4().substring(0, 5).toUpperCase();
