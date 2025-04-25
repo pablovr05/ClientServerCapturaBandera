@@ -458,9 +458,7 @@ class GameLogic {
                     hasGold: false,
                 }));
             }
-
-            console.log(client.socket.remoteAddress)
-    
+            
             console.log(`Jugador ${clientId} ha sido agregado al lobby ${lobbyId} en el equipo ${teamName}`);
 
             this.checkPlayerCountForGameStart(lobbyId)

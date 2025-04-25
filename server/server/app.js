@@ -41,7 +41,10 @@ const httpServer = app.listen(port, () => {
 ws.init(httpServer, port);
 
 ws.onConnection = (socket, id) => {
-    if (debug) console.log("WebSocket client connected: " + id);
+    if (debug) {
+        const clientIP = socket.upgradeReq.headers['x-forwarded-for'] || socket.remoteAddress;
+        console.log("WebSocket client connected: " + id + " from IP: " + clientIP);
+    }
     game.addClient(id, socket);
 };
 
