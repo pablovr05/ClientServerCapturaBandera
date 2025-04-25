@@ -33,7 +33,7 @@ class Obj {
 
         // Obtener la IP pública del cliente
         const clientIp = req.connection.remoteAddress;
-        console.log("Client IP: " + clientIp); // Aquí estamos obteniendo la IP pública del cliente
+        console.log(req); // Aquí estamos obteniendo la IP pública del cliente
 
         // Generar ID único para el cliente
         const id = "C" + uuidv4().substring(0, 5).toUpperCase();
