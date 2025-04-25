@@ -730,7 +730,7 @@ class GameLogic {
         const area = [];
     
         // 🧠 Offset para corregir desplazamiento en TOP y BOTTOM
-        const yOffset = (direction === "TOP") ? 1 : (direction === "BOTTOM") ? -1 : 0;
+        const yOffset = (direction === "TOP") ? 2 : (direction === "BOTTOM") ? -2 : 0;
     
         for (let i = 1; i <= range; i++) {
             for (let j = -Math.floor(width / 2); j <= Math.floor(width / 2); j++) {
