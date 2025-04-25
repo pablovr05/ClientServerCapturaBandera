@@ -219,10 +219,14 @@ class GameLogic {
     }
     
 
-    addClient(id, socket) {
-        this.clients.set(id, { socket });
+    addClient(id, socket, clientIp) {
+        // Guardar tanto el socket como la IP pública del cliente
+        this.clients.set(id, { socket, clientIp });
+        
+        console.log("AQUI TIENES TU PUTISIMA IP PUBLICA: " + clientIp)
         return this.clients.get(id);
     }
+    
 
     removeClient(id) {
         console.log(`Eliminando cliente con ID: ${id}`);
@@ -458,7 +462,7 @@ class GameLogic {
                     hasGold: false,
                 }));
             }
-            
+
             console.log(`Jugador ${clientId} ha sido agregado al lobby ${lobbyId} en el equipo ${teamName}`);
 
             this.checkPlayerCountForGameStart(lobbyId)

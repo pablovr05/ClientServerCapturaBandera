@@ -40,9 +40,12 @@ const httpServer = app.listen(port, () => {
 // Gestionar WebSockets
 ws.init(httpServer, port);
 
-ws.onConnection = (socket, id) => {
-    if (debug) console.log("WebSocket client connected: " + id);
-    game.addClient(id, socket);
+ws.onConnection = (socket, id, clientIp) => {
+    if (debug) {
+        console.log("WebSocket client connected: " + id);
+        console.log("Client IP: " + clientIp); // Puedes ver la IP en los logs también
+    }
+    game.addClient(id, socket, clientIp); // Pasamos la IP aquí
 };
 
 ws.onMessage = (socket, id, msg) => {

@@ -30,16 +30,16 @@ class Obj {
     // A websocket client connects
     newConnection(con, req) {
         console.log("Client connected");
-
+    
         // Obtener la IP pública del cliente
-        const clientIp = req.connection.remoteAddress;
-        console.log(req.headers['x-forwarded-for']); // Aquí estamos obteniendo la IP pública del cliente
-
+        const clientIp = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+        console.log(`Client IP: ${clientIp}`); // Verifica la IP en los logs
+    
         // Generar ID único para el cliente
         const id = "C" + uuidv4().substring(0, 5).toUpperCase();
         const metadata = { id, clientIp }; // Guardamos la IP en los metadatos
         this.socketsClients.set(con, metadata);
-
+    
         // Enviar mensaje de bienvenida
         con.send(JSON.stringify({
             type: "welcome",
@@ -47,7 +47,7 @@ class Obj {
             totalClients: this.getClientsIds().length,
             message: "Welcome to the server",
         }));
-
+    
         // Notificar a todos los clientes sobre la nueva conexión
         this.broadcast(JSON.stringify({
             type: "newClient",
@@ -55,19 +55,21 @@ class Obj {
             totalClients: this.getClientsIds().length,
             message: "A new client joined the server",
         }));
-
+    
+        // Llamar al callback de conexión y pasar la IP
         if (this.onConnection && typeof this.onConnection === "function") {
-            this.onConnection(con, id);
+            this.onConnection(con, id, clientIp); // Pasamos la IP aquí
         }
-
+    
         con.on("close", () => {
             this.closeConnection(con);
         });
-
+    
         con.on('message', (bufferedMessage) => { 
             this.newMessage(con, id, bufferedMessage);
         });
     }
+    
 
     closeConnection(con) {
         const metadata = this.socketsClients.get(con);
