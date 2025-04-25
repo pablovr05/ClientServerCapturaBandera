@@ -13,64 +13,57 @@ class Obj {
         this.onClose = (socket, id) => { }
 
         // Run WebSocket server
-        this.ws = new Server({ server: httpServer })
-        this.socketsClients = new Map()
-        console.log(`Listening for WebSocket queries on ${port}`)
+        this.ws = new Server({ server: httpServer });
+        this.socketsClients = new Map();
+        console.log(`Listening for WebSocket queries on ${port}`);
 
         // What to do when a websocket client connects
-        this.ws.on('connection', (ws) => { this.newConnection(ws) })
+        this.ws.on('connection', (ws, req) => {
+            this.newConnection(ws, req); // Pasar el req aquí para obtener la IP
+        });
     }
 
     end() {
-        this.ws.close()
+        this.ws.close();
     }
 
     // A websocket client connects
-    newConnection(con) {
+    newConnection(con, req) {
+        console.log("Client connected");
 
-        const clientIP = con.upgradeReq ? con.upgradeReq.headers['x-forwarded-for'] : con._socket.remoteAddress;
+        // Obtener la IP pública del cliente
+        const clientIp = req.connection.remoteAddress;
+        console.log("Client IP: " + clientIp); // Aquí estamos obteniendo la IP pública del cliente
 
-// Si la dirección tiene el formato ::ffff:<IP>, extraemos solo la dirección IPv4
-const ipv4Regex = /^::ffff:(\d+\.\d+\.\d+\.\d+)$/;
-const match = clientIP.match(ipv4Regex);
-
-let clientIpAddress = clientIP; // Por defecto, usamos la IP tal cual
-if (match) {
-    clientIpAddress = match[1];  // Extraemos solo la parte IPv4
-}
-
-console.log("Client connected with IP: " + clientIpAddress);
-
-            
-        // Generar ID únic per al client
+        // Generar ID único para el cliente
         const id = "C" + uuidv4().substring(0, 5).toUpperCase();
-        const metadata = { id };
+        const metadata = { id, clientIp }; // Guardamos la IP en los metadatos
         this.socketsClients.set(con, metadata);
-    
-        // Enviar missatge de benvinguda amb ID únic
+
+        // Enviar mensaje de bienvenida
         con.send(JSON.stringify({
             type: "welcome",
             id: id,
             totalClients: this.getClientsIds().length,
             message: "Welcome to the server",
         }));
-    
-        // Informar tots els clients de la nova connexió
+
+        // Notificar a todos los clientes sobre la nueva conexión
         this.broadcast(JSON.stringify({
             type: "newClient",
             id: id,
             totalClients: this.getClientsIds().length,
             message: "A new client joined the server",
         }));
-    
+
         if (this.onConnection && typeof this.onConnection === "function") {
             this.onConnection(con, id);
         }
-    
+
         con.on("close", () => {
             this.closeConnection(con);
         });
-    
+
         con.on('message', (bufferedMessage) => { 
             this.newMessage(con, id, bufferedMessage);
         });
@@ -97,7 +90,6 @@ console.log("Client connected with IP: " + clientIpAddress);
             this.onClose(con, id);
         }
     }
-    
 
     // Send a message to all websocket clients
     broadcast(msg) {
@@ -121,7 +113,6 @@ console.log("Client connected with IP: " + clientIpAddress);
         console.log("Broadcast process completed."); // Traza después de intentar enviar el mensaje a todos los clientes
     }
 
-
     // A message is received from a websocket client
     newMessage(ws, id, bufferedMessage) {
         var messageAsString = bufferedMessage.toString()
@@ -141,7 +132,7 @@ console.log("Client connected with IP: " + clientIpAddress);
 
     getClientsIds() {
         let clients = [];
-        this.socketsClients.forEach((value, key) => {
+        this.socketsClients.forEach((value) => {
             clients.push(value.id);
         });
         return clients;
@@ -149,11 +140,9 @@ console.log("Client connected with IP: " + clientIpAddress);
 
     getClientsData() {
         let clients = [];
-        for (let [client, metadata] of this.socketsClients.entries()) {
-            clients.push(metadata);
-        }
+        this.socketsClients.forEach((value) => {
+            clients.push(value);
+        });
         return clients;
     }
 }
-
-module.exports = Obj;
