@@ -458,6 +458,8 @@ class GameLogic {
                     hasGold: false,
                 }));
             }
+
+            console.log(client.socket)
     
             console.log(`Jugador ${clientId} ha sido agregado al lobby ${lobbyId} en el equipo ${teamName}`);
 
