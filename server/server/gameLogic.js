@@ -591,7 +591,7 @@ class GameLogic {
                                 }
                 
                                 // ⚠️ NUEVO: calcular área de ataque en casillas
-                                const attackRange = 3; // Puedes ajustar el rango
+                                const attackRange = 1; // Puedes ajustar el rango
                                 const attackWidth = 3; // Puedes ajustar el ancho
                                 console.log(`Calculando área de ataque con rango: ${attackRange} y ancho: ${attackWidth}...`);
                                 const attackArea = this.getAttackArea(attackerTileX, attackerTileY, viewState, attackRange, attackWidth);
