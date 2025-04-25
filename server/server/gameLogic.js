@@ -553,7 +553,6 @@ class GameLogic {
                         if (teamSet.has(id)) {
                             const client = this.clients.get(id);
                             if (client && client.state === "IDLE" && client.hasGold === false) {
-                                console.log(viewState)
 
                                 const message = {
                                     type: "performAttack",
@@ -568,6 +567,9 @@ class GameLogic {
                                         client.socket.send(JSON.stringify(message));
                                     }
                                 }
+
+                                console.log(client.position.x)
+                                console.log(client.position.y)
 
                             }
                             break;

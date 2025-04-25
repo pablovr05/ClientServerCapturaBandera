@@ -419,7 +419,6 @@ public class GameScreen implements Screen {
         }
     }
 
-    
     private void drawAttacks(float delta) {
         batch.begin();
         
@@ -481,9 +480,10 @@ public class GameScreen implements Screen {
             TextureRegion frame = attackFrames[row][frameIndex];
         
             // Posicionamos el ataque en la pantalla
-            float scale = 1.0f;
+            float scale = 0.85f;
             float width = frame.getRegionWidth() * scale;
             float height = frame.getRegionHeight() * scale;
+
             float drawX = atk.x - width / 2;
             float drawY = atk.y - height / 2;
             
