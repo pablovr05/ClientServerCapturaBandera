@@ -42,7 +42,6 @@ ws.init(httpServer, port);
 
 ws.onConnection = (socket, id) => {
     if (debug) console.log("WebSocket client connected: " + id);
-     console.log(socket)
     game.addClient(id, socket);
 };
 
