@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { crearPartida } = require('./crearPartida');
+const axios = require('axios');
 
 const GAME_DURATION = 3 * 1000;  // Duración del juego de 3 segundos
 const COUNTDOWN_30_SECONDS = 30 * 1000;  // Contador de 60 segundos
@@ -217,16 +218,29 @@ class GameLogic {
             return null;
         }
     }
-    
 
-    addClient(id, socket, clientIp) {
-        // Guardar tanto el socket como la IP pública del cliente
-        this.clients.set(id, { socket, clientIp });
-        
-        console.log("AQUI TIENES TU PUTISIMA IP PUBLICA: " + clientIp)
+    async addClient(id, socket, clientIp) {
+        try {
+            // Realizar la solicitud a la API para obtener los datos de la IP
+            const response = await axios.get(`https://ipinfo.io/${clientIp}/json`);
+            
+            // Extraer solo la ciudad y el país
+            const { city, country } = response.data;
+
+            // Guardar la IP, ciudad y país junto con el socket
+            this.clients.set(id, { socket, clientIp, city, country });
+
+            console.log(`Cliente registrado con IP pública: ${clientIp}, Ciudad: ${city}, País: ${country}`);
+        } catch (error) {
+            console.error('Error al obtener la información de la IP:', error);
+            // En caso de error, solo guardamos la IP y el socket (sin detalles adicionales)
+            this.clients.set(id, { socket, clientIp });
+            console.log(`Cliente registrado con IP pública: ${clientIp} (sin detalles de geolocalización)`);
+        }
+
+        // Devuelve la información del cliente (sin esperar la respuesta de la API)
         return this.clients.get(id);
     }
-    
 
     removeClient(id) {
         console.log(`Eliminando cliente con ID: ${id}`);
