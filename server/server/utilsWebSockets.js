@@ -146,3 +146,5 @@ class Obj {
         return clients;
     }
 }
+
+module.exports = Obj;
