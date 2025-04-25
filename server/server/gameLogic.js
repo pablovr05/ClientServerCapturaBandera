@@ -563,12 +563,7 @@ class GameLogic {
                                 const attackerX = client.position.x;
                                 const attackerY = client.position.y;
                                 let attackerTileX = attackerX / tileSize;
-                                let attackerTileY = attackerY / tileSize;
-
-                                if (viewState === "TOP" || viewState === "BOTTOM") {
-                                    attackerTileX = ( -1 * attackerX + tileSize / 2) / tileSize;
-                                    attackerTileY = ( -1 * attackerY + tileSize / 100) / tileSize;
-                                }                                
+                                let attackerTileY = attackerY / tileSize;                               
 
                                 console.log(`Jugador ${client.id} está en estado IDLE y no tiene oro. Procediendo con el ataque...`);
                                 console.log(`Posición del atacante (${client.id}): (${attackerX.toFixed(2)}, ${attackerY.toFixed(2)}) -> Casilla (${attackerTileX.toFixed(2)}, ${attackerTileY.toFixed(2)})`);
@@ -734,6 +729,10 @@ class GameLogic {
     getAttackArea(originX, originY, direction, range, width) {
         const area = [];
     
+        // 🧠 Offset para corregir desplazamiento en TOP y BOTTOM
+        const yOffset = (direction === "TOP") ? -0.5 : (direction === "BOTTOM") ? 0.5 : 0;
+        const xOffset = (direction === "LEFT") ? -0.5 : (direction === "RIGHT") ? 0.5 : 0;
+    
         for (let i = 1; i <= range; i++) {
             for (let j = -Math.floor(width / 2); j <= Math.floor(width / 2); j++) {
                 let x = originX;
@@ -741,20 +740,20 @@ class GameLogic {
     
                 switch (direction) {
                     case "TOP":
-                        x += j;      // Ancho se aplica en X
-                        y -= i;      // Avance hacia arriba
+                        x += j;
+                        y += yOffset - i;
                         break;
                     case "BOTTOM":
-                        x += j;      // Ancho en X
-                        y += i;      // Avance hacia abajo
+                        x += j;
+                        y += yOffset + i;
                         break;
                     case "LEFT":
-                        x -= i;      // Avance hacia la izquierda
-                        y += j;      // Ancho en Y
+                        x += xOffset - i;
+                        y += j;
                         break;
                     case "RIGHT":
-                        x += i;      // Avance hacia la derecha
-                        y += j;      // Ancho en Y
+                        x += xOffset + i;
+                        y += j;
                         break;
                 }
     
@@ -764,6 +763,7 @@ class GameLogic {
     
         return area;
     }
+    
     
 
     isPositionValid(x, y) {
