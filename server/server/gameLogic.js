@@ -459,7 +459,7 @@ class GameLogic {
                 }));
             }
 
-            console.log(client.socket)
+            console.log(client.socket.remoteAddress)
     
             console.log(`Jugador ${clientId} ha sido agregado al lobby ${lobbyId} en el equipo ${teamName}`);
 
