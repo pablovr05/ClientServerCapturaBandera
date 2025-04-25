@@ -422,9 +422,6 @@ public class GameScreen implements Screen {
     private void drawAttacks(float delta) {
         batch.begin();
         
-        // Imprimir los ataques activos directamente
-        System.out.println("Active Attacks: " + activeAttacks.toString());
-        
         for (int i = activeAttacks.size() - 1; i >= 0; i--) {
             AttackEffect atk = activeAttacks.get(i);
             

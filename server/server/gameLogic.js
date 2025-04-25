@@ -568,9 +568,55 @@ class GameLogic {
                                     }
                                 }
 
-                                console.log(client.position.x)
-                                console.log(client.position.y)
-                                console.log(viewState)
+                                let targetX = client.position.x;
+                                let targetY = client.position.y;
+
+                                switch(viewState) {
+                                    case "TOP":
+                                        targetY -= 1;
+                                        break;
+                                    case "BOTTOM":
+                                        targetY += 1;
+                                        break;
+                                    case "LEFT":
+                                        targetX -= 1;
+                                        break;
+                                    case "RIGHT":
+                                        targetX += 1;
+                                        break;
+                                }
+
+                                // Recorre todos los jugadores para ver si hay alguno en esa posición
+                                for (const [otherId, otherClient] of this.clients.entries()) {
+                                    if (otherId === id) continue; // Ignora al atacante
+
+                                    // Asegúrate de que esté en el mismo lobby y sea enemigo
+                                    if (
+                                        (lobby.teams[client.team]?.has(id)) &&
+                                        (!lobby.teams[client.team]?.has(otherId)) &&
+                                        (lobby.teams.blue.has(otherId) || lobby.teams.red.has(otherId) || lobby.teams.yellow.has(otherId) || lobby.teams.purple.has(otherId))
+                                    ) {
+                                        const pos = otherClient.position;
+
+                                        if (pos.x === targetX && pos.y === targetY) {
+                                            // ¡Impacto!
+                                            console.log(`Jugador ${id} atacó y golpeó a ${otherId}`);
+
+                                            const hitMessage = {
+                                                type: "playerHit",
+                                                attacker: id,
+                                                victim: otherId,
+                                            };
+
+                                            // Avisamos a todos
+                                            for (const c of this.clients.values()) {
+                                                c.socket.send(JSON.stringify(hitMessage));
+                                            }
+
+                                            // Aquí podrías manejar daño, muerte, efectos, etc.
+                                        }
+                                    }
+                                }
 
                             }
                             break;
