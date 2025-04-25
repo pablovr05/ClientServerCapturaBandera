@@ -554,12 +554,19 @@ class GameLogic {
                 
                     console.log("El juego ha comenzado. Procesando ataque...");
                 
+                    // Definir el tamaño de las casillas (en píxeles)
+                    const tileSize = 64;
+                
                     for (const [teamName, teamSet] of Object.entries(lobby.teams)) {
                         if (teamSet.has(id)) {
                             const client = this.clients.get(id);
                             if (client && client.state === "IDLE" && client.hasGold === false) {
                                 console.log(`Jugador ${client.id} está en estado IDLE y no tiene oro. Procediendo con el ataque...`);
-                                console.log(`Posición del atacante (${client.id}): (${client.position.x}, ${client.position.y})`);
+                
+                                // Convertir la posición del jugador a coordenadas de casilla
+                                const attackerTileX = Math.floor(client.position.x / tileSize);
+                                const attackerTileY = Math.floor(client.position.y / tileSize);
+                                console.log(`Posición del atacante (${client.id}): Casilla (${attackerTileX}, ${attackerTileY})`);
                 
                                 const message = {
                                     type: "performAttack",
@@ -583,13 +590,13 @@ class GameLogic {
                                     }
                                 }
                 
-                                // ⚠️ NUEVO: calcular área de ataque
+                                // ⚠️ NUEVO: calcular área de ataque en casillas
                                 const attackRange = 3; // Puedes ajustar el rango
                                 const attackWidth = 3; // Puedes ajustar el ancho
                                 console.log(`Calculando área de ataque con rango: ${attackRange} y ancho: ${attackWidth}...`);
-                                const attackArea = this.getAttackArea(client.position.x, client.position.y, viewState, attackRange, attackWidth);
+                                const attackArea = this.getAttackArea(attackerTileX, attackerTileY, viewState, attackRange, attackWidth);
                 
-                                console.log(`Área de ataque calculada:`);
+                                console.log(`Área de ataque calculada en casillas:`);
                                 console.table(attackArea); // Imprime en la consola la matriz del área de ataque
                 
                                 // Mostrar la posición de los otros jugadores y verificar si son atacados
@@ -601,18 +608,18 @@ class GameLogic {
                                     const isInGame = lobby.teams.blue.has(otherId) || lobby.teams.red.has(otherId) || lobby.teams.yellow.has(otherId) || lobby.teams.purple.has(otherId);
                 
                                     if (!sameTeam && isInGame) {
-                                        const pos = otherClient.position;
-                
-                                        // Mostrar la posición de los otros jugadores
-                                        console.log(`Posición del jugador ${otherId}: (${pos.x}, ${pos.y})`);
+                                        // Convertir la posición del jugador enemigo a casillas
+                                        const otherTileX = Math.floor(otherClient.position.x / tileSize);
+                                        const otherTileY = Math.floor(otherClient.position.y / tileSize);
+                                        console.log(`Posición del jugador ${otherId}: Casilla (${otherTileX}, ${otherTileY})`);
                 
                                         // Verifica si la posición del enemigo está en el área de ataque
                                         const wasHit = attackArea.some(tile =>
-                                            Math.floor(tile.x) === Math.floor(pos.x) && Math.floor(tile.y) === Math.floor(pos.y)
+                                            tile.x === otherTileX && tile.y === otherTileY
                                         );
                 
                                         if (wasHit) {
-                                            console.log(`🎯 Jugador ${id} atacó y golpeó a ${otherId} en la posición (${pos.x}, ${pos.y})`);
+                                            console.log(`🎯 Jugador ${id} atacó y golpeó a ${otherId} en la casilla (${otherTileX}, ${otherTileY})`);
                 
                                             const hitMessage = {
                                                 type: "playerHit",
@@ -640,7 +647,7 @@ class GameLogic {
                     }
                 
                     break;
-                }                
+                }         
                 
                 case "updateMovement": {
                     const dirX = obj.x; // entre -1 y 1
@@ -721,14 +728,16 @@ class GameLogic {
         }
     } 
     
-    getAttackArea(originX, originY, direction, range, width) {
-        const area = [];
     
+    // Función para calcular el área de ataque basada en casillas
+    getAttackArea(originTileX, originTileY, direction, range, width) {
+        const area = [];
+
         for (let i = 1; i <= range; i++) {
             for (let j = -Math.floor(width / 2); j <= Math.floor(width / 2); j++) {
-                let x = originX;
-                let y = originY;
-    
+                let x = originTileX;
+                let y = originTileY;
+
                 switch (direction) {
                     case "TOP":
                         x += j;
@@ -747,11 +756,11 @@ class GameLogic {
                         y += j;
                         break;
                 }
-    
+
                 area.push({ x, y });
             }
         }
-    
+
         return area;
     }
 
