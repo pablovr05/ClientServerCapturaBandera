@@ -567,9 +567,8 @@ class GameLogic {
 
                                 if (viewState === "TOP" || viewState === "BOTTOM") {
                                     attackerTileX = (attackerX + tileSize / 2) / tileSize;
-                                    attackerTileY = (attackerY + tileSize / 2) / tileSize;
-                                }
-
+                                    attackerTileY = (attackerY + tileSize * 0.75) / tileSize;
+                                }                                
 
                                 console.log(`Jugador ${client.id} está en estado IDLE y no tiene oro. Procediendo con el ataque...`);
                                 console.log(`Posición del atacante (${client.id}): (${attackerX.toFixed(2)}, ${attackerY.toFixed(2)}) -> Casilla (${attackerTileX.toFixed(2)}, ${attackerTileY.toFixed(2)})`);
