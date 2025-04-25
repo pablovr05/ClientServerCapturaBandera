@@ -545,13 +545,20 @@ class GameLogic {
                     }
                 
                     const lobby = this.lobbys.get(firstLobbyId);
+                    console.log(`Lobby encontrado: ${firstLobbyId}`);
                 
-                    if (!lobby.gameStarted) break;
+                    if (!lobby.gameStarted) {
+                        console.log("El juego aún no ha comenzado.");
+                        break;
+                    }
+                
+                    console.log("El juego ha comenzado. Procesando ataque...");
                 
                     for (const [teamName, teamSet] of Object.entries(lobby.teams)) {
                         if (teamSet.has(id)) {
                             const client = this.clients.get(id);
                             if (client && client.state === "IDLE" && client.hasGold === false) {
+                                console.log(`Jugador ${client.id} está en estado IDLE y no tiene oro. Procediendo con el ataque...`);
                 
                                 const message = {
                                     type: "performAttack",
@@ -562,6 +569,7 @@ class GameLogic {
                                 };
                 
                                 // Avisar a todos del ataque
+                                console.log(`Enviando mensaje de ataque a todos los jugadores...`);
                                 for (const [clientId, c] of this.clients.entries()) {
                                     if (
                                         lobby.teams.blue.has(clientId) ||
@@ -575,9 +583,13 @@ class GameLogic {
                                 }
                 
                                 // ⚠️ NUEVO: calcular área de ataque
-                                const attackRange = 3; // puedes ajustar el rango
-                                const attackWidth = 3; // puedes ajustar el ancho
+                                const attackRange = 3; // Puedes ajustar el rango
+                                const attackWidth = 3; // Puedes ajustar el ancho
+                                console.log(`Calculando área de ataque con rango: ${attackRange} y ancho: ${attackWidth}...`);
                                 const attackArea = this.getAttackArea(client.position.x, client.position.y, viewState, attackRange, attackWidth);
+                
+                                console.log(`Área de ataque calculada:`);
+                                console.table(attackArea); // Imprime en la consola la matriz del área de ataque
                 
                                 for (const [otherId, otherClient] of this.clients.entries()) {
                                     if (otherId === id) continue;
@@ -589,12 +601,13 @@ class GameLogic {
                                     if (!sameTeam && isInGame) {
                                         const pos = otherClient.position;
                 
+                                        // Verifica si la posición del enemigo está en el área de ataque
                                         const wasHit = attackArea.some(tile =>
                                             Math.floor(tile.x) === Math.floor(pos.x) && Math.floor(tile.y) === Math.floor(pos.y)
                                         );
                 
                                         if (wasHit) {
-                                            console.log(`🎯 Jugador ${id} atacó y golpeó a ${otherId}`);
+                                            console.log(`🎯 Jugador ${id} atacó y golpeó a ${otherId} en la posición (${pos.x}, ${pos.y})`);
                 
                                             const hitMessage = {
                                                 type: "playerHit",
@@ -603,21 +616,26 @@ class GameLogic {
                                             };
                 
                                             // Avisar a todos del impacto
+                                            console.log(`Notificando a todos sobre el impacto...`);
                                             for (const c of this.clients.values()) {
                                                 c.socket.send(JSON.stringify(hitMessage));
                                             }
                 
                                             // Aquí podrías agregar lógica de daño o efectos especiales
+                                        } else {
+                                            console.log(`El jugador ${otherId} no fue golpeado, ya que no está dentro del área de ataque.`);
                                         }
                                     }
                                 }
+                            } else {
+                                console.log(`El jugador ${client.id} no está en estado IDLE o tiene oro, no puede atacar.`);
                             }
                             break;
                         }
                     }
                 
                     break;
-                }
+                }                
                 
                 
                 case "updateMovement": {
