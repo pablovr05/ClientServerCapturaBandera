@@ -747,11 +747,11 @@ class GameLogic {
                         y += yOffset + i;
                         break;
                     case "LEFT":
-                        x += xOffset - i;
+                        x += - i;
                         y += j;
                         break;
                     case "RIGHT":
-                        x += xOffset + i;
+                        x += + i;
                         y += j;
                         break;
                 }
