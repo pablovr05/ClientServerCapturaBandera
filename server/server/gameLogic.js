@@ -536,95 +536,89 @@ class GameLogic {
                 }
 
                 case "attack": {
-
-                    const viewState = obj.viewState; 
-
+                    const viewState = obj.viewState;
+                
                     const firstLobbyId = this.lobbys.keys().next().value;
                     if (!firstLobbyId) {
                         console.warn("No hay lobbys creados");
                         return;
                     }
-
+                
                     const lobby = this.lobbys.get(firstLobbyId);
                 
                     if (!lobby.gameStarted) break;
-
+                
                     for (const [teamName, teamSet] of Object.entries(lobby.teams)) {
                         if (teamSet.has(id)) {
                             const client = this.clients.get(id);
                             if (client && client.state === "IDLE" && client.hasGold === false) {
-
+                
                                 const message = {
                                     type: "performAttack",
                                     attacker: id,
                                     viewState: viewState,
                                     team: client.team,
-                                    message: "El jugador con id: " + client.id + " está atacando en dirección: " + viewState,
+                                    message: `El jugador con id: ${client.id} está atacando en dirección: ${viewState}`,
                                 };
-
-                                for (const [clientId, client] of this.clients.entries()) {
-                                    if (lobby.teams.blue.has(clientId) || lobby.teams.red.has(clientId) || lobby.teams.yellow.has(clientId) || lobby.teams.purple.has(clientId) || lobby.spectators.has(clientId)) {
-                                        client.socket.send(JSON.stringify(message));
+                
+                                // Avisar a todos del ataque
+                                for (const [clientId, c] of this.clients.entries()) {
+                                    if (
+                                        lobby.teams.blue.has(clientId) ||
+                                        lobby.teams.red.has(clientId) ||
+                                        lobby.teams.yellow.has(clientId) ||
+                                        lobby.teams.purple.has(clientId) ||
+                                        lobby.spectators.has(clientId)
+                                    ) {
+                                        c.socket.send(JSON.stringify(message));
                                     }
                                 }
-
-                                let targetX = client.position.x;
-                                let targetY = client.position.y;
-
-                                switch(viewState) {
-                                    case "TOP":
-                                        targetY -= 1;
-                                        break;
-                                    case "BOTTOM":
-                                        targetY += 1;
-                                        break;
-                                    case "LEFT":
-                                        targetX -= 1;
-                                        break;
-                                    case "RIGHT":
-                                        targetX += 1;
-                                        break;
-                                }
-
-                                // Recorre todos los jugadores para ver si hay alguno en esa posición
+                
+                                // ⚠️ NUEVO: calcular área de ataque
+                                const attackRange = 3; // puedes ajustar el rango
+                                const attackWidth = 3; // puedes ajustar el ancho
+                                const attackArea = this.getAttackArea(client.position.x, client.position.y, viewState, attackRange, attackWidth);
+                
                                 for (const [otherId, otherClient] of this.clients.entries()) {
-                                    if (otherId === id) continue; // Ignora al atacante
-
-                                    // Asegúrate de que esté en el mismo lobby y sea enemigo
-                                    if (
-                                        (lobby.teams[client.team]?.has(id)) &&
-                                        (!lobby.teams[client.team]?.has(otherId)) &&
-                                        (lobby.teams.blue.has(otherId) || lobby.teams.red.has(otherId) || lobby.teams.yellow.has(otherId) || lobby.teams.purple.has(otherId))
-                                    ) {
+                                    if (otherId === id) continue;
+                
+                                    // Verifica si es enemigo
+                                    const sameTeam = lobby.teams[client.team]?.has(otherId);
+                                    const isInGame = lobby.teams.blue.has(otherId) || lobby.teams.red.has(otherId) || lobby.teams.yellow.has(otherId) || lobby.teams.purple.has(otherId);
+                
+                                    if (!sameTeam && isInGame) {
                                         const pos = otherClient.position;
-
-                                        if (pos.x === targetX && pos.y === targetY) {
-                                            // ¡Impacto!
-                                            console.log(`Jugador ${id} atacó y golpeó a ${otherId}`);
-
+                
+                                        const wasHit = attackArea.some(tile =>
+                                            Math.floor(tile.x) === Math.floor(pos.x) && Math.floor(tile.y) === Math.floor(pos.y)
+                                        );
+                
+                                        if (wasHit) {
+                                            console.log(`🎯 Jugador ${id} atacó y golpeó a ${otherId}`);
+                
                                             const hitMessage = {
                                                 type: "playerHit",
                                                 attacker: id,
                                                 victim: otherId,
                                             };
-
-                                            // Avisamos a todos
+                
+                                            // Avisar a todos del impacto
                                             for (const c of this.clients.values()) {
                                                 c.socket.send(JSON.stringify(hitMessage));
                                             }
-
-                                            // Aquí podrías manejar daño, muerte, efectos, etc.
+                
+                                            // Aquí podrías agregar lógica de daño o efectos especiales
                                         }
                                     }
                                 }
-
                             }
                             break;
                         }
                     }
-
+                
                     break;
                 }
+                
                 
                 case "updateMovement": {
                     const dirX = obj.x; // entre -1 y 1
@@ -705,6 +699,40 @@ class GameLogic {
         }
     } 
     
+    getAttackArea(originX, originY, direction, range, width) {
+        const area = [];
+    
+        for (let i = 1; i <= range; i++) {
+            for (let j = -Math.floor(width / 2); j <= Math.floor(width / 2); j++) {
+                let x = originX;
+                let y = originY;
+    
+                switch (direction) {
+                    case "TOP":
+                        x += j;
+                        y -= i;
+                        break;
+                    case "BOTTOM":
+                        x += j;
+                        y += i;
+                        break;
+                    case "LEFT":
+                        x -= i;
+                        y += j;
+                        break;
+                    case "RIGHT":
+                        x += i;
+                        y += j;
+                        break;
+                }
+    
+                area.push({ x, y });
+            }
+        }
+    
+        return area;
+    }
+
     isPositionValid(x, y) {
 
         const tileSize = 64;
