@@ -570,6 +570,7 @@ class GameLogic {
 
                                 console.log(client.position.x)
                                 console.log(client.position.y)
+                                console.log(viewState)
 
                             }
                             break;
