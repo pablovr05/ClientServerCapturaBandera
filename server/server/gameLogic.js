@@ -675,7 +675,7 @@ class GameLogic {
 
                                             if (otherClient.hasGold === true) {
                                                 otherClient.hasGold = false;
-                                                this.addGoldToLobbyCords(firstLobbyId, playerLastX, playerLastY)
+                                                client.hasGold = true;
                                             }
                 
                                             // Puedes agregar lógica de daño aquí
