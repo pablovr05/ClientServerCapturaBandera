@@ -27,7 +27,10 @@ class Obj {
 
     // A websocket client connects
     newConnection(con) {
-        console.log("Client connected");
+
+        const clientIP = con._socket.remoteAddress;
+
+        console.log("Client connected with IP: " + clientIP);
     
         // Generar ID únic per al client
         const id = "C" + uuidv4().substring(0, 5).toUpperCase();
