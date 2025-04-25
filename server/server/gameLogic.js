@@ -562,9 +562,9 @@ class GameLogic {
                             if (client && client.state === "IDLE" && client.hasGold === false) {
                                 const attackerX = client.position.x;
                                 const attackerY = client.position.y;
-                                const attackerTileX = attackerX / tileSize;
-                                const attackerTileY = attackerY / tileSize;
-                
+                                const attackerTileX = (attackerX + tileSize / 2) / tileSize;
+                                const attackerTileY = (attackerY + tileSize / 2) / tileSize;
+
                                 console.log(`Jugador ${client.id} está en estado IDLE y no tiene oro. Procediendo con el ataque...`);
                                 console.log(`Posición del atacante (${client.id}): (${attackerX.toFixed(2)}, ${attackerY.toFixed(2)}) -> Casilla (${attackerTileX.toFixed(2)}, ${attackerTileY.toFixed(2)})`);
                 
@@ -736,20 +736,20 @@ class GameLogic {
     
                 switch (direction) {
                     case "TOP":
-                        x += j;
-                        y -= i;
+                        x += j;      // Ancho se aplica en X
+                        y -= i;      // Avance hacia arriba
                         break;
                     case "BOTTOM":
-                        x += j;
-                        y += i;
+                        x += j;      // Ancho en X
+                        y += i;      // Avance hacia abajo
                         break;
                     case "LEFT":
-                        x -= i;
-                        y += j;
+                        x -= i;      // Avance hacia la izquierda
+                        y += j;      // Ancho en Y
                         break;
                     case "RIGHT":
-                        x += i;
-                        y += j;
+                        x += i;      // Avance hacia la derecha
+                        y += j;      // Ancho en Y
                         break;
                 }
     
