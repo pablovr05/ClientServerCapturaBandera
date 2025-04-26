@@ -17,6 +17,7 @@ import java.io.OutputStream;
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
 import java.io.InputStream;
+import java.net.URI;
 
 public class TermsScreen implements Screen {
 
@@ -131,32 +132,28 @@ public class TermsScreen implements Screen {
         stage.addActor(container);
     }
 
-    // Método que envía la solicitud HTTP para registrar al usuario
     private void registerUser() {
-        String url = "http://localhost:3000/api/register";  // Reemplaza con la URL de tu servidor
-
-        // Crear el cuerpo de la solicitud
+        String url = "http://localhost:3000/api/register";
+    
         String jsonPayload = "{"
-            + "\"nickname\": \"" + nickname + "\"," 
+            + "\"nickname\": \"" + nickname + "\","
             + "\"email\": \"" + email + "\","
             + "\"phone\": \"" + phone + "\","
+            + "\"password\": \"" + password + "\","
             + "\"acceptTerms\": true"
             + "}";
-
+    
         try {
-            // Establecer la conexión
-            HttpURLConnection connection = (HttpURLConnection) new java.net.URL(url).openConnection();
+            HttpURLConnection connection = (HttpURLConnection) URI.create(url).toURL().openConnection();
             connection.setRequestMethod("POST");
             connection.setDoOutput(true);
             connection.setRequestProperty("Content-Type", "application/json");
-
-            // Enviar la solicitud
+    
             try (OutputStream os = connection.getOutputStream()) {
                 byte[] input = jsonPayload.getBytes("utf-8");
                 os.write(input, 0, input.length);
             }
-
-            // Obtener la respuesta
+    
             try (InputStream is = connection.getInputStream()) {
                 BufferedReader br = new BufferedReader(new InputStreamReader(is, "utf-8"));
                 StringBuilder response = new StringBuilder();
@@ -165,15 +162,15 @@ public class TermsScreen implements Screen {
                     response.append(responseLine.trim());
                 }
                 System.out.println("Response: " + response.toString());
-                // Dependiendo de la respuesta, cambiar la pantalla
                 game.setScreen(new MenuScreen(game));
             }
-
+    
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println("Error durante el registro");
         }
     }
+       
 
     @Override
     public void show() {}

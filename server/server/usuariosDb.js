@@ -4,7 +4,8 @@ const uri = 'mongodb://localhost:27017';
 const dbName = 'miJuego';
 const collectionName = 'usuarios';
 
-async function crearUsuario({ nickname, email, phone, token, validated }) {
+
+async function crearUsuario({ nickname, email, phone, token, password, validated = false }) {
     const client = new MongoClient(uri);
 
     try {
@@ -16,6 +17,7 @@ async function crearUsuario({ nickname, email, phone, token, validated }) {
             nickname,
             email,
             phone,
+            password,
             token,
             validated,
             date: new Date()

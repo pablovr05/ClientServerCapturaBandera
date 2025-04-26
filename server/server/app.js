@@ -59,38 +59,36 @@ app.get('/api/terms', (req, res) => {
 });
 
 app.post('/api/register', async (req, res) => {
-    const { nickname, email, phone, acceptTerms } = req.body;
+    const { nickname, email, phone, password } = req.body;
 
-    if (!nickname || !email) {
-        return res.status(400).json({ error: 'Nickname y email son obligatorios' });
-    }
-
-    if (!acceptTerms) {
-        return res.status(400).json({ error: 'Debes aceptar los términos de uso' });
+    if (!nickname || !email || !password) {
+        return res.status(400).json({ error: 'Nickname, email, and password are required' });
     }
 
     const token = uuidv4();
 
     try {
-        await crearUsuario({ nickname, email, phone, token, validated: false });
+        // Save user with plain text password
+        await crearUsuario({ nickname, email, phone, password, token, validated: false });
 
         const confirmUrl = `http://localhost:${port}/api/confirm/${token}`;
 
         await transporter.sendMail({
-            from: process.env.EMAIL_USER, // Usar el email configurado en las variables de entorno
+            from: process.env.EMAIL_USER, // Use email from environment variables
             to: email,
-            subject: 'Confirma tu registro',
-            html: `<h2>Hola ${nickname}!</h2><p>Haz click en el siguiente enlace para confirmar tu cuenta:</p><a href="${confirmUrl}">Confirmar Cuenta</a>`
+            subject: 'Confirm your registration',
+            html: `<h2>Hello ${nickname}!</h2><p>Click the link below to confirm your account:</p><a href="${confirmUrl}">Confirm Account</a>`
         });
 
-        console.log(`✅ Email de confirmación enviado a ${email}`);
-        res.json({ message: "Registro exitoso. Revisa tu email para confirmar tu cuenta." });
+        console.log(`✅ Confirmation email sent to ${email}`);
+        res.json({ message: "Registration successful. Check your email to confirm your account." });
 
     } catch (error) {
-        console.error('❌ Error en el registro:', error);
-        res.status(500).json({ error: "Error interno del servidor" });
+        console.error('❌ Error in registration:', error);
+        res.status(500).json({ error: "Internal server error" });
     }
 });
+
 
 // ----------- 📩 API: Confirmar registro ----------------
 app.get('/api/confirm/:token', async (req, res) => {
