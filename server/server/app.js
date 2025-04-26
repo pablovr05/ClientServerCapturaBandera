@@ -61,6 +61,12 @@ app.get('/api/terms', (req, res) => {
 app.post('/api/register', async (req, res) => {
     const { nickname, email, phone, password } = req.body;
 
+    console.log(nickname)
+    console.log(email)
+    console.log(phone)
+    console.log(password)
+
+
     if (!nickname || !email || !password) {
         return res.status(400).json({ error: 'Nickname, email, and password are required' });
     }

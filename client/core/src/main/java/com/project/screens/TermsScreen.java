@@ -13,12 +13,12 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 
 import java.net.HttpURLConnection;
+import java.net.URL;
 import java.io.OutputStream;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
-import java.io.InputStream;
-import java.net.URI;
-
+import java.nio.charset.StandardCharsets;
 public class TermsScreen implements Screen {
 
     private final Game game;
@@ -133,44 +133,71 @@ public class TermsScreen implements Screen {
     }
 
     private void registerUser() {
-        String url = "http://localhost:3000/api/register";
-    
+        System.out.println("🛠 Iniciando registro de usuario...");
+
+        String urlString = "https://bandera3.ieti.site/api/register/";
+
         String jsonPayload = "{"
-            + "\"nickname\": \"" + nickname + "\","
-            + "\"email\": \"" + email + "\","
-            + "\"phone\": \"" + phone + "\","
-            + "\"password\": \"" + password + "\","
-            + "\"acceptTerms\": true"
-            + "}";
-    
+                + "\"nickname\": \"" + nickname + "\","
+                + "\"email\": \"" + email + "\","
+                + "\"phone\": \"" + phone + "\","
+                + "\"password\": \"" + password + "\","
+                + "}";
+
+        System.out.println("📦 Payload JSON a enviar:");
+        System.out.println(jsonPayload);
+
         try {
-            HttpURLConnection connection = (HttpURLConnection) URI.create(url).toURL().openConnection();
+            System.out.println("🌐 Creando objeto URL...");
+            URL url = new URL(urlString);
+
+            System.out.println("🔗 Abriendo conexión...");
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
             connection.setDoOutput(true);
-            connection.setRequestProperty("Content-Type", "application/json");
-    
+            connection.setRequestProperty("Content-Type", "application/json; utf-8");
+            connection.setRequestProperty("Accept", "application/json");
+
+            System.out.println("✉️ Enviando datos al servidor...");
             try (OutputStream os = connection.getOutputStream()) {
-                byte[] input = jsonPayload.getBytes("utf-8");
+                byte[] input = jsonPayload.getBytes(StandardCharsets.UTF_8);
                 os.write(input, 0, input.length);
             }
-    
-            try (InputStream is = connection.getInputStream()) {
-                BufferedReader br = new BufferedReader(new InputStreamReader(is, "utf-8"));
+            System.out.println("✅ Datos enviados correctamente.");
+
+            int responseCode = connection.getResponseCode();
+            System.out.println("🔍 Código de respuesta: " + responseCode);
+
+            InputStream inputStream;
+            if (responseCode >= 200 && responseCode < 400) {
+                inputStream = connection.getInputStream();
+            } else {
+                inputStream = connection.getErrorStream();
+            }
+
+            System.out.println("⏳ Leyendo respuesta...");
+            try (BufferedReader br = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
                 StringBuilder response = new StringBuilder();
                 String responseLine;
                 while ((responseLine = br.readLine()) != null) {
                     response.append(responseLine.trim());
                 }
-                System.out.println("Response: " + response.toString());
-                game.setScreen(new MenuScreen(game));
+                System.out.println("📨 Respuesta recibida del servidor:");
+                System.out.println(response.toString());
             }
-    
+
+            if (responseCode == HttpURLConnection.HTTP_OK) {
+                System.out.println("🎯 Registro exitoso, cambiando a pantalla de menú...");
+                game.setScreen(new MenuScreen(game));
+            } else {
+                System.out.println("⚠️ El servidor respondió con error (" + responseCode + ")");
+            }
+
         } catch (Exception e) {
+            System.out.println("❌ Error durante el proceso de registro:");
             e.printStackTrace();
-            System.out.println("Error durante el registro");
         }
     }
-       
 
     @Override
     public void show() {}
