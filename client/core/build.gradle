@@ -2,20 +2,23 @@
 eclipse.project.name = appName + '-core'
 
 dependencies {
-  api "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
-  api "com.badlogicgames.gdx:gdx:$gdxVersion"
-  api "com.crashinvaders.lml:gdx-autumn-mvc:$lmlVersion"
-  api "com.crashinvaders.lml:gdx-autumn:$lmlVersion"
-  api "com.crashinvaders.lml:gdx-kiwi:$lmlVersion"
-  api "com.crashinvaders.lml:gdx-lml:$lmlVersion"
-  api "com.github.tommyettinger:anim8-gdx:$anim8Version"
-  api "de.golfgl.gdxcontrollerutils:gdx-controllerutils-scene2d:$controllerScene2DVersion"
+    api "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
+    api "com.badlogicgames.gdx:gdx:$gdxVersion"
+    api "com.crashinvaders.lml:gdx-autumn-mvc:$lmlVersion"
+    api "com.crashinvaders.lml:gdx-autumn:$lmlVersion"
+    api "com.crashinvaders.lml:gdx-kiwi:$lmlVersion"
+    api "com.crashinvaders.lml:gdx-lml:$lmlVersion"
+    api "com.github.tommyettinger:anim8-gdx:$anim8Version"
+    api "de.golfgl.gdxcontrollerutils:gdx-controllerutils-scene2d:$controllerScene2DVersion"
 
-  implementation 'javax.json:javax.json-api:1.1.4'
-  implementation 'org.java-websocket:Java-WebSocket:1.5.3'
-  implementation 'org.json:json:20210307'
+    implementation 'javax.json:javax.json-api:1.1.4'
+    implementation 'org.java-websocket:Java-WebSocket:1.5.3'
+    implementation 'org.json:json:20210307'
+
+    // 👇 AQUÍ SOLO gdx-freetype NORMAL
+    implementation "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
 
   if(enableGraalNative == 'true') {
-    implementation "io.github.berstanio:gdx-svmhelper-annotations:$graalHelperVersion"
-  }
+        implementation "io.github.berstanio:gdx-svmhelper-annotations:$graalHelperVersion"
+    }
 }
