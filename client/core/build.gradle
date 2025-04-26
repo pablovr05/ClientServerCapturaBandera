@@ -16,6 +16,7 @@ dependencies {
     implementation 'org.json:json:20210307'
     implementation 'com.badlogicgames.gdx:gdx-backend-lwjgl3:1.10.0'  // versión de ejemplo
     implementation 'com.badlogicgames.gdx:gdx:1.10.0'
+    implementation 'com.squareup.okhttp3:okhttp:4.9.0'
 
     // 👇 AQUÍ SOLO gdx-freetype NORMAL
     implementation "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"

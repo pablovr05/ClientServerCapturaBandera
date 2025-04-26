@@ -12,15 +12,17 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.io.OutputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.BufferedReader;
-import java.nio.charset.StandardCharsets;
-
 import org.json.JSONObject;
+
+import okhttp3.Call;
+import okhttp3.Callback;  // Importa Callback de okhttp3
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+
+import java.io.IOException;
 public class TermsScreen implements Screen {
 
     private final Game game;
@@ -136,71 +138,56 @@ public class TermsScreen implements Screen {
 
     private void registerUser() {
         System.out.println("🛠 Iniciando registro de usuario...");
-
+        
         String urlString = "https://bandera3.ieti.site/api/register";
 
-        // Construir el JSON usando JSONObject
+        // Crear el JSON para enviar
         JSONObject jsonPayload = new JSONObject();
-        jsonPayload.put("nickname", nickname);
-        jsonPayload.put("email", email);
-        jsonPayload.put("phone", phone);
-        jsonPayload.put("password", password);
+        jsonPayload.put("nickname", this.nickname);
+        jsonPayload.put("email", this.email);
+        jsonPayload.put("phone", this.phone);
+        jsonPayload.put("password", this.password);
 
         System.out.println("📦 Payload JSON a enviar:");
         System.out.println(jsonPayload.toString());
 
-        try {
-            System.out.println("🌐 Creando objeto URL...");
-            URL url = new URL(urlString);
+        // Crear el cliente OkHttp
+        OkHttpClient client = new OkHttpClient();
 
-            System.out.println("🔗 Abriendo conexión...");
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("POST");
-            connection.setDoOutput(true);
-            connection.setRequestProperty("Content-Type", "application/json; utf-8");
-            connection.setRequestProperty("Accept", "application/json");
+        // Crear el cuerpo de la solicitud
+        RequestBody body = RequestBody.create(
+            jsonPayload.toString(), MediaType.get("application/json; charset=utf-8")
+        );
 
-            System.out.println("✉️ Enviando datos al servidor...");
-            try (OutputStream os = connection.getOutputStream()) {
-                byte[] input = jsonPayload.toString().getBytes(StandardCharsets.UTF_8);
-                os.write(input, 0, input.length);
-            }
-            System.out.println("✅ Datos enviados correctamente.");
+        // Crear la solicitud POST
+        Request request = new Request.Builder()
+            .url(urlString)
+            .post(body)
+            .build();
 
-            int responseCode = connection.getResponseCode();
-            System.out.println("🔍 Código de respuesta: " + responseCode);
-
-            InputStream inputStream;
-            if (responseCode >= 200 && responseCode < 400) {
-                inputStream = connection.getInputStream();
-            } else {
-                inputStream = connection.getErrorStream();
+        // Enviar la solicitud
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                System.out.println("❌ Error durante el proceso de registro:");
+                e.printStackTrace();
             }
 
-            System.out.println("⏳ Leyendo respuesta...");
-            try (BufferedReader br = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
-                StringBuilder response = new StringBuilder();
-                String responseLine;
-                while ((responseLine = br.readLine()) != null) {
-                    response.append(responseLine.trim());
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    // Si la solicitud fue exitosa
+                    System.out.println("🎯 Registro exitoso, respuesta del servidor:");
+                    System.out.println(response.body().string());
+                } else {
+                    // Si hubo un error en la solicitud
+                    System.out.println("⚠️ El servidor respondió con error: " + response.code());
+                    System.out.println(response.body().string());
                 }
-                System.out.println("📨 Respuesta recibida del servidor:");
-                System.out.println(response.toString());
             }
-
-            if (responseCode == HttpURLConnection.HTTP_OK) {
-                System.out.println("🎯 Registro exitoso, cambiando a pantalla de menú...");
-                game.setScreen(new MenuScreen(game));
-            } else {
-                System.out.println("⚠️ El servidor respondió con error (" + responseCode + ")");
-            }
-
-        } catch (Exception e) {
-            System.out.println("❌ Error durante el proceso de registro:");
-            e.printStackTrace();
-        }
+        });
     }
-
+    
     @Override
     public void show() {}
 
