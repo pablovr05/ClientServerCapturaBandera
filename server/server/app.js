@@ -3,7 +3,7 @@ const game = require('./gameLogic.js');
 const Obj = require('./utilsWebSockets.js');
 const GameLoop = require('./utilsGameLoop.js');
 const { obtenerPartidas, clearMongoDb } = require('./partidasDb.js');
-const { crearUsuario, validarUsuario, obtenerUsuarioPorToken } = require('./usuariosDb');
+const { crearUsuario, validarUsuario, obtenerUsuarioPorToken, obtenerUsuarios } = require('./usuariosDb');
 const path = require('path');
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
@@ -42,6 +42,20 @@ app.get('/api/games', async (req, res) => {
         res.json(partidas);
     } catch (error) {
         console.error("❌ Error al obtener partidas en el endpoint:", error);
+        res.status(500).json({ error: "Error interno del servidor" });
+    }
+});
+
+app.get('/api/usuarios', async (req, res) => {
+    console.log("📡 Petición GET /api/usuarios recibida");
+
+    try {
+        // Usamos la función obtenerUsuarios que acaba de ser definida
+        const usuarios = await obtenerUsuarios();
+        console.log("✅ Enviando usuarios al cliente...");
+        res.json(usuarios);  // Responde con la lista de usuarios
+    } catch (error) {
+        console.error("❌ Error al obtener usuarios en el endpoint:", error);
         res.status(500).json({ error: "Error interno del servidor" });
     }
 });

@@ -82,4 +82,32 @@ async function obtenerUsuarioPorToken(token) {
     }
 }
 
-module.exports = { crearUsuario, validarUsuario, obtenerUsuarioPorToken };
+async function obtenerUsuarios() {
+    const client = new MongoClient(uri);
+
+    try {
+        console.log('🔌 Conectando a MongoDB...');
+        await client.connect();
+        console.log('✅ Conectado a MongoDB');
+
+        const db = client.db(dbName);
+        console.log(`📂 Usando base de datos: ${dbName}`);
+
+        const usuarios = db.collection(collectionName);
+        console.log(`📄 Accediendo a la colección: ${collectionName}`);
+
+        const listaUsuarios = await usuarios.find().toArray();
+        console.log(`📦 Se han recuperado ${listaUsuarios.length} usuarios`);
+
+        return listaUsuarios;
+
+    } catch (error) {
+        console.error('❌ Error al obtener usuarios:', error);
+        return [];
+    } finally {
+        console.log('🔒 Cerrando conexión con MongoDB...');
+        await client.close();
+    }
+}
+
+module.exports = { crearUsuario, validarUsuario, obtenerUsuarioPorToken, obtenerUsuarios };

@@ -23,13 +23,27 @@ android {
     }
   }
   packagingOptions {
-		resources {
-			excludes += ['META-INF/robovm/ios/robovm.xml', 'META-INF/DEPENDENCIES.txt', 'META-INF/DEPENDENCIES',
-                   'META-INF/dependencies.txt', '**/*.gwt.xml']
-			pickFirsts += ['META-INF/LICENSE.txt', 'META-INF/LICENSE', 'META-INF/license.txt', 'META-INF/LGPL2.1',
-                     'META-INF/NOTICE.txt', 'META-INF/NOTICE', 'META-INF/notice.txt']
-		}
+    resources {
+      excludes += [
+        'META-INF/robovm/ios/robovm.xml',
+        'META-INF/DEPENDENCIES.txt',
+        'META-INF/DEPENDENCIES',
+        'META-INF/dependencies.txt',
+        '**/*.gwt.xml',
+        'META-INF/INDEX.LIST'  // 👈 agrega esta línea
+      ]
+      pickFirsts += [
+        'META-INF/LICENSE.txt',
+        'META-INF/LICENSE',
+        'META-INF/license.txt',
+        'META-INF/LGPL2.1',
+        'META-INF/NOTICE.txt',
+        'META-INF/NOTICE',
+        'META-INF/notice.txt'
+      ]
+    }
   }
+
   defaultConfig {
     applicationId 'com.project'
     minSdkVersion 19
@@ -59,9 +73,10 @@ repositories {
 configurations { natives }
 
 dependencies {
-  coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.4'
+  coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.5'
   implementation "com.badlogicgames.gdx:gdx-backend-android:$gdxVersion"
   implementation "com.crashinvaders.lml:gdx-autumn-android:$lmlVersion"
+  //implementation 'com.squareup.okhttp3:okhttp:4.10.0'
   implementation project(':core')
 
   natives "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-arm64-v8a"
