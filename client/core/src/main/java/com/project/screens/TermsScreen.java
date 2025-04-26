@@ -12,6 +12,12 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 
+import java.net.HttpURLConnection;
+import java.io.OutputStream;
+import java.io.InputStreamReader;
+import java.io.BufferedReader;
+import java.io.InputStream;
+
 public class TermsScreen implements Screen {
 
     private final Game game;
@@ -27,8 +33,19 @@ public class TermsScreen implements Screen {
     private TextButton cancelButton;
     private Label termsLabel;
 
-    public TermsScreen(Game game) {
+    private String nickname;
+    private String email;
+    private String phone;
+    private String password;
+
+    public TermsScreen(Game game, String nickname, String email, String phone, String password) {
         this.game = game;
+
+        this.nickname = nickname;
+        this.email = email;
+        this.phone = phone;
+        this.password = password;
+
         this.batch = new SpriteBatch();
         this.stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
@@ -80,7 +97,7 @@ public class TermsScreen implements Screen {
         acceptButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                game.setScreen(new MenuScreen(game));
+                registerUser(); // Llamamos a la función para registrar al usuario
             }
         });
 
@@ -114,6 +131,49 @@ public class TermsScreen implements Screen {
         stage.addActor(container);
     }
 
+    // Método que envía la solicitud HTTP para registrar al usuario
+    private void registerUser() {
+        String url = "http://localhost:3000/api/register";  // Reemplaza con la URL de tu servidor
+
+        // Crear el cuerpo de la solicitud
+        String jsonPayload = "{"
+            + "\"nickname\": \"" + nickname + "\"," 
+            + "\"email\": \"" + email + "\","
+            + "\"phone\": \"" + phone + "\","
+            + "\"acceptTerms\": true"
+            + "}";
+
+        try {
+            // Establecer la conexión
+            HttpURLConnection connection = (HttpURLConnection) new java.net.URL(url).openConnection();
+            connection.setRequestMethod("POST");
+            connection.setDoOutput(true);
+            connection.setRequestProperty("Content-Type", "application/json");
+
+            // Enviar la solicitud
+            try (OutputStream os = connection.getOutputStream()) {
+                byte[] input = jsonPayload.getBytes("utf-8");
+                os.write(input, 0, input.length);
+            }
+
+            // Obtener la respuesta
+            try (InputStream is = connection.getInputStream()) {
+                BufferedReader br = new BufferedReader(new InputStreamReader(is, "utf-8"));
+                StringBuilder response = new StringBuilder();
+                String responseLine;
+                while ((responseLine = br.readLine()) != null) {
+                    response.append(responseLine.trim());
+                }
+                System.out.println("Response: " + response.toString());
+                // Dependiendo de la respuesta, cambiar la pantalla
+                game.setScreen(new MenuScreen(game));
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("Error durante el registro");
+        }
+    }
 
     @Override
     public void show() {}

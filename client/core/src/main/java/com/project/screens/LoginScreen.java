@@ -121,7 +121,11 @@ public class LoginScreen implements Screen {
                     System.out.println("Email: " + emailField.getText());
                     System.out.println("Teléfono: " + phoneField.getText());
                     System.out.println("Contraseña: " + passwordField.getText());
-                    game.setScreen(new TermsScreen(game));
+                    if (!nicknameField.getText().isEmpty() && !emailField.getText().isEmpty() && !passwordField.getText().isEmpty()) {
+                        game.setScreen(new TermsScreen(game, nicknameField.getText(), emailField.getText(), phoneField.getText(), passwordField.getText()));
+                    } else {
+                        System.out.println("Faltan datos para el registro");
+                    }
                 } else {
                     System.out.println("Iniciando sesión:");
                     System.out.println("Nickname: " + nicknameField.getText());

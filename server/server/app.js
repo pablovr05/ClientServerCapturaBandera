@@ -33,7 +33,6 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-// ----------- 📡 API: Obtener partidas ----------------
 app.get('/api/games', async (req, res) => {
     console.log("📡 Petición GET /api/games recibida");
 
@@ -47,7 +46,6 @@ app.get('/api/games', async (req, res) => {
     }
 });
 
-// ----------- 📜 API: Obtener términos de uso ----------------
 app.get('/api/terms', (req, res) => {
     const termsPath = path.join(__dirname, 'terms.txt');
 
@@ -60,7 +58,6 @@ app.get('/api/terms', (req, res) => {
     });
 });
 
-// ----------- 🧑‍💻 API: Registrar un jugador ----------------
 app.post('/api/register', async (req, res) => {
     const { nickname, email, phone, acceptTerms } = req.body;
 
