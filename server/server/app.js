@@ -59,13 +59,15 @@ app.get('/api/terms', (req, res) => {
 });
 
 app.post('/api/register', async (req, res) => {
+    // Imprimir todo el cuerpo de la solicitud recibido
+    console.log("📨 Mensaje recibido del cliente:", req.body);
+
     const { nickname, email, phone, password } = req.body;
 
-    console.log(nickname)
-    console.log(email)
-    console.log(phone)
-    console.log(password)
-
+    console.log("🔑 Nickname:", nickname);
+    console.log("📧 Email:", email);
+    console.log("📱 Phone:", phone);
+    console.log("🔒 Password:", password);
 
     if (!nickname || !email || !password) {
         return res.status(400).json({ error: 'Nickname, email, and password are required' });
@@ -74,13 +76,13 @@ app.post('/api/register', async (req, res) => {
     const token = uuidv4();
 
     try {
-        // Save user with plain text password
+        // Guardar el usuario con la contraseña en texto plano
         await crearUsuario({ nickname, email, phone, password, token, validated: false });
 
         const confirmUrl = `http://localhost:${port}/api/confirm/${token}`;
 
         await transporter.sendMail({
-            from: process.env.EMAIL_USER, // Use email from environment variables
+            from: process.env.EMAIL_USER, // Usa el email desde las variables de entorno
             to: email,
             subject: 'Confirm your registration',
             html: `<h2>Hello ${nickname}!</h2><p>Click the link below to confirm your account:</p><a href="${confirmUrl}">Confirm Account</a>`

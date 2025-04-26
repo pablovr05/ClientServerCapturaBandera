@@ -19,6 +19,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
 import java.nio.charset.StandardCharsets;
+
+import org.json.JSONObject;
 public class TermsScreen implements Screen {
 
     private final Game game;
@@ -135,17 +137,17 @@ public class TermsScreen implements Screen {
     private void registerUser() {
         System.out.println("🛠 Iniciando registro de usuario...");
 
-        String urlString = "https://bandera3.ieti.site/api/register/";
+        String urlString = "https://bandera3.ieti.site/api/register";
 
-        String jsonPayload = "{"
-                + "\"nickname\": \"" + nickname + "\","
-                + "\"email\": \"" + email + "\","
-                + "\"phone\": \"" + phone + "\","
-                + "\"password\": \"" + password + "\","
-                + "}";
+        // Construir el JSON usando JSONObject
+        JSONObject jsonPayload = new JSONObject();
+        jsonPayload.put("nickname", nickname);
+        jsonPayload.put("email", email);
+        jsonPayload.put("phone", phone);
+        jsonPayload.put("password", password);
 
         System.out.println("📦 Payload JSON a enviar:");
-        System.out.println(jsonPayload);
+        System.out.println(jsonPayload.toString());
 
         try {
             System.out.println("🌐 Creando objeto URL...");
@@ -160,7 +162,7 @@ public class TermsScreen implements Screen {
 
             System.out.println("✉️ Enviando datos al servidor...");
             try (OutputStream os = connection.getOutputStream()) {
-                byte[] input = jsonPayload.getBytes(StandardCharsets.UTF_8);
+                byte[] input = jsonPayload.toString().getBytes(StandardCharsets.UTF_8);
                 os.write(input, 0, input.length);
             }
             System.out.println("✅ Datos enviados correctamente.");
