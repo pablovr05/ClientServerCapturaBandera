@@ -121,6 +121,7 @@ public class LoginScreen implements Screen {
                     System.out.println("Email: " + emailField.getText());
                     System.out.println("Teléfono: " + phoneField.getText());
                     System.out.println("Contraseña: " + passwordField.getText());
+                    game.setScreen(new TermsScreen(game));
                 } else {
                     System.out.println("Iniciando sesión:");
                     System.out.println("Nickname: " + nicknameField.getText());

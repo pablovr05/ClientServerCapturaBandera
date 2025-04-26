@@ -2,7 +2,8 @@ const express = require('express');
 const game = require('./gameLogic.js');
 const Obj = require('./utilsWebSockets.js');
 const GameLoop = require('./utilsGameLoop.js');
-const { obtenerPartidas, clearMongoDb } = require('./crearPartida');
+const { obtenerPartidas, clearMongoDb } = require('./partidasDb.js');
+const { crearUsuario, validarUsuario, obtenerUsuarioPorToken } = require('./usuariosDb');
 
 let gameLoop = new GameLoop();
 
@@ -29,6 +30,72 @@ app.get('/api/games', async (req, res) => {
     } catch (error) {
         console.error("❌ Error al obtener partidas en el endpoint:", error);
         res.status(500).json({ error: "Error interno del servidor" });
+    }
+});
+
+app.get('/api/terms', (req, res) => {
+    const termsPath = path.join(__dirname, 'terms.txt');
+
+    fs.readFile(termsPath, 'utf8', (err, data) => {
+        if (err) {
+            console.error("❌ Error leyendo términos:", err);
+            return res.status(500).json({ error: "Error interno del servidor" });
+        }
+        res.send(data);
+    });
+});
+
+app.post('/api/register', async (req, res) => {
+    const { nickname, email, phone, acceptTerms } = req.body;
+
+    if (!nickname || !email) {
+        return res.status(400).json({ error: 'Nickname y email son obligatorios' });
+    }
+
+    if (!acceptTerms) {
+        return res.status(400).json({ error: 'Debes aceptar los términos de uso' });
+    }
+
+    const token = uuidv4();
+
+    try {
+        await crearUsuario({ nickname, email, phone, token, validated: false });
+
+        const confirmUrl = `http://localhost:${port}/api/confirm/${token}`;
+
+        await transporter.sendMail({
+            from: 'pablovicenteroura2005@gmail.com',
+            to: email,
+            subject: 'Confirma tu registro',
+            html: `<h2>Hola ${nickname}!</h2><p>Haz click en el siguiente enlace para confirmar tu cuenta:</p><a href="${confirmUrl}">Confirmar Cuenta</a>`
+        });
+
+        console.log(`✅ Email de confirmación enviado a ${email}`);
+        res.json({ message: "Registro exitoso. Revisa tu email para confirmar tu cuenta." });
+
+    } catch (error) {
+        console.error('❌ Error en el registro:', error);
+        res.status(500).json({ error: "Error interno del servidor" });
+    }
+});
+
+app.get('/api/confirm/:token', async (req, res) => {
+    const { token } = req.params;
+
+    try {
+        const usuario = await obtenerUsuarioPorToken(token);
+
+        if (!usuario) {
+            return res.status(400).send("Token inválido o expirado.");
+        }
+
+        await validarUsuario(token);
+
+        res.send(`<h1>✅ Registro confirmado!</h1><p>Ya puedes usar tu nickname: <strong>${usuario.nickname}</strong></p>`);
+
+    } catch (error) {
+        console.error('❌ Error en la confirmación:', error);
+        res.status(500).send("Error interno del servidor.");
     }
 });
 
