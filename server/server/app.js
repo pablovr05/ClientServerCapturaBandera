@@ -77,13 +77,13 @@ app.post('/api/register', async (req, res) => {
         // Guardar el usuario con la contraseña en texto plano
         await crearUsuario({ nickname, email, phone, password, token, validated: false });
 
-        const confirmUrl = `http://localhost:${port}/api/confirm/${token}`;
+        const confirmUrl = `https://bandera3.ieti.site/api/confirm/${token}`;
 
         await transporter.sendMail({
             from: process.env.EMAIL_USER,
             to: email,
             subject: 'Confirm your registration',
-            html: `<h2>Hello ${nickname}!</h2><p>Click the link below to confirm your account:</p><a href="${confirmUrl}">Confirm Account</a>`
+            html: `<h2>Hola ${nickname}!</h2><p>Dale click a este link para poder autenticar tu cuenta:</p><a href="${confirmUrl}">Confirmar cuenta</a>`
         });
 
         console.log(`✅ Confirmation email sent to ${email}`);
@@ -94,8 +94,6 @@ app.post('/api/register', async (req, res) => {
         res.status(500).json({ error: "Internal server error" });
     }
 });
-
-
 
 // ----------- 📩 API: Confirmar registro ----------------
 app.get('/api/confirm/:token', async (req, res) => {
