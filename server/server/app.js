@@ -4,6 +4,10 @@ const Obj = require('./utilsWebSockets.js');
 const GameLoop = require('./utilsGameLoop.js');
 const { obtenerPartidas, clearMongoDb } = require('./partidasDb.js');
 const { crearUsuario, validarUsuario, obtenerUsuarioPorToken } = require('./usuariosDb');
+const path = require('path');
+const fs = require('fs');
+const { v4: uuidv4 } = require('uuid');
+const nodemailer = require('nodemailer');
 
 let gameLoop = new GameLoop();
 
@@ -18,8 +22,18 @@ const app = express();
 app.use(express.static('public'));
 app.use(express.json());
 
-clearMongoDb()
+clearMongoDb();
 
+// Configurar nodemailer (asegúrate de no poner datos sensibles directamente en el código)
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: "pablovicenteroura2005@gmail.com", // Configura las variables de entorno
+        pass: "Viro2005$"
+    }
+});
+
+// ----------- 📡 API: Obtener partidas ----------------
 app.get('/api/games', async (req, res) => {
     console.log("📡 Petición GET /api/games recibida");
 
@@ -33,6 +47,7 @@ app.get('/api/games', async (req, res) => {
     }
 });
 
+// ----------- 📜 API: Obtener términos de uso ----------------
 app.get('/api/terms', (req, res) => {
     const termsPath = path.join(__dirname, 'terms.txt');
 
@@ -45,6 +60,7 @@ app.get('/api/terms', (req, res) => {
     });
 });
 
+// ----------- 🧑‍💻 API: Registrar un jugador ----------------
 app.post('/api/register', async (req, res) => {
     const { nickname, email, phone, acceptTerms } = req.body;
 
@@ -64,7 +80,7 @@ app.post('/api/register', async (req, res) => {
         const confirmUrl = `http://localhost:${port}/api/confirm/${token}`;
 
         await transporter.sendMail({
-            from: 'pablovicenteroura2005@gmail.com',
+            from: process.env.EMAIL_USER, // Usar el email configurado en las variables de entorno
             to: email,
             subject: 'Confirma tu registro',
             html: `<h2>Hola ${nickname}!</h2><p>Haz click en el siguiente enlace para confirmar tu cuenta:</p><a href="${confirmUrl}">Confirmar Cuenta</a>`
@@ -79,6 +95,7 @@ app.post('/api/register', async (req, res) => {
     }
 });
 
+// ----------- 📩 API: Confirmar registro ----------------
 app.get('/api/confirm/:token', async (req, res) => {
     const { token } = req.params;
 
@@ -101,7 +118,7 @@ app.get('/api/confirm/:token', async (req, res) => {
 
 // Inicialitzar servidor HTTP
 const httpServer = app.listen(port, () => {
-    console.log(`Servidor HTTP escoltant a: http://localhost:${port}`);
+    console.log(`Servidor HTTP escuchando en: http://localhost:${port}`);
 });
 
 // Gestionar WebSockets
@@ -158,7 +175,7 @@ gameLoop.run = (fps) => {
 
 gameLoop.start();
 
-// Gestionar el tancament del servidor
+// Gestionar el cierre del servidor
 process.on('SIGTERM', shutDown);
 process.on('SIGINT', shutDown);
 
