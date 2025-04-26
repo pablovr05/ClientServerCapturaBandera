@@ -29,7 +29,7 @@ const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
         user: "pablovicenteroura2005@gmail.com", // Configura las variables de entorno
-        pass: "Viro2005$"
+        pass: "rodenfkrtrnueevc"
     }
 });
 
