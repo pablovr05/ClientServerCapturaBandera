@@ -81,8 +81,8 @@ public class WebSockets {
                                 handleAttack(jsonMessage);
                                 break;
                             case "clientId":
-                                System.out.println("RACATAPA");
-                                System.out.println(message);
+                                String clientId = jsonMessage.getString("id");
+                                sendUserInformation(clientId);
                             default:
                                 System.out.println("Tipo de mensaje desconocido: " + messageType);
                                 break;
@@ -147,5 +147,26 @@ public class WebSockets {
 
     public String getPlayerId() {
         return playerId;
+    }
+
+    private void sendUserInformation(String clientId) {
+        // Crear un objeto JSON con la información adicional del usuario
+        JSONObject userInformation = new JSONObject();
+        try {
+            userInformation.put("type", "userInfo");
+            userInformation.put("clientId", clientId);
+            userInformation.put("id", this.id);
+            userInformation.put("username", this.username);
+            userInformation.put("email", this.email);
+            userInformation.put("phone", this.phone);
+            userInformation.put("validated", this.validated);
+
+            // Enviar la información adicional al servidor
+            webSocketClient.send(userInformation.toString());
+            System.out.println("Sent user info: " + userInformation.toString());
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 }

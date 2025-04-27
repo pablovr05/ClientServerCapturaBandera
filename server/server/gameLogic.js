@@ -567,8 +567,8 @@ class GameLogic {
             //console.log("Mensaje de tipo: " + obj.type + " recibido de " + socket);
     
             switch (obj.type) {
-                case "join": {
-                    console.log(`Cliente ${id} se ha unido con los datos:`, obj);
+                case "userInfo": {
+                    console.log(`Cliente ${id} envia información adicional:`, obj);
                     
                     console.log(JSON.stringify(this.clients))
                     console.log(JSON.stringify(id))
