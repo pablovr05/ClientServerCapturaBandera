@@ -570,6 +570,8 @@ class GameLogic {
                 case "join": {
                     console.log(`Cliente ${id} se ha unido con los datos:`, obj);
                     
+                    console.log(JSON.stringify(clients))
+                    console.log(JSON.stringify(id))
                     const client = this.clients.get(id);
 
                     console.log(JSON.stringify(client));
