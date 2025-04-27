@@ -157,4 +157,4 @@ async function clearUsuariosDb() {
     }
 }
 
-module.exports = { crearUsuario, validarUsuario, obtenerUsuarioPorToken, obtenerUsuarios, clearUsuariosDb };
+module.exports = { crearUsuario, validarUsuario, obtenerUsuarioPorToken, obtenerUsuarios, clearUsuariosDb, obtenerUsuarioPorNickname };
