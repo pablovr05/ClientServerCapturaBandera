@@ -525,16 +525,19 @@ class GameLogic {
             for (const clientId of teamSet) {
                 const client = this.clients.get(clientId);
                 if (client) {
+                    const nickname = game.validate === "true" ? client.username || null : null;
+        
                     players.push({
                         id: clientId,
                         position: client.position,
                         state: client.state,
                         team: teamName,
-                        nickname: client.username || null
+                        nickname: nickname
                     });
                 }
             }
         }
+        
     
         return {
             players,
