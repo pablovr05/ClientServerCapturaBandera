@@ -570,7 +570,6 @@ class GameLogic {
                 case "userInfo": {
                     console.log(`Cliente ${id} envia información adicional:`, obj);
                 
-                    // Retrasar la obtención del cliente para darle tiempo a que se agregue al mapa
                     setTimeout(() => {
                         const client = this.clients.get(id);
                 
@@ -586,7 +585,7 @@ class GameLogic {
                         } else {
                             console.log(`El cliente con id ${id} aún no está disponible.`);
                         }
-                    }, 100);  // Retrasar 100ms, ajusta el tiempo según sea necesario
+                    }, 500);
                 
                     break;
                 }                
