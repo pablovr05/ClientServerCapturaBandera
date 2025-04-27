@@ -567,6 +567,21 @@ class GameLogic {
             //console.log("Mensaje de tipo: " + obj.type + " recibido de " + socket);
     
             switch (obj.type) {
+                case "join": {
+                    console.log(`Cliente ${id} se ha unido con los datos:`, obj);
+                
+                    // Aquí podrías guardar la información adicional que manda el cliente:
+                    const client = this.clients.get(id);
+                    if (client) {
+                        client.id = obj.id || client.id;
+                        client.username = obj.username || "";
+                        client.email = obj.email || "";
+                        client.phone = obj.phone || "";
+                        client.validated = obj.validated || "false";
+                    }
+                
+                    break;
+                }                
                 case "addClientToLobby":
                     const firstLobbyId = this.lobbys.keys().next().value;
 

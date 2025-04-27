@@ -327,19 +327,19 @@ public class LoginScreen implements Screen {
                         String username = jsonResponse.optString("nickname", "Desconocido");
                         String email = jsonResponse.optString("email", "Desconocido");
                         String phone = jsonResponse.optString("phone", "Desconocido");
-                        String status = jsonResponse.optString("validated", "Desconocido");
+                        String validated = jsonResponse.optString("validated", "Desconocido");
 
                         // Mostrar la información del usuario en la consola
                         System.out.println("Información del usuario:");
                         System.out.println("Nickname: " + username);
                         System.out.println("Email: " + email);
                         System.out.println("Teléfono: " + phone);
-                        System.out.println("Estado: " + status);
+                        System.out.println("Estado: " + validated);
 
                         // Mostrar la información del usuario en la pantalla (por ejemplo)
                         Gdx.app.postRunnable(() -> {
                             System.out.println("SE COSTRUYEEE 2");
-                            game.setScreen(new MenuScreen(game, id, username, email, phone, status));
+                            game.setScreen(new MenuScreen(game, id, username, email, phone, validated));
                         });
 
                         callback.onLoginComplete(true);

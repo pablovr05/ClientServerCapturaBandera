@@ -118,7 +118,7 @@ public class MenuScreen implements Screen {
         // Añadir la tabla al stage
         stage.addActor(table);
 
-        webSockets = new WebSockets(this);
+        webSockets = new WebSockets(this, id, username, email, phone, validated);
 
     }
 

@@ -14,12 +14,25 @@ import javax.json.JsonObject;
 
 public class WebSockets {
     private WebSocketClient webSocketClient;
-    private MenuScreen menuScreen; // Instancia de MenuScreen
+    private MenuScreen menuScreen;
     private GameScreen gameScreen;
     private String playerId;
 
-    public WebSockets(MenuScreen menuScreen) {
-        this.menuScreen = menuScreen;  // Recibimos y almacenamos la instancia
+    // Guardar estos valores
+    private String id;
+    private String username;
+    private String email;
+    private String phone;
+    private String validated;
+
+    public WebSockets(MenuScreen menuScreen, String id, String username, String email, String phone, String validated) {
+        this.menuScreen = menuScreen;
+        this.id = id;
+        this.username = username;
+        this.email = email;
+        this.phone = phone;
+        this.validated = validated;
+
         connectWebSocket();
     }
 
@@ -31,18 +44,31 @@ public class WebSockets {
                 @Override
                 public void onOpen(ServerHandshake handshake) {
                     System.out.println("Conectado al servidor WebSocket");
-                    sendMessage("Hola desde LibGDX!"); // Envía un mensaje al servidor al conectar
+
+                    // Crear el JSON que quieres enviar
+                    JSONObject json = new JSONObject();
+                    try {
+                        json.put("type", "join");
+                        json.put("id", id);
+                        json.put("username", username);
+                        json.put("email", email);
+                        json.put("phone", phone);
+                        json.put("validated", validated);
+                    } catch (JSONException e) {
+                        System.err.println("Error creando JSON de conexión: " + e.getMessage());
+                    }
+
+                    // Enviar el JSON como String
+                    sendMessage(json.toString());
                 }
 
                 @Override
                 public void onMessage(String message) {
-                    // Parseamos el mensaje recibido para procesarlo
                     try {
                         JSONObject jsonMessage = new JSONObject(message);
                         String messageType = jsonMessage.getString("type");
 
                         switch (messageType) {
-
                             case "welcome":
                                 playerId = jsonMessage.getString("id");
                                 handleUpdateClientsConnected(jsonMessage);
@@ -86,18 +112,15 @@ public class WebSockets {
         }
     }
 
-    // Maneja la actualización de la cantidad de clientes conectados
     private void handleUpdateClientsConnected(JSONObject jsonMessage) throws JSONException {
         int totalClients = jsonMessage.getInt("totalClients");
         System.out.println("Total de jugadores conectados: " + totalClients);
 
-        // Actualizar la UI de MenuScreen con el nuevo número de jugadores
         if (menuScreen != null) {
-            menuScreen.updatePlayersCount(totalClients);  // Llamamos el método para actualizar la interfaz
+            menuScreen.updatePlayersCount(totalClients);
         }
     }
 
-    // Maneja el update de los personajes y de la instancia del juego
     private void handleUpdate(JSONObject jsonMessage) throws JSONException {
         gameScreen.paintEntities(jsonMessage);
     }
@@ -108,7 +131,6 @@ public class WebSockets {
 
     public void sendMessage(String message) {
         if (webSocketClient != null && webSocketClient.isOpen()) {
-            //System.out.println("Mensaje a enviar: " + message);
             webSocketClient.send(message);
         } else {
             System.out.println("No se pudo enviar el mensaje. WebSocket no conectado.");
