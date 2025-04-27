@@ -73,55 +73,55 @@ public class LoginScreen implements Screen {
     private void createUI() {
         table = new Table();
         table.top().pad(30);
-    
+
         container = new Container<>(table);
         container.setTransform(true);
         container.setFillParent(false);
-    
+
         Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
         pixmap.setColor(Color.WHITE);
         pixmap.fill();
         Texture whiteTexture = new Texture(pixmap);
         pixmap.dispose();
-    
+
         // Estilo para el título
         Label.LabelStyle labelStyle = new Label.LabelStyle(font, Color.WHITE);
-    
+
         // Estilo para el fondo de los botones
         Texture buttonTexture = new Texture("button.png"); // Añade tu imagen de fondo
         Drawable buttonBackground = new TextureRegionDrawable(new TextureRegion(buttonTexture));
-    
+
         // Estilo para los TextFields
         TextField.TextFieldStyle textFieldStyle = new TextField.TextFieldStyle();
         textFieldStyle.font = font;
         textFieldStyle.fontColor = Color.BLACK;
         textFieldStyle.background = new TextureRegionDrawable(new TextureRegion(whiteTexture));
-    
+
         // Estilo para los botones
         TextButton.TextButtonStyle buttonStyle = new TextButton.TextButtonStyle();
         buttonStyle.font = font;
         buttonStyle.up = buttonBackground; // Asignar fondo a los botones
         buttonStyle.down = buttonBackground; // Fondo cuando el botón es presionado
         buttonStyle.fontColor = Color.DARK_GRAY; // Aseguramos que el texto de los botones sea negro
-    
+
         // Crear el título
         titleLabel = new Label("Login / Registro", labelStyle);
-    
+
         // Crear los campos de texto
         nicknameField = new TextField("", textFieldStyle);
         nicknameField.setMessageText("Nickname");
-    
+
         emailField = new TextField("", textFieldStyle);
         emailField.setMessageText("Email");
-    
+
         phoneField = new TextField("", textFieldStyle);
         phoneField.setMessageText("Teléfono (opcional)");
-    
+
         passwordField = new TextField("", textFieldStyle);
         passwordField.setMessageText("Contraseña");
         passwordField.setPasswordCharacter('*');
         passwordField.setPasswordMode(true);
-    
+
         // Crear los botones
         confirmButton = new TextButton("Confirmar", buttonStyle);
         confirmButton.padBottom(15f);
@@ -131,7 +131,7 @@ public class LoginScreen implements Screen {
         registerModeButton.padBottom(15f);
         guestButton = new TextButton("Entrar como Invitado", buttonStyle);
         guestButton.padBottom(15f);
-    
+
         // Listener para los botones
         confirmButton.addListener(new ChangeListener() {
             @Override
@@ -142,9 +142,9 @@ public class LoginScreen implements Screen {
                     System.out.println("Iniciando sesión:");
                     System.out.println("Nickname: " + nicknameField.getText());
                     System.out.println("Contraseña: " + passwordField.getText());
-    
+
                     // Llamamos a loginUser con un LoginCallback para manejar el resultado
-    
+
                     confirmButton.setDisabled(true);
                     loginUser(nicknameField.getText(), passwordField.getText(), new LoginCallback() {
                         @Override
@@ -163,7 +163,7 @@ public class LoginScreen implements Screen {
                 }
             }
         });
-    
+
         loginModeButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -171,7 +171,7 @@ public class LoginScreen implements Screen {
                 rebuildForm();
             }
         });
-    
+
         registerModeButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -179,7 +179,7 @@ public class LoginScreen implements Screen {
                 rebuildForm();
             }
         });
-    
+
         guestButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -187,10 +187,10 @@ public class LoginScreen implements Screen {
                 game.setScreen(new MenuScreen(game, null, null, null, null, "false"));
             }
         });
-    
+
         rebuildForm();
     }
-    
+
 
     private void rebuildForm() {
         table.clear();

@@ -226,7 +226,6 @@ ws.onConnection = (socket, id, clientIp) => {
     console.log(`Mensaje enviado al cliente ${id}:`, message);
 };
 
-
 ws.onMessage = (socket, id, msg) => {
     game.handleMessage(id, msg, socket);
 };
