@@ -581,6 +581,12 @@ class GameLogic {
                             client.email = obj.email || client.email;
                             client.username = obj.username || client.username;
 
+                            console.log("--------------------- [INFO ACTUALIZADA DEL USUARIO] --------------------")
+
+                            const clientUpdated = this.clients.get(id);
+                            console.log(JSON.stringify(clientUpdated))
+                            console.log("-------------------------------------------------------------------------")
+
                         } else {
                             console.log(`El cliente con id ${id} aún no está disponible.`);
                         }

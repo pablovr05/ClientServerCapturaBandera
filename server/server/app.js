@@ -240,11 +240,6 @@ const prevStates = new Map();
 
 gameLoop.run = (fps) => {
 
-    Object.entries(game.clients).forEach(([clientId, client]) => {
-        const { socket, ...clientInfo } = client;
-        console.log(JSON.stringify(clientInfo));
-    });
-
     game.lobbys.forEach((lobby, lobbyId) => {
         const gameState = game.getGameState(lobbyId);
 
