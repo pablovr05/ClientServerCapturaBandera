@@ -58,7 +58,8 @@ public class TermsScreen implements Screen {
 
         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("Roboto-Italic-VariableFont_wdth,wght.ttf"));
         FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
-        parameter.size = 32;
+        parameter.size = 24;
+        parameter.borderWidth = 0.1f;
         parameter.color = Color.WHITE;
         parameter.minFilter = Texture.TextureFilter.Linear;
         parameter.magFilter = Texture.TextureFilter.Linear;
@@ -66,7 +67,7 @@ public class TermsScreen implements Screen {
         generator.dispose();
 
         backgroundTexture = new Texture("fondo3.gif");
-        termsImage = new Texture("fondo.png"); // <-- carga aquí tu imagen para los términos (ponla en assets)
+        termsImage = new Texture("marcoTransparente.png"); // <-- carga aquí tu imagen para los términos (ponla en assets)
 
         createUI();
     }
@@ -77,29 +78,48 @@ public class TermsScreen implements Screen {
         container = new Container<>(table);
         container.setTransform(true);
         container.setFillParent(false);
-
+    
         // Estilos
         Label.LabelStyle labelStyle = new Label.LabelStyle(font, Color.WHITE);
+        
+        // Aumentar el tamaño de la fuente para el Label
+        FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("Roboto-Italic-VariableFont_wdth,wght.ttf"));
+        FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
+        parameter.size = 40;  // Tamaño de fuente más grande para el label
+        parameter.color = Color.WHITE;
+        parameter.minFilter = Texture.TextureFilter.Linear;
+        parameter.magFilter = Texture.TextureFilter.Linear;
+        BitmapFont largeFont = generator.generateFont(parameter);
+        generator.dispose();
+    
+        labelStyle = new Label.LabelStyle(largeFont, Color.WHITE);  // Usar la nueva fuente más grande
+    
+        // Botones
         Texture buttonTexture = new Texture("button.png");
         Drawable buttonBackground = new TextureRegionDrawable(new TextureRegion(buttonTexture));
-
+    
         TextButton.TextButtonStyle buttonStyle = new TextButton.TextButtonStyle();
         buttonStyle.font = font;
         buttonStyle.up = buttonBackground;
         buttonStyle.down = buttonBackground;
-
+        
+        // Cambiar color de texto de los botones a Dark Grey
+        buttonStyle.fontColor = Color.DARK_GRAY;
+    
         // Imagen
         Image termsImg = new Image(new TextureRegionDrawable(new TextureRegion(termsImage)));
         termsImg.setScaling(Scaling.fit);
-
+    
         // Label
         termsLabel = new Label("Acepta los términos para continuar", labelStyle);
         termsLabel.setAlignment(Align.center);
-
+    
         // Botones
         acceptButton = new TextButton("Aceptar", buttonStyle);
+        acceptButton.padBottom(15f);
         cancelButton = new TextButton("Cancelar", buttonStyle);
-
+        cancelButton.padBottom(15f);
+    
         acceptButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -107,36 +127,37 @@ public class TermsScreen implements Screen {
                 game.setScreen(new LoginScreen(game));
             }
         });
-
+    
         cancelButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 game.setScreen(new LoginScreen(game));
             }
         });
-
+    
         // Subtabla para poner los botones juntos
         Table buttonsTable = new Table();
         buttonsTable.add(acceptButton).width(250).height(80).padRight(20);
         buttonsTable.add(cancelButton).width(250).height(80);
-
+    
         // Construcción principal
         table.add(termsImg)
             .width(Gdx.graphics.getWidth() * 0.6f)
             .height(Gdx.graphics.getHeight() * 0.6f)
             .row();
-
+    
         table.add(termsLabel)
             .padTop(20)
             .padBottom(20)
             .row();
-
+    
         table.add(buttonsTable) // Aquí agregamos los botones juntos
             .padTop(20)
             .row();
-
+    
         stage.addActor(container);
     }
+    
 
     private void registerUser() {
         System.out.println("🛠 Iniciando registro de usuario...");

@@ -35,7 +35,7 @@ public class MenuScreen implements Screen {
 
     private WebSockets webSockets;
 
-    public MenuScreen(Game game) {
+    public MenuScreen(Game game, String id, String username, String email, String phone, String validated) {
         this.game = game;
         batch = new SpriteBatch();
         font = new BitmapFont(); // Usando una fuente básica
