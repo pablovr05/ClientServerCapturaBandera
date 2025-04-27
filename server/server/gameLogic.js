@@ -569,20 +569,26 @@ class GameLogic {
             switch (obj.type) {
                 case "join": {
                     console.log(`Cliente ${id} se ha unido con los datos:`, obj);
-                
-                    // Aquí podrías guardar la información adicional que manda el cliente:
+                    
                     const client = this.clients.get(id);
-                    console.log(JSON.stringify(client, null, 2));
-                    if (client) {
-                        client.id = obj.id || client.id;
-                        client.username = obj.username || "";
-                        client.email = obj.email || "";
-                        client.phone = obj.phone || "";
-                        client.validated = obj.validated || "false";
-                    }
+
+                    console.log(JSON.stringify(client));
+                    
+                    // Si el cliente existe, guardar la información adicional
+                    const message = {
+                        type: "idUser",  // O el tipo que desees
+                        id: client.id
+                    };
+                    
+                    // Usar el socket del cliente para enviar el mensaje
+                    client.socket.send(JSON.stringify(message));
+                    
+                    // También podrías enviar más detalles si lo deseas
+                    console.log(`Mensaje enviado al cliente ${client.id}:`, message);
                 
                     break;
                 }
+                
                 
                 case "addClientToLobby":
                     const firstLobbyId = this.lobbys.keys().next().value;

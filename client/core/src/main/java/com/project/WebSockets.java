@@ -49,11 +49,6 @@ public class WebSockets {
                     JSONObject json = new JSONObject();
                     try {
                         json.put("type", "join");
-                        json.put("id", id);
-                        json.put("username", username);
-                        json.put("email", email);
-                        json.put("phone", phone);
-                        json.put("validated", validated);
                     } catch (JSONException e) {
                         System.err.println("Error creando JSON de conexión: " + e.getMessage());
                     }
@@ -85,6 +80,9 @@ public class WebSockets {
                             case "performAttack":
                                 handleAttack(jsonMessage);
                                 break;
+                            case "idUser":
+                                System.out.println("RACATAPA");
+                                System.out.println(message);
                             default:
                                 System.out.println("Tipo de mensaje desconocido: " + messageType);
                                 break;
