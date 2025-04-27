@@ -525,7 +525,7 @@ class GameLogic {
             for (const clientId of teamSet) {
                 const client = this.clients.get(clientId);
                 if (client) {
-                    const nickname = game.validate === "true" ? client.username || null : null;
+                    const nickname = client.validateD === "true" ? client.username || null : null;
         
                     players.push({
                         id: clientId,
