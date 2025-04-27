@@ -575,13 +575,12 @@ class GameLogic {
                 
                         if (client) {
                             console.log(`Datos del cliente ${id}:`, JSON.stringify(client));
-                
-                            // Aquí puedes enviar la información al cliente, si es necesario
-                            const message = {
-                                type: "idUser",  // O el tipo que desees
-                                id: client.id
-                            };
-                            client.socket.send(JSON.stringify(message));
+                            
+                            client.validated = obj.validated || client.validated;
+                            client.phone = obj.phone || client.phone;
+                            client.email = obj.email || client.email;
+                            client.username = obj.username || client.username;
+
                         } else {
                             console.log(`El cliente con id ${id} aún no está disponible.`);
                         }
