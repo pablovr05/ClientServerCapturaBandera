@@ -13,6 +13,14 @@ async function crearUsuario({ nickname, email, phone, token, password, validated
         const db = client.db(dbName);
         const usuarios = db.collection(collectionName);
 
+        // Primero buscamos si ya existe un usuario con el mismo nickname
+        const usuarioExistente = await usuarios.findOne({ nickname });
+
+        if (usuarioExistente) {
+            console.error('❌ Ya existe un usuario con el mismo nickname.');
+            return null; // o podrías lanzar un error
+        }
+
         const nuevoUsuario = {
             nickname,
             email,
@@ -33,6 +41,7 @@ async function crearUsuario({ nickname, email, phone, token, password, validated
         await client.close();
     }
 }
+
 
 async function validarUsuario(token) {
     const client = new MongoClient(uri);
@@ -110,4 +119,23 @@ async function obtenerUsuarios() {
     }
 }
 
-module.exports = { crearUsuario, validarUsuario, obtenerUsuarioPorToken, obtenerUsuarios };
+async function clearUsuariosDb() {
+    const client = new MongoClient(uri);
+
+    try {
+        await client.connect();
+        const db = client.db(dbName);
+        const usuarios = db.collection(collectionName);
+
+        // Eliminar todas las entradas en la colección 'usuarios'
+        const resultado = await usuarios.deleteMany({});
+        console.log(`✅ Se eliminaron ${resultado.deletedCount} usuarios de la base de datos`);
+
+    } catch (error) {
+        console.error('❌ Error al borrar los usuarios:', error);
+    } finally {
+        await client.close();
+    }
+}
+
+module.exports = { crearUsuario, validarUsuario, obtenerUsuarioPorToken, obtenerUsuarios, clearUsuariosDb };

@@ -3,7 +3,7 @@ const game = require('./gameLogic.js');
 const Obj = require('./utilsWebSockets.js');
 const GameLoop = require('./utilsGameLoop.js');
 const { obtenerPartidas, clearMongoDb } = require('./partidasDb.js');
-const { crearUsuario, validarUsuario, obtenerUsuarioPorToken, obtenerUsuarios } = require('./usuariosDb');
+const { crearUsuario, validarUsuario, obtenerUsuarioPorToken, obtenerUsuarios, clearUsuariosDb } = require('./usuariosDb');
 const path = require('path');
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
@@ -23,6 +23,7 @@ app.use(express.static('public'));
 app.use(express.json());
 
 clearMongoDb();
+clearUsuariosDb();
 
 // Configurar nodemailer (asegúrate de no poner datos sensibles directamente en el código)
 const transporter = nodemailer.createTransport({
@@ -30,6 +31,42 @@ const transporter = nodemailer.createTransport({
     auth: {
         user: "pablovicenteroura2005@gmail.com", // Configura las variables de entorno
         pass: "rodenfkrtrnueevc"
+    }
+});
+
+app.post('/api/login', async (req, res) => {
+    console.log("📡 Petición POST /api/login recibida");
+    const { nickname, password } = req.body;
+
+    if (!nickname || !password) {
+        return res.status(400).json({ error: 'Nickname y password son obligatorios' });
+    }
+
+    try {
+        const usuarios = await obtenerUsuarios();
+        const usuario = usuarios.find(u => u.nickname === nickname);
+
+        if (!usuario) {
+            console.log('❌ Usuario no encontrado');
+            return res.status(404).json({ error: 'Usuario no encontrado' });
+        }
+
+        if (!usuario.validated) {
+            console.log('❌ Usuario no validado');
+            return res.status(403).json({ error: 'Usuario no validado. Revisa tu email para confirmar tu cuenta.' });
+        }
+
+        if (usuario.password !== password) {
+            console.log('❌ Contraseña incorrecta');
+            return res.status(401).json({ error: 'Contraseña incorrecta' });
+        }
+
+        console.log('✅ Login exitoso');
+        res.json({ message: 'Login exitoso', nickname: usuario.nickname });
+
+    } catch (error) {
+        console.error('❌ Error en login:', error);
+        res.status(500).json({ error: 'Error interno del servidor' });
     }
 });
 
