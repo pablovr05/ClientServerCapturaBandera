@@ -569,28 +569,27 @@ class GameLogic {
             switch (obj.type) {
                 case "userInfo": {
                     console.log(`Cliente ${id} envia información adicional:`, obj);
-                    
-                    console.log(JSON.stringify(this.clients))
-                    console.log(JSON.stringify(id))
-                    const client = this.clients.get(id);
-
-                    console.log(JSON.stringify(client));
-                    
-                    // Si el cliente existe, guardar la información adicional
-                    //const message = {
-                        //type: "idUser",  // O el tipo que desees
-                        //id: client.id
-                    //};
-                    
-                    // Usar el socket del cliente para enviar el mensaje
-                    //client.socket.send(JSON.stringify(message));
-                    
-                    // También podrías enviar más detalles si lo deseas
-                    //console.log(`Mensaje enviado al cliente ${client.id}:`, message);
+                
+                    // Retrasar la obtención del cliente para darle tiempo a que se agregue al mapa
+                    setTimeout(() => {
+                        const client = this.clients.get(id);
+                
+                        if (client) {
+                            console.log(`Datos del cliente ${id}:`, JSON.stringify(client));
+                
+                            // Aquí puedes enviar la información al cliente, si es necesario
+                            const message = {
+                                type: "idUser",  // O el tipo que desees
+                                id: client.id
+                            };
+                            client.socket.send(JSON.stringify(message));
+                        } else {
+                            console.log(`El cliente con id ${id} aún no está disponible.`);
+                        }
+                    }, 100);  // Retrasar 100ms, ajusta el tiempo según sea necesario
                 
                     break;
-                }
-                
+                }                
                 
                 case "addClientToLobby":
                     const firstLobbyId = this.lobbys.keys().next().value;
