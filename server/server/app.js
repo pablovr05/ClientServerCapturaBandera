@@ -51,11 +51,6 @@ app.post('/api/login', async (req, res) => {
             return res.status(404).json({ error: 'Usuario no encontrado' });
         }
 
-        if (!usuario.validated) {
-            console.log('❌ Usuario no validado');
-            return res.status(403).json({ error: 'Usuario no validado. Revisa tu email para confirmar tu cuenta.' });
-        }
-
         if (usuario.password !== password) {
             console.log('❌ Contraseña incorrecta');
             return res.status(401).json({ error: 'Contraseña incorrecta' });

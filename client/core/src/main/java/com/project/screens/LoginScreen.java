@@ -1,5 +1,9 @@
 package com.project.screens;
 
+import java.io.IOException;
+
+import org.json.JSONObject;
+
 import com.badlogic.gdx.*;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.*;
@@ -9,6 +13,15 @@ import com.badlogic.gdx.scenes.scene2d.utils.*;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 
 public class LoginScreen implements Screen {
@@ -130,6 +143,8 @@ public class LoginScreen implements Screen {
                     System.out.println("Iniciando sesión:");
                     System.out.println("Nickname: " + nicknameField.getText());
                     System.out.println("Contraseña: " + passwordField.getText());
+                    loginUser(nicknameField.getText(), passwordField.getText());
+
                 }
             }
         });
@@ -183,6 +198,56 @@ public class LoginScreen implements Screen {
 
         stage.clear();
         stage.addActor(container);
+    }
+
+    private void loginUser(String nickname, String password) {
+        System.out.println("🛠 Iniciando login de usuario...");
+        
+        String urlString = "https://bandera3.ieti.site/api/login";
+
+        // Crear el JSON para enviar
+        JSONObject jsonPayload = new JSONObject();
+        jsonPayload.put("nickname", nickname);
+        jsonPayload.put("password", password);
+
+        System.out.println("📦 Payload JSON a enviar:");
+        System.out.println(jsonPayload.toString());
+
+        // Crear el cliente OkHttp
+        OkHttpClient client = new OkHttpClient();
+
+        // Crear el cuerpo de la solicitud
+        RequestBody body = RequestBody.create(
+            jsonPayload.toString(), MediaType.get("application/json; charset=utf-8")
+        );
+
+        // Crear la solicitud POST
+        Request request = new Request.Builder()
+            .url(urlString)
+            .post(body)
+            .build();
+
+        // Enviar la solicitud
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                System.out.println("❌ Error durante el proceso de registro:");
+                e.printStackTrace();
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    // Si la solicitud fue exitosa
+                    System.out.println("🎯 Login exitoso, respuesta del servidor:");
+                    System.out.println(response.body().string());
+                } else {
+                    // Si hubo un error en la solicitud
+                    System.out.println("⚠️ El servidor respondió con error: " + response.code());
+                    System.out.println(response.body().string());
+                }
+            }
+        });
     }
 
 
