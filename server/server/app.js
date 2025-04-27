@@ -242,7 +242,7 @@ gameLoop.run = (fps) => {
 
     //console.log("Usuarios conectados:");
     game.clients.forEach((client, clientId) => {
-        //console.log(clientId);
+        console.log(JSON.stringify(game.clients));
     });
 
     game.lobbys.forEach((lobby, lobbyId) => {
