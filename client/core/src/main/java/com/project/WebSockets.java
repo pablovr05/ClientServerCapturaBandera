@@ -80,7 +80,7 @@ public class WebSockets {
                             case "performAttack":
                                 handleAttack(jsonMessage);
                                 break;
-                            case "idUser":
+                            case "clientId":
                                 System.out.println("RACATAPA");
                                 System.out.println(message);
                             default:

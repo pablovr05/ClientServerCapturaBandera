@@ -213,8 +213,19 @@ ws.onConnection = (socket, id, clientIp) => {
         console.log("WebSocket client connected: " + id);
         console.log("Client IP: " + clientIp); // Puedes ver la IP en los logs también
     }
-    game.addClient(id, socket, clientIp); // Pasamos la IP aquí
+
+    game.addClient(id, socket, clientIp);
+
+    const message = {
+        type: "clientId",
+        id: id
+    };
+
+    socket.send(JSON.stringify(message));
+
+    console.log(`Mensaje enviado al cliente ${id}:`, message);
 };
+
 
 ws.onMessage = (socket, id, msg) => {
     game.handleMessage(id, msg, socket);
