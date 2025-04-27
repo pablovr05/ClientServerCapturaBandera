@@ -581,7 +581,8 @@ class GameLogic {
                     }
                 
                     break;
-                }                
+                }
+                
                 case "addClientToLobby":
                     const firstLobbyId = this.lobbys.keys().next().value;
 
