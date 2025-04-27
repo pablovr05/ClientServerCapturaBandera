@@ -98,7 +98,7 @@ app.get('/api/usuarios', async (req, res) => {
 });
 
 app.get('/api/terms', (req, res) => {
-    const termsPath = path.join(__dirname, 'terms.txt');
+    const termsPath = path.join(__dirname, 'assets/terms.txt');
 
     fs.readFile(termsPath, 'utf8', (err, data) => {
         if (err) {
