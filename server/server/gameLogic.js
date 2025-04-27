@@ -529,7 +529,8 @@ class GameLogic {
                         id: clientId,
                         position: client.position,
                         state: client.state,
-                        team: teamName
+                        team: teamName,
+                        nickname: client.username || null
                     });
                 }
             }

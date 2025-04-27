@@ -512,6 +512,7 @@ public class GameScreen implements Screen {
     
         for (int i = 0; i < players.length(); i++) {
             JSONObject player = players.getJSONObject(i);
+            System.out.println(player);
             JSONObject pos = player.getJSONObject("position");
     
             float x = (float) pos.getDouble("x");
