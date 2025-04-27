@@ -577,16 +577,16 @@ class GameLogic {
                     console.log(JSON.stringify(client));
                     
                     // Si el cliente existe, guardar la información adicional
-                    const message = {
-                        type: "idUser",  // O el tipo que desees
-                        id: client.id
-                    };
+                    //const message = {
+                        //type: "idUser",  // O el tipo que desees
+                        //id: client.id
+                    //};
                     
                     // Usar el socket del cliente para enviar el mensaje
-                    client.socket.send(JSON.stringify(message));
+                    //client.socket.send(JSON.stringify(message));
                     
                     // También podrías enviar más detalles si lo deseas
-                    console.log(`Mensaje enviado al cliente ${client.id}:`, message);
+                    //console.log(`Mensaje enviado al cliente ${client.id}:`, message);
                 
                     break;
                 }
