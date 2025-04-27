@@ -103,7 +103,7 @@ public class TermsScreen implements Screen {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 registerUser(); // Llamamos a la función para registrar al usuario
-                game.setScreen(new MenuScreen(game));
+                game.setScreen(new LoginScreen(game));
             }
         });
 
