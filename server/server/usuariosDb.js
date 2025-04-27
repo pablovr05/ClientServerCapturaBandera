@@ -91,6 +91,25 @@ async function obtenerUsuarioPorToken(token) {
     }
 }
 
+async function obtenerUsuarioPorNickname(nickname) {
+    const client = new MongoClient(uri);
+
+    try {
+        await client.connect();
+        const db = client.db(dbName);
+        const usuarios = db.collection(collectionName);
+
+        const usuario = await usuarios.findOne({ nickname });
+        return usuario;
+
+    } catch (error) {
+        console.error('❌ Error al obtener usuario por nickname:', error);
+        return null;
+    } finally {
+        await client.close();
+    }
+}
+
 async function obtenerUsuarios() {
     const client = new MongoClient(uri);
 

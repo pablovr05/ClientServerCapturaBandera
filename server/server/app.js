@@ -113,8 +113,15 @@ app.post('/api/register', async (req, res) => {
 
     const { nickname, email, phone, password } = req.body;
 
+    // Verificar que todos los campos necesarios estén presentes
     if (!nickname || !email || !password) {
         return res.status(400).json({ error: 'Nickname, email, and password are required' });
+    }
+
+    // Validar si el email tiene un formato correcto (simple validación de formato de email)
+    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
+    if (!emailRegex.test(email)) {
+        return res.status(400).json({ error: 'Invalid email format' });
     }
 
     const token = uuidv4();
@@ -125,19 +132,25 @@ app.post('/api/register', async (req, res) => {
 
         const confirmUrl = `https://bandera3.ieti.site/api/confirm/${token}`;
 
-        await transporter.sendMail({
-            from: process.env.EMAIL_USER,
-            to: email,
-            subject: 'Confirm your registration',
-            html: `<h2>Hola ${nickname}!</h2><p>Dale click a este link para poder autenticar tu cuenta:</p><a href="${confirmUrl}">Confirmar cuenta</a>`
-        });
+        // Intentar enviar el correo de confirmación
+        try {
+            await transporter.sendMail({
+                from: process.env.EMAIL_USER,
+                to: email,
+                subject: 'Confirm your registration',
+                html: `<h2>Hola ${nickname}!</h2><p>Dale click a este link para poder autenticar tu cuenta:</p><a href="${confirmUrl}">Confirmar cuenta</a>`
+            });
 
-        console.log(`✅ Confirmation email sent to ${email}`);
-        res.json({ message: "Registration successful. Check your email to confirm your account." });
+            console.log(`✅ Confirmation email sent to ${email}`);
+            return res.json({ message: "Registration successful. Check your email to confirm your account." });
+        } catch (emailError) {
+            console.error('❌ Error al enviar el correo:', emailError);
+            return res.status(500).json({ error: "Error sending confirmation email. Please try again later." });
+        }
 
     } catch (error) {
         console.error('❌ Error en el registro:', error);
-        res.status(500).json({ error: "Internal server error" });
+        return res.status(500).json({ error: "Internal server error during registration" });
     }
 });
 
@@ -159,6 +172,31 @@ app.get('/api/confirm/:token', async (req, res) => {
     } catch (error) {
         console.error('❌ Error en la confirmación:', error);
         res.status(500).send("Error interno del servidor.");
+    }
+});
+
+app.get('/api/usuario/:nickname', async (req, res) => {
+    const { nickname } = req.params;
+
+    console.log(`📡 Petición GET /api/usuario/${nickname} recibida`);
+
+    if (!nickname) {
+        return res.status(400).json({ error: 'Nickname es obligatorio' });
+    }
+
+    try {
+        const usuario = await obtenerUsuarioPorNickname(nickname);
+
+        if (!usuario) {
+            return res.status(404).json({ error: 'Usuario no encontrado' });
+        }
+
+        console.log(`✅ Usuario encontrado: ${usuario.nickname}`);
+        return res.json(usuario);
+
+    } catch (error) {
+        console.error('❌ Error al obtener el usuario:', error);
+        return res.status(500).json({ error: 'Error interno del servidor' });
     }
 });
 
