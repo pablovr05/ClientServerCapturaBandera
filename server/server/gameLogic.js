@@ -572,6 +572,7 @@ class GameLogic {
                 
                     // Aquí podrías guardar la información adicional que manda el cliente:
                     const client = this.clients.get(id);
+                    console.log(JSON.stringify(client, null, 2));
                     if (client) {
                         client.id = obj.id || client.id;
                         client.username = obj.username || "";

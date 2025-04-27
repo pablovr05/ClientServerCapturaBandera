@@ -229,9 +229,9 @@ const prevStates = new Map();
 
 gameLoop.run = (fps) => {
 
-    console.log("Usuarios conectados:");
+    //console.log("Usuarios conectados:");
     game.clients.forEach((client, clientId) => {
-        console.log(JSON.stringify(client, null, 2));
+        //console.log(JSON.stringify(client, null, 2));
     });
 
     game.lobbys.forEach((lobby, lobbyId) => {
