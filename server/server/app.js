@@ -3,6 +3,7 @@ const game = require('./gameLogic.js');
 const Obj = require('./utilsWebSockets.js');
 const GameLoop = require('./utilsGameLoop.js');
 const { obtenerPartidas, clearMongoDb } = require('./partidasDb.js');
+const { borrarTodosLosJugadores } = require('./jugadoresDb.js');
 const { crearUsuario, validarUsuario, obtenerUsuarioPorToken, obtenerUsuarios, clearUsuariosDb, obtenerUsuarioPorNickname } = require('./usuariosDb');
 const path = require('path');
 const fs = require('fs');
@@ -24,6 +25,7 @@ app.use(express.json());
 
 clearMongoDb();
 clearUsuariosDb();
+borrarTodosLosJugadores();
 
 // Configurar nodemailer (asegúrate de no poner datos sensibles directamente en el código)
 const transporter = nodemailer.createTransport({

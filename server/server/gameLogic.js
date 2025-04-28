@@ -934,15 +934,12 @@ class GameLogic {
         }
     }
     
-
-    endGame(lobbyId, winnerClient) {
+    async endGame(lobbyId, winnerClient) {
         const lobby = this.lobbys.get(lobbyId);
         if (!lobby) return;
     
-        // Mostrar mensaje del ganador
         console.log(`🏆 El juego ha terminado. El ganador es el jugador ${winnerClient.id} del equipo ${winnerClient.team}`);
     
-        // Mensaje a enviar
         const message = {
             type: "gameOver",
             winner: winnerClient.id,
@@ -950,21 +947,26 @@ class GameLogic {
             message: "¡El juego ha terminado! El ganador es el equipo " + winnerClient.team
         };
     
-        crearPartida({
-            gameId: Math.floor(Math.random() * (999999 - 100000 + 1)) + 100000,
-            estat: 1,
-            totalplayers: this.getTotalPlayerCountInLobby(lobbyId),
-            spectators: lobby.spectators.length,
-            winner: winnerClient.team,
-        }).then(id => {
-            console.log('Partida creada con éxito, id:', id);
-        }).catch(err => {
+        const gameId = Math.floor(Math.random() * (999999 - 100000 + 1)) + 100000; // Guardamos gameId
+    
+        try {
+            await crearPartida({
+                gameId: gameId,
+                estat: 1,
+                totalplayers: this.getTotalPlayerCountInLobby(lobbyId),
+                spectators: lobby.spectators.length,
+                winner: winnerClient.team,
+            });
+            console.log('Partida creada con éxito, gameId:', gameId);
+        } catch (err) {
             console.error('Error al crear partida:', err.message);
-        });
+        }
+    
+        // Guardar la información de los jugadores en MongoDB
+        await guardarInformacionJugadores.call(this, lobbyId, gameId);
     
         console.log("📝 INFO DE TODOS LOS JUGADORES DE EQUIPOS:");
     
-        // Solo jugadores de equipo
         for (const [teamName, teamSet] of Object.entries(lobby.teams)) {
             for (const clientId of teamSet) {
                 const client = this.clients.get(clientId);
@@ -972,6 +974,7 @@ class GameLogic {
                     const resultado = (client.team === winnerClient.team) ? "GANADOR" : "PERDEDOR";
     
                     console.log(`--- Jugador del equipo ${client.team} (${resultado}) ---`);
+                    console.log(`GameID de la partida: ${gameId}`);
                     console.log(`ID: ${client.id}`);
                     console.log(`Username: ${client.username}`);
                     console.log(`Email: ${client.email}`);
@@ -1007,17 +1010,15 @@ class GameLogic {
             }
         }
     
-        // Generar nuevo oro
         this.addGoldToLobby(lobbyId);
     
-        // Reiniciar el ciclo del juego
         console.log("🔄 Nuevo oro generado y jugadores reiniciados, el ciclo del juego reiniciado.");
     
         lobby.gameStarted = false;
     
         this.resetGameStartCountdown(lobbyId);
         this.checkPlayerCountForGameStart(lobbyId);
-    }    
+    }       
 }
 
 const instance = new GameLogic();
