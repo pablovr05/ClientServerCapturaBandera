@@ -940,16 +940,16 @@ class GameLogic {
         if (!lobby) return;
     
         // Mostrar mensaje del ganador
-        console.log(`El juego ha terminado. El ganador es el jugador ${winnerClient.id} del equipo ${winnerClient.team}`);
+        console.log(`🏆 El juego ha terminado. El ganador es el jugador ${winnerClient.id} del equipo ${winnerClient.team}`);
     
-        // Broadcast a todos los jugadores y espectadores en el lobby
+        // Mensaje a enviar
         const message = {
             type: "gameOver",
             winner: winnerClient.id,
             team: winnerClient.team,
             message: "¡El juego ha terminado! El ganador es el equipo " + winnerClient.team
         };
-
+    
         crearPartida({
             gameId: Math.floor(Math.random() * (999999 - 100000 + 1)) + 100000,
             estat: 1,
@@ -962,10 +962,36 @@ class GameLogic {
             console.error('Error al crear partida:', err.message);
         });
     
-        // Enviar el mensaje a todos los clientes en el lobby
-        for (const [clientId, client] of this.clients.entries()) {
-            if (lobby.teams.blue.has(clientId) || lobby.teams.red.has(clientId) || lobby.teams.yellow.has(clientId) || lobby.teams.purple.has(clientId) || lobby.spectators.has(clientId)) {
-                client.socket.send(JSON.stringify(message));
+        console.log("📝 INFO DE TODOS LOS JUGADORES DE EQUIPOS:");
+    
+        // Solo jugadores de equipo
+        for (const [teamName, teamSet] of Object.entries(lobby.teams)) {
+            for (const clientId of teamSet) {
+                const client = this.clients.get(clientId);
+                if (client) {
+                    const resultado = (client.team === winnerClient.team) ? "GANADOR" : "PERDEDOR";
+    
+                    console.log(`--- Jugador del equipo ${client.team} (${resultado}) ---`);
+                    console.log(`ID: ${client.id}`);
+                    console.log(`Username: ${client.username}`);
+                    console.log(`Email: ${client.email}`);
+                    console.log(`Teléfono: ${client.phone}`);
+                    console.log(`País: ${client.country}`);
+                    console.log(`Ciudad: ${client.city}`);
+                    console.log(`IP: ${client.clientIp}`);
+                    console.log(`Validado: ${client.validated}`);
+                    console.log(`Estado: ${client.state}`);
+                    console.log(`Tiene oro: ${client.hasGold}`);
+                    if (client.position) {
+                        console.log(`Posición -> X: ${client.position.x}, Y: ${client.position.y}`);
+                    } else {
+                        console.log(`Posición: No disponible`);
+                    }
+                    console.log(`Socket conectado: ${client.socket ? "Sí" : "No"}`);
+                    console.log(`-----------------------------`);
+    
+                    client.socket?.send(JSON.stringify(message));
+                }
             }
         }
     
@@ -974,27 +1000,24 @@ class GameLogic {
             for (const clientId of teamSet) {
                 const client = this.clients.get(clientId);
                 if (client) {
-                    client.hasGold = false;  // Reiniciar estado del oro
-                    client.position = this.assignInitialPosition();  // Asignar nuevas posiciones
-                    client.state = "IDLE";  // Reiniciar el estado
+                    client.hasGold = false;
+                    client.position = this.assignInitialPosition();
+                    client.state = "IDLE";
                 }
             }
         }
     
-        // Generar un nuevo oro
+        // Generar nuevo oro
         this.addGoldToLobby(lobbyId);
     
-        // Iniciar el ciclo del juego nuevamente
-        console.log("Nuevo oro generado y jugadores reiniciados, el ciclo del juego reiniciado.");
-
-        lobby.gameStarted = false;
-
-        this.resetGameStartCountdown(lobbyId)
-
-        this.checkPlayerCountForGameStart(lobbyId);
+        // Reiniciar el ciclo del juego
+        console.log("🔄 Nuevo oro generado y jugadores reiniciados, el ciclo del juego reiniciado.");
     
-        // Opcional: Puedes configurar un nuevo ciclo de juego aquí, o simplemente dejarlo como está.
-    }
+        lobby.gameStarted = false;
+    
+        this.resetGameStartCountdown(lobbyId);
+        this.checkPlayerCountForGameStart(lobbyId);
+    }    
 }
 
 const instance = new GameLogic();
