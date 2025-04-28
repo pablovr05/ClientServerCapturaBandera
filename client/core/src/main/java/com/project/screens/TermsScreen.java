@@ -80,41 +80,54 @@ public class TermsScreen implements Screen {
         container.setFillParent(false);
     
         // Estilos
-        Label.LabelStyle labelStyle = new Label.LabelStyle(font, Color.WHITE);
-        
-        // Aumentar el tamaño de la fuente para el Label
         FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("Roboto-Italic-VariableFont_wdth,wght.ttf"));
         FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
-        parameter.size = 40;  // Tamaño de fuente más grande para el label
-        parameter.color = Color.WHITE;
+        parameter.size = 26;  // Tamaño de fuente grande
+        parameter.color = Color.BLACK;  // TEXTO NEGRO
         parameter.minFilter = Texture.TextureFilter.Linear;
         parameter.magFilter = Texture.TextureFilter.Linear;
         BitmapFont largeFont = generator.generateFont(parameter);
         generator.dispose();
     
-        labelStyle = new Label.LabelStyle(largeFont, Color.WHITE);  // Usar la nueva fuente más grande
+        Label.LabelStyle labelStyle = new Label.LabelStyle(largeFont, Color.BLACK);  // Usamos negro
+    
+        // Label para los términos
+        termsLabel = new Label("Cargando términos...", labelStyle);
+        termsLabel.setWrap(true);  // Permitir saltos de línea
+        termsLabel.setAlignment(Align.topLeft);
+    
+        // ScrollPane para contener el texto
+        ScrollPane.ScrollPaneStyle scrollPaneStyle = new ScrollPane.ScrollPaneStyle();
+        ScrollPane scrollPane = new ScrollPane(termsLabel, scrollPaneStyle);
+        scrollPane.setScrollingDisabled(true, false);
+        scrollPane.setFadeScrollBars(false);
+        scrollPane.setForceScroll(false, true);
+        scrollPane.setScrollbarsVisible(true);
+    
+        // 🚀 Añadimos padding al ScrollPane
+        Table scrollTable = new Table();
+        scrollTable.pad(110);  // 20px de margen en todos los lados
+        scrollTable.add(scrollPane).expand().fill();
+    
+        // Imagen del marco
+        Image termsImg = new Image(new TextureRegionDrawable(new TextureRegion(termsImage)));
+        termsImg.setScaling(Scaling.fit);
+    
+        // Stack para poner el marco de fondo y el texto encima
+        Stack stack = new Stack();
+        stack.add(termsImg);     // Fondo: la imagen del marco
+        stack.add(scrollTable);  // Encima: el scrollPane dentro de la tabla con padding
     
         // Botones
         Texture buttonTexture = new Texture("button.png");
         Drawable buttonBackground = new TextureRegionDrawable(new TextureRegion(buttonTexture));
     
         TextButton.TextButtonStyle buttonStyle = new TextButton.TextButtonStyle();
-        buttonStyle.font = font;
+        buttonStyle.font = largeFont;
         buttonStyle.up = buttonBackground;
         buttonStyle.down = buttonBackground;
-        
-        // Cambiar color de texto de los botones a Dark Grey
         buttonStyle.fontColor = Color.DARK_GRAY;
     
-        // Imagen
-        Image termsImg = new Image(new TextureRegionDrawable(new TextureRegion(termsImage)));
-        termsImg.setScaling(Scaling.fit);
-    
-        // Label
-        termsLabel = new Label("Acepta los términos para continuar", labelStyle);
-        termsLabel.setAlignment(Align.center);
-    
-        // Botones
         acceptButton = new TextButton("Aceptar", buttonStyle);
         acceptButton.padBottom(15f);
         cancelButton = new TextButton("Cancelar", buttonStyle);
@@ -123,7 +136,7 @@ public class TermsScreen implements Screen {
         acceptButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                registerUser(); // Llamamos a la función para registrar al usuario
+                registerUser();
                 game.setScreen(new LoginScreen(game));
             }
         });
@@ -135,30 +148,27 @@ public class TermsScreen implements Screen {
             }
         });
     
-        // Subtabla para poner los botones juntos
+        // Subtabla para los botones
         Table buttonsTable = new Table();
         buttonsTable.add(acceptButton).width(250).height(80).padRight(20);
         buttonsTable.add(cancelButton).width(250).height(80);
     
         // Construcción principal
-        table.add(termsImg)
+        table.add(stack)
             .width(Gdx.graphics.getWidth() * 0.6f)
             .height(Gdx.graphics.getHeight() * 0.6f)
             .row();
     
-        table.add(termsLabel)
-            .padTop(20)
-            .padBottom(20)
-            .row();
-    
-        table.add(buttonsTable) // Aquí agregamos los botones juntos
+        table.add(buttonsTable)
             .padTop(20)
             .row();
     
         stage.addActor(container);
+    
+        // Al final, cargar los términos de la API
+        fetchTerms();
     }
     
-
     private void registerUser() {
         System.out.println("🛠 Iniciando registro de usuario...");
     
@@ -260,8 +270,34 @@ public class TermsScreen implements Screen {
             Actions.removeActor()
         ));
     }
+
+    private void fetchTerms() {
+        OkHttpClient client = new OkHttpClient();
     
+        Request request = new Request.Builder()
+                .url("https://bandera3.ieti.site/api/terms")
+                .build();
     
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
+                Gdx.app.postRunnable(() -> termsLabel.setText("Error al cargar los términos de uso."));
+            }
+    
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (!response.isSuccessful()) {
+                    Gdx.app.postRunnable(() -> termsLabel.setText("Error al cargar los términos de uso."));
+                    return;
+                }
+    
+                final String responseData = response.body().string();
+                Gdx.app.postRunnable(() -> termsLabel.setText(responseData));
+            }
+        });
+    }
+        
     @Override
     public void show() {}
 

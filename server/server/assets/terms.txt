@@ -1,4 +1,28 @@
-Si aceptas los términos de uso, estas aceptando que guardemos tu ubicación, es decir que sabremos dónde vives, también guardaremos la IP de tu dispositivo del cuá en cualquier momento te podremos meter un troyano y robaremos todos tus datos de correo y cuentas bancarias. 
-No somos responsables de tu información, si aceptas no nos podrás denunciar ya que te lo hemos advertido y nosotros te lo agradeceremos con mucha gratitud y la utilizaremos de la mejor forma posible.
-En caso de que lo aceptes podrás acceder al juego y disfrutarás de una experiencia única e inolvidable.
-¿Estás seguro de lo que haces??
+📜 Términos de Uso
+Bienvenido a nuestro juego. Antes de continuar, por favor lee detenidamente los siguientes términos y condiciones:
+
+1. Aceptación de los términos:
+Al acceder y utilizar este juego, aceptas cumplir y estar sujeto a estos términos de uso. Si no estás de acuerdo con alguna parte de los mismos, no podrás acceder o utilizar el juego.
+
+2. Datos recopilados:
+Al aceptar, autorizas a la aplicación a recopilar y procesar cierta información, incluyendo:
+
+Tu ubicación aproximada.
+
+La dirección IP de tu dispositivo.
+
+Esta información será utilizada exclusivamente para mejorar tu experiencia de usuario, garantizar la seguridad del sistema y ofrecer contenido personalizado. No se compartirán tus datos personales con terceros sin tu consentimiento previo.
+
+3. Uso de la información:
+Toda la información recopilada será tratada de acuerdo con las leyes de protección de datos vigentes. Nos comprometemos a mantener la confidencialidad y seguridad de tu información.
+
+4. Limitación de responsabilidad:
+El uso de este juego es bajo tu propio riesgo. No seremos responsables por cualquier daño directo, indirecto o incidental derivado del uso del mismo.
+
+5. Modificaciones:
+Nos reservamos el derecho de modificar estos términos de uso en cualquier momento. Te notificaremos de cualquier cambio relevante a través de la propia aplicación.
+
+6. Acceso al juego:
+Al aceptar estos términos, podrás acceder al juego y disfrutar de todas sus funciones.
+
+¿Aceptas los términos de uso y deseas continuar?
