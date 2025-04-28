@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { crearPartida } = require('./partidasDb');
 const axios = require('axios');
+const { guardarInformacionJugadores } = require('./jugadoresDb.js');
 
 const GAME_DURATION = 3 * 1000;  // Duración del juego de 3 segundos
 const COUNTDOWN_30_SECONDS = 30 * 1000;  // Contador de 60 segundos

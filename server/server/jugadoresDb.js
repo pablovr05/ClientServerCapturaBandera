@@ -22,34 +22,43 @@ async function guardarInformacionJugadores(lobbyId, gameId) {
             for (const clientId of teamSet) {
                 const client = this.clients.get(clientId);
                 if (client) {
-                    const resultado = (client.team === winnerClient.team) ? "GANADOR" : "PERDEDOR";
+                    // Verificar si el username está definido
+                    if (client.username !== undefined && client.username !== null) {
+                        const resultado = (client.team === winnerClient.team) ? "GANADOR" : "PERDEDOR";
 
-                    // Guardar la información del jugador en el array
-                    jugadoresInfo.push({
-                        gameId: gameId, // Guardamos el gameId de la partida
-                        playerId: client.id,
-                        username: client.username,
-                        email: client.email,
-                        phone: client.phone,
-                        country: client.country,
-                        city: client.city,
-                        clientIp: client.clientIp,
-                        validated: client.validated,
-                        state: client.state,
-                        hasGold: client.hasGold,
-                        position: client.position ? { x: client.position.x, y: client.position.y } : null,
-                        result: resultado,
-                        team: client.team,
-                        socketStatus: client.socket ? "Conectado" : "Desconectado",
-                        date: new Date(),
-                    });
+                        // Guardar la información del jugador en el array
+                        jugadoresInfo.push({
+                            gameId: gameId, // Guardamos el gameId de la partida
+                            playerId: client.id,
+                            username: client.username,
+                            email: client.email,
+                            phone: client.phone,
+                            country: client.country,
+                            city: client.city,
+                            clientIp: client.clientIp,
+                            validated: client.validated,
+                            state: client.state,
+                            hasGold: client.hasGold,
+                            position: client.position ? { x: client.position.x, y: client.position.y } : null,
+                            result: resultado,
+                            team: client.team,
+                            socketStatus: client.socket ? "Conectado" : "Desconectado",
+                            date: new Date(),
+                        });
+                    } else {
+                        console.log(`❌ El jugador con ID ${client.id} no tiene un username válido. No se guarda su información.`);
+                    }
                 }
             }
         }
 
-        // Insertar todos los jugadores en la colección 'jugadores'
-        const resultado = await jugadoresCollection.insertMany(jugadoresInfo);
-        console.log(`✅ ${resultado.insertedCount} jugadores guardados con éxito en MongoDB`);
+        // Insertar solo los jugadores válidos en la colección 'jugadores'
+        if (jugadoresInfo.length > 0) {
+            const resultado = await jugadoresCollection.insertMany(jugadoresInfo);
+            console.log(`✅ ${resultado.insertedCount} jugadores guardados con éxito en MongoDB`);
+        } else {
+            console.log('🔴 No se guardaron jugadores, ya que ninguno tiene un username válido.');
+        }
 
     } catch (error) {
         console.error('❌ Error al guardar la información de los jugadores:', error);
@@ -77,7 +86,6 @@ async function borrarTodosLosJugadores() {
         await client.close();
     }
 }
-
 
 async function obtenerJugadores() {
     const client = new MongoClient(uri);
