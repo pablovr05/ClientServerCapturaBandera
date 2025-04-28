@@ -78,4 +78,34 @@ async function borrarTodosLosJugadores() {
     }
 }
 
-module.exports = { guardarInformacionJugadores, borrarTodosLosJugadores };
+
+async function obtenerJugadores() {
+    const client = new MongoClient(uri);
+
+    try {
+        console.log('🔌 Conectando a MongoDB...');
+        await client.connect();
+        console.log('✅ Conectado a MongoDB');
+
+        const db = client.db(dbName);
+        console.log(`📂 Usando base de datos: ${dbName}`);
+
+        const jugadoresCollection = db.collection(playersCollectionName);
+        console.log(`📄 Accediendo a la colección: ${playersCollectionName}`);
+
+        // Recuperar todos los jugadores
+        const listaJugadores = await jugadoresCollection.find().toArray();
+        console.log(`📦 Se han recuperado ${listaJugadores.length} jugadores`);
+
+        return listaJugadores;
+
+    } catch (error) {
+        console.error('❌ Error al obtener los jugadores:', error);
+        return [];
+    } finally {
+        console.log('🔒 Cerrando conexión con MongoDB...');
+        await client.close();
+    }
+}
+
+module.exports = { obtenerJugadores, guardarInformacionJugadores, borrarTodosLosJugadores };

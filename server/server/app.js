@@ -3,7 +3,7 @@ const game = require('./gameLogic.js');
 const Obj = require('./utilsWebSockets.js');
 const GameLoop = require('./utilsGameLoop.js');
 const { obtenerPartidas, clearMongoDb } = require('./partidasDb.js');
-const { borrarTodosLosJugadores } = require('./jugadoresDb.js');
+const { borrarTodosLosJugadores, obtenerJugadores } = require('./jugadoresDb.js');
 const { crearUsuario, validarUsuario, obtenerUsuarioPorToken, obtenerUsuarios, clearUsuariosDb, obtenerUsuarioPorNickname } = require('./usuariosDb');
 const path = require('path');
 const fs = require('fs');
@@ -76,6 +76,20 @@ app.get('/api/games', async (req, res) => {
         res.json(partidas);
     } catch (error) {
         console.error("❌ Error al obtener partidas en el endpoint:", error);
+        res.status(500).json({ error: "Error interno del servidor" });
+    }
+});
+
+// Endpoint para obtener los jugadores
+app.get('/api/players', async (req, res) => {
+    console.log("📡 Petición GET /api/players recibida");
+
+    try {
+        const jugadores = await obtenerJugadores();
+        console.log("✅ Enviando jugadores al cliente...");
+        res.json(jugadores);  // Respondemos con los jugadores en formato JSON
+    } catch (error) {
+        console.error("❌ Error al obtener jugadores en el endpoint:", error);
         res.status(500).json({ error: "Error interno del servidor" });
     }
 });
