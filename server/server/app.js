@@ -24,7 +24,6 @@ app.use(express.static('public'));
 app.use(express.json());
 
 clearMongoDb();
-clearUsuariosDb();
 borrarTodosLosJugadores();
 
 // Configurar nodemailer (asegúrate de no poner datos sensibles directamente en el código)

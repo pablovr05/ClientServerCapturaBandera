@@ -520,6 +520,8 @@ public class GameScreen implements Screen {
             String team = player.getString("team").toLowerCase();
             String state = player.getString("state").toUpperCase();
             String playerId = player.getString("id");
+            String nickname = player.getString("nickname");
+            String hasGold = player.getString("hasGold");
     
             // Verificar si el jugador está realizando un ataque
             boolean isAttacking = false;

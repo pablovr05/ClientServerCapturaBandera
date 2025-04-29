@@ -270,7 +270,9 @@ class GameLogic {
         const lobbyId = this.generateLobbyCode();
 
         // Crear el lobby con equipos e inicialización de objetos
+        
         this.lobbys.set(lobbyId, {
+            gameEnded: false,
             teams: {
                 blue: new Set(),
                 purple: new Set(),
@@ -925,6 +927,14 @@ class GameLogic {
         const lobby = this.lobbys.get(lobbyId);
         if (!lobby) return;
     
+        // Verifica si el juego ya terminó
+        if (lobby.gameEnded) {
+            return;
+        }
+    
+        // Marca el juego como terminado
+        lobby.gameEnded = true;
+    
         console.log(`🏆 El juego ha terminado. El ganador es el jugador ${winnerClient.id} del equipo ${winnerClient.team}`);
     
         const message = {
@@ -987,8 +997,6 @@ class GameLogic {
                 }
             }
         }
-
-        removeAllGoldFromLobby(lobbyId)
     
         this.addGoldToLobby(lobbyId);
     
@@ -998,7 +1006,7 @@ class GameLogic {
     
         this.resetGameStartCountdown(lobbyId);
         this.checkPlayerCountForGameStart(lobbyId);
-    }       
+    }    
 }
 
 const instance = new GameLogic();
