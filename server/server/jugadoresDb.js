@@ -22,7 +22,7 @@ async function guardarJugadores({ gameId, players, winnerTeam}) {
             clientIp: client.clientIp,
             validated: client.validated,
             team: client.team,
-            result: (client.team === client.winnerTeam) ? "GANADOR" : "PERDEDOR", // Determinamos si fue ganador o perdedor
+            result: (client.team === winnerTeam) ? "GANADOR" : "PERDEDOR", // Determinamos si fue ganador o perdedor
             date: new Date()
         }));
 
