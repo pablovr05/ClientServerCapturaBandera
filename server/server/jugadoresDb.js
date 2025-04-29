@@ -4,7 +4,7 @@ const uri = 'mongodb://localhost:27017';
 const dbName = 'miJuego';
 const playersCollectionName = 'jugadores'; // Colección para los jugadores
 
-async function guardarInformacionJugadores(lobbyId, gameId) {
+async function guardarInformacionJugadores(lobbyId, gameId, winnerTeam) {
     const client = new MongoClient(uri);
 
     try {
@@ -24,7 +24,7 @@ async function guardarInformacionJugadores(lobbyId, gameId) {
                 if (client) {
                     // Verificar si el username está definido
                     if (client.username !== undefined && client.username !== null) {
-                        const resultado = (client.team === winnerClient.team) ? "GANADOR" : "PERDEDOR";
+                        const resultado = (client.team === winnerTeam) ? "GANADOR" : "PERDEDOR";
 
                         // Guardar la información del jugador en el array
                         jugadoresInfo.push({

@@ -960,7 +960,7 @@ class GameLogic {
         }
     
         // Guardar la información de los jugadores en MongoDB
-        await guardarInformacionJugadores.call(this, lobbyId, gameId);
+        guardarInformacionJugadores(lobbyId, gameId, winnerClient.team);
     
         console.log("📝 INFO DE TODOS LOS JUGADORES DE EQUIPOS:");
     
