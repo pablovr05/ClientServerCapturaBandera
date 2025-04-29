@@ -6,9 +6,11 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
@@ -33,7 +35,7 @@ public class GameScreen implements Screen {
     private ShapeRenderer uiShapeRenderer;
     private BitmapFont font, titleFont;
     private WebSockets webSockets;
-
+    private GlyphLayout layout;
     private OrthographicCamera camera;
 
     private JSONObject latestGameState;
@@ -90,6 +92,8 @@ public class GameScreen implements Screen {
     public GameScreen(Game game, WebSockets webSockets) throws JSONException {
         this.game = game;
         this.webSockets = webSockets;
+
+        layout = new GlyphLayout();
 
         movementOutput = new Vector2();
 
@@ -501,9 +505,6 @@ public class GameScreen implements Screen {
         batch.end();
     }
     
-    
-    
-    
     private void drawPlayers(JSONObject gameState) throws JSONException {
         if (!gameState.has("players")) return;
     
@@ -512,18 +513,15 @@ public class GameScreen implements Screen {
     
         for (int i = 0; i < players.length(); i++) {
             JSONObject player = players.getJSONObject(i);
-            System.out.println(player);
             JSONObject pos = player.getJSONObject("position");
-    
             float x = (float) pos.getDouble("x");
             float y = (float) pos.getDouble("y");
             String team = player.getString("team").toLowerCase();
             String state = player.getString("state").toUpperCase();
             String playerId = player.getString("id");
-            String nickname = player.getString("nickname");
-            String hasGold = player.getString("hasGold");
+            String nickname = player.optString("nickname", team);
+            boolean hasGold = player.getBoolean("hasGold");
     
-            // Verificar si el jugador está realizando un ataque
             boolean isAttacking = false;
             for (AttackEffect atk : activeAttacks) {
                 if (atk.attackerId.equals(playerId)) {
@@ -531,12 +529,9 @@ public class GameScreen implements Screen {
                     break;
                 }
             }
+            if (isAttacking) continue;
     
-            if (isAttacking) {
-                continue;  // Si está atacando, no dibujamos al jugador
-            }
-    
-            String lastDirection = playerDirections.getOrDefault(player.getString("id"), "RIGHT");
+            String lastDirection = playerDirections.getOrDefault(playerId, "RIGHT");
     
             TextureRegion[][] frames = null;
             switch (team) {
@@ -547,21 +542,41 @@ public class GameScreen implements Screen {
             }
     
             if (frames != null) {
-    
                 int row = (state.equals("RIGHT") || state.equals("LEFT")) ? 1 : 0;
                 int frameIndex = ((int)(animationTimer / frameDuration)) % 6;
-    
                 TextureRegion frame = frames[row][frameIndex];
     
                 if (state.equals("LEFT") || (state.equals("IDLE") && lastDirection.equals("LEFT"))) {
-                    frame = new TextureRegion(frame); // Evitar modificar original
-                    frame.flip(true, false);  // Volteamos el sprite
+                    frame = new TextureRegion(frame);
+                    frame.flip(true, false);
                 }
     
-                float scale = 0.85f;  // Ajusta la escala según lo necesites
-                batch.draw(frame, x - (96 * scale), y - (96 * scale), frame.getRegionWidth() * scale, frame.getRegionHeight() * scale);
+                float scale = 0.85f;
+                batch.draw(frame, x - (96 * scale), y - (96 * scale),
+                        frame.getRegionWidth() * scale, frame.getRegionHeight() * scale);
+    
+                if (nickname != null && !nickname.isEmpty()) {
+                    layout.setText(font, nickname);
+                    float textX = x - layout.width / 2;
+                    float textY = y + 50;
+    
+                    // Borde negro
+                    font.setColor(Color.BLACK);
+                    for (int dx = -1; dx <= 1; dx++) {
+                        for (int dy = -1; dy <= 1; dy++) {
+                            if (dx != 0 || dy != 0) {
+                                font.draw(batch, nickname, textX + dx, textY + dy);
+                            }
+                        }
+                    }
+    
+                    // Texto principal
+                    font.setColor(hasGold ? Color.GOLD : Color.WHITE);
+                    font.draw(batch, nickname, textX, textY);
+                }
             }
         }
+    
         batch.end();
     }
     
