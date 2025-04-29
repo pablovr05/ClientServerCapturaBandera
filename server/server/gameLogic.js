@@ -386,34 +386,19 @@ class GameLogic {
         }
     }
 
-    addGoldToLobbyCords(lobbyId, x, y) {
-        // Verifica si el lobby existe
+    removeAllGoldFromLobby(lobbyId) {
         const lobby = this.lobbys.get(lobbyId);
         if (lobby) {
-            // Crea un objeto de oro con las coordenadas especificadas
-            const gold = {
-                type: 'gold',
-                position: { x, y }
-            };
+            const goldObjects = lobby.objects.gold;
     
-            // Asegúrate de que el lobby tenga una propiedad "objects" para almacenar los objetos
-            if (!lobby.objects) {
-                lobby.objects = {};
-            }
+            // Vaciar la colección de oros (Set) del lobby
+            goldObjects.clear();  // Esto elimina todos los objetos de oro
     
-            // Asegúrate de que el lobby tenga un conjunto para el tipo de oro
-            if (!lobby.objects.gold) {
-                lobby.objects.gold = new Set();
-            }
-    
-            // Añadir el objeto de oro al conjunto
-            lobby.objects.gold.add(gold);
-            console.log(`Gold added to lobby ${lobbyId} at position: (${x}, ${y})`);
+            console.log(`All gold removed from lobby ${lobbyId}`);
         } else {
             console.warn(`Lobby with ID ${lobbyId} not found`);
         }
     }
-    
     
     addSpectatorToLobby(lobbyId, clientId) {
         if (this.lobbys.has(lobbyId)) {
@@ -533,7 +518,8 @@ class GameLogic {
                         position: client.position,
                         state: client.state,
                         team: teamName,
-                        nickname: nickname
+                        nickname: nickname,
+                        hasGold: client.hasGold,
                     });
                 }
             }
@@ -976,7 +962,6 @@ class GameLogic {
     
                     console.log(`--- Jugador del equipo ${client.team} (${resultado}) ---`);
                     console.log(`GameID de la partida: ${gameId}`);
-                    console.log(`ID: ${client.id}`);
                     console.log(`Username: ${client.username}`);
                     console.log(`Email: ${client.email}`);
                     console.log(`Teléfono: ${client.phone}`);
@@ -984,14 +969,6 @@ class GameLogic {
                     console.log(`Ciudad: ${client.city}`);
                     console.log(`IP: ${client.clientIp}`);
                     console.log(`Validado: ${client.validated}`);
-                    console.log(`Estado: ${client.state}`);
-                    console.log(`Tiene oro: ${client.hasGold}`);
-                    if (client.position) {
-                        console.log(`Posición -> X: ${client.position.x}, Y: ${client.position.y}`);
-                    } else {
-                        console.log(`Posición: No disponible`);
-                    }
-                    console.log(`Socket conectado: ${client.socket ? "Sí" : "No"}`);
                     console.log(`-----------------------------`);
     
                     client.socket?.send(JSON.stringify(message));
@@ -1010,6 +987,8 @@ class GameLogic {
                 }
             }
         }
+
+        removeAllGoldFromLobby(lobbyId)
     
         this.addGoldToLobby(lobbyId);
     
