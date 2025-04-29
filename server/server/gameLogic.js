@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { crearPartida } = require('./partidasDb');
 const axios = require('axios');
-const { guardarInformacionJugadores } = require('./jugadoresDb.js');
+const { guardarJugadores } = require('./jugadoresDb.js');
 
 const GAME_DURATION = 3 * 1000;  // Duración del juego de 3 segundos
 const COUNTDOWN_30_SECONDS = 30 * 1000;  // Contador de 60 segundos
@@ -927,13 +927,13 @@ class GameLogic {
         const lobby = this.lobbys.get(lobbyId);
         if (!lobby) return;
     
-        // Verifica si el juego ya terminó
         if (lobby.gameEnded) {
             return;
         }
     
-        // Marca el juego como terminado
         lobby.gameEnded = true;
+
+        const winnerTeam = winnerClient.team;
     
         console.log(`🏆 El juego ha terminado. El ganador es el jugador ${winnerClient.id} del equipo ${winnerClient.team}`);
     
@@ -959,11 +959,9 @@ class GameLogic {
             console.error('Error al crear partida:', err.message);
         }
     
-        // Guardar la información de los jugadores en MongoDB
-        guardarInformacionJugadores(lobbyId, gameId, winnerClient.team);
-    
         console.log("📝 INFO DE TODOS LOS JUGADORES DE EQUIPOS:");
     
+        const players = []; // Array para almacenar los jugadores
         for (const [teamName, teamSet] of Object.entries(lobby.teams)) {
             for (const clientId of teamSet) {
                 const client = this.clients.get(clientId);
@@ -982,8 +980,18 @@ class GameLogic {
                     console.log(`-----------------------------`);
     
                     client.socket?.send(JSON.stringify(message));
+    
+                    // Agregar el jugador al array de jugadores
+                    players.push(client);
                 }
             }
+        }
+    
+        // Guardar los jugadores en la base de datos
+        try {
+            await guardarJugadores({ gameId, players, winnerClient});
+        } catch (err) {
+            console.error('Error al guardar jugadores:', err);
         }
     
         // Reiniciar el estado de los jugadores
@@ -1006,8 +1014,8 @@ class GameLogic {
     
         this.resetGameStartCountdown(lobbyId);
         this.checkPlayerCountForGameStart(lobbyId);
-    }    
-}
+    }
+}    
 
 const instance = new GameLogic();
 Object.freeze(instance);

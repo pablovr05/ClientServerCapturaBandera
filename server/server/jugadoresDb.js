@@ -4,64 +4,34 @@ const uri = 'mongodb://localhost:27017';
 const dbName = 'miJuego';
 const playersCollectionName = 'jugadores'; // Colección para los jugadores
 
-async function guardarInformacionJugadores(lobbyId, gameId, winnerTeam) {
+async function guardarJugadores({ gameId, players, winnerTeam}) {
     const client = new MongoClient(uri);
 
     try {
         await client.connect();
         const db = client.db(dbName);
-        const jugadoresCollection = db.collection(playersCollectionName);
+        const jugadores = db.collection(playersCollectionName);
 
-        // Obtener todos los jugadores del lobby
-        const lobby = this.lobbys.get(lobbyId);
-        if (!lobby) return;
+        const jugadoresData = players.map(client => ({
+            gameId,
+            username: client.username,
+            email: client.email,
+            phone: client.phone,
+            country: client.country,
+            city: client.city,
+            clientIp: client.clientIp,
+            validated: client.validated,
+            team: client.team,
+            result: (client.team === client.winnerTeam) ? "GANADOR" : "PERDEDOR", // Determinamos si fue ganador o perdedor
+            date: new Date()
+        }));
 
-        const jugadoresInfo = [];
-
-        for (const [teamName, teamSet] of Object.entries(lobby.teams)) {
-            for (const clientId of teamSet) {
-                const client = this.clients.get(clientId);
-                if (client) {
-                    // Verificar si el username está definido
-                    if (client.username !== undefined && client.username !== null) {
-                        const resultado = (client.team === winnerTeam) ? "GANADOR" : "PERDEDOR";
-
-                        // Guardar la información del jugador en el array
-                        jugadoresInfo.push({
-                            gameId: gameId, // Guardamos el gameId de la partida
-                            playerId: client.id,
-                            username: client.username,
-                            email: client.email,
-                            phone: client.phone,
-                            country: client.country,
-                            city: client.city,
-                            clientIp: client.clientIp,
-                            validated: client.validated,
-                            state: client.state,
-                            hasGold: client.hasGold,
-                            position: client.position ? { x: client.position.x, y: client.position.y } : null,
-                            result: resultado,
-                            team: client.team,
-                            socketStatus: client.socket ? "Conectado" : "Desconectado",
-                            date: new Date(),
-                        });
-                    } else {
-                        console.log(`❌ El jugador con ID ${client.id} no tiene un username válido. No se guarda su información.`);
-                    }
-                }
-            }
-        }
-
-        // Insertar solo los jugadores válidos en la colección 'jugadores'
-        if (jugadoresInfo.length > 0) {
-            const resultado = await jugadoresCollection.insertMany(jugadoresInfo);
-            console.log(`✅ ${resultado.insertedCount} jugadores guardados con éxito en MongoDB`);
-        } else {
-            console.log('🔴 No se guardaron jugadores, ya que ninguno tiene un username válido.');
-        }
+        const resultado = await jugadores.insertMany(jugadoresData);
+        console.log('✅ Jugadores guardados con éxito, _ids:', resultado.insertedIds);
+        return resultado.insertedIds;
 
     } catch (error) {
-        console.error('❌ Error al guardar la información de los jugadores:', error);
+        console.error('❌ Error al guardar jugadores:', error);
     } finally {
         await client.close();
     }
@@ -116,4 +86,4 @@ async function obtenerJugadores() {
     }
 }
 
-module.exports = { obtenerJugadores, guardarInformacionJugadores, borrarTodosLosJugadores };
+module.exports = { obtenerJugadores, guardarJugadores, borrarTodosLosJugadores };
