@@ -989,7 +989,7 @@ class GameLogic {
     
         // Guardar los jugadores en la base de datos
         try {
-            await guardarJugadores({ gameId, players, winnerClient});
+            await guardarJugadores({ gameId, players, winnerTeam});
         } catch (err) {
             console.error('Error al guardar jugadores:', err);
         }
