@@ -23,8 +23,9 @@ const app = express();
 app.use(express.static('public'));
 app.use(express.json());
 
-clearMongoDb();
-borrarTodosLosJugadores();
+//clearUsuariosDb();
+//clearMongoDb();
+//borrarTodosLosJugadores();
 
 // Configurar nodemailer (asegúrate de no poner datos sensibles directamente en el código)
 const transporter = nodemailer.createTransport({
